@@ -14,6 +14,8 @@ const sections = [
   { id: 'experience', title: '工作经历' },
   { id: 'projects', title: '项目经历' },
   { id: 'education', title: '教育背景' },
+  { id: 'languages', title: '语言能力' },
+  { id: 'certificates', title: '证书' },
 ]
 
 const fetchResumeData = async () => {
@@ -80,7 +82,7 @@ onMounted(() => {
           </ul>
         </nav>
         <div class="download-pdf">
-          <a href="#" class="btn-pdf">下载 PDF 简历</a>
+          <a href="/media/resume/resume.pdf" class="btn-pdf" target="_blank" download>下载 PDF 简历</a>
         </div>
       </aside>
 
@@ -171,6 +173,34 @@ onMounted(() => {
             </div>
           </div>
           <div v-else class="empty-state">暂无教育背景</div>
+        </section>
+
+        <!-- Languages -->
+        <section id="languages" class="section-card">
+          <h3>🌐 语言能力</h3>
+          <div class="language-list" v-if="resumeData && resumeData.languages && resumeData.languages.length">
+            <div v-for="lang in resumeData.languages" :key="lang.id" class="language-item">
+              <span class="language-name">{{ lang.name }}</span>
+              <span class="language-proficiency">{{ lang.proficiency }}</span>
+            </div>
+          </div>
+          <div v-else class="empty-state">暂无语言能力信息</div>
+        </section>
+
+        <!-- Certificates -->
+        <section id="certificates" class="section-card">
+          <h3>📜 证书</h3>
+          <div class="certificate-list" v-if="resumeData && resumeData.certificates && resumeData.certificates.length">
+            <div v-for="cert in resumeData.certificates" :key="cert.id" class="certificate-item">
+              <div class="certificate-header">
+                <span class="certificate-name">{{ cert.name }}</span>
+                <span class="certificate-date">{{ cert.date }}</span>
+              </div>
+              <div class="certificate-issuer">{{ cert.issuer }}</div>
+              <a v-if="cert.link" :href="cert.link" target="_blank" class="certificate-link">查看证书</a>
+            </div>
+          </div>
+          <div v-else class="empty-state">暂无证书信息</div>
         </section>
       </div>
     </div>
@@ -410,6 +440,76 @@ h3 {
 .project-link {
   display: inline-block;
   margin-top: 10px;
+  color: #42b983;
+  font-size: 0.9rem;
+}
+
+/* Languages */
+.language-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.language-item {
+  background-color: #f9f9f9;
+  padding: 10px 15px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.language-name {
+  font-weight: bold;
+  color: #333;
+}
+
+.language-proficiency {
+  color: #666;
+  font-size: 0.9rem;
+  background-color: #eee;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Certificates */
+.certificate-item {
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  transition: box-shadow 0.3s;
+}
+
+.certificate-item:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.certificate-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.certificate-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.certificate-date {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.certificate-issuer {
+  color: #666;
+}
+
+.certificate-link {
+  display: inline-block;
+  margin-top: 8px;
   color: #42b983;
   font-size: 0.9rem;
 }

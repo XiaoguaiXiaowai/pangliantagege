@@ -78,3 +78,28 @@ class Education(models.Model):
 
     def __str__(self):
         return self.school
+
+class Language(models.Model):
+    name = models.CharField(max_length=50, verbose_name='语言')
+    proficiency = models.CharField(max_length=50, verbose_name='熟练程度') # e.g. Native, Fluent, Intermediate
+
+    class Meta:
+        verbose_name = '语言能力'
+        verbose_name_plural = '语言能力'
+
+    def __str__(self):
+        return self.name
+
+class Certificate(models.Model):
+    name = models.CharField(max_length=100, verbose_name='证书名称')
+    issuer = models.CharField(max_length=100, verbose_name='颁发机构')
+    date = models.DateField(verbose_name='颁发日期')
+    link = models.URLField(blank=True, null=True, verbose_name='证书链接')
+
+    class Meta:
+        verbose_name = '证书'
+        verbose_name_plural = '证书'
+        ordering = ['-date']
+
+    def __str__(self):
+        return self.name

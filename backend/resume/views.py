@@ -1,10 +1,10 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from .models import BasicInfo, Skill, Experience, Project, Education
+from .models import BasicInfo, Skill, Experience, Project, Education, Language, Certificate
 from .serializers import (
     BasicInfoSerializer, SkillSerializer, ExperienceSerializer,
-    ProjectSerializer, EducationSerializer
+    ProjectSerializer, EducationSerializer, LanguageSerializer, CertificateSerializer
 )
 
 class ResumeViewSet(viewsets.ViewSet):
@@ -19,6 +19,8 @@ class ResumeViewSet(viewsets.ViewSet):
         experiences = Experience.objects.all()
         projects = Project.objects.all()
         educations = Education.objects.all()
+        languages = Language.objects.all()
+        certificates = Certificate.objects.all()
 
         return Response({
             'basic_info': BasicInfoSerializer(basic_info).data if basic_info else None,
@@ -26,4 +28,6 @@ class ResumeViewSet(viewsets.ViewSet):
             'experiences': ExperienceSerializer(experiences, many=True).data,
             'projects': ProjectSerializer(projects, many=True).data,
             'educations': EducationSerializer(educations, many=True).data,
+            'languages': LanguageSerializer(languages, many=True).data,
+            'certificates': CertificateSerializer(certificates, many=True).data,
         })

@@ -10,7 +10,7 @@ import { RouterLink, RouterView } from 'vue-router'
           胖脸他哥哥 - 李佳的个人网站
         </div>
         <nav>
-          <RouterLink to="/">关于我</RouterLink>
+          <RouterLink to="/">个人简历</RouterLink>
           <RouterLink to="/message-board">留言板</RouterLink>
           <RouterLink to="/ai-assistant">AI 助理</RouterLink>
           <RouterLink to="/tools">小工具</RouterLink>

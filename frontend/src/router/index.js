@@ -8,7 +8,7 @@ const router = createRouter({
       path: '/',
       name: 'resume',
       component: ResumeView,
-      meta: { title: '关于我' }
+      meta: { title: '个人简历' }
     },
     {
       path: '/message-board',
