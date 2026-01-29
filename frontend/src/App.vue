@@ -53,6 +53,14 @@ header {
 .site-branding {
   font-size: 1.2rem;
   font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+.site-branding .highlight {
+  font-size: 5rem;
+  color: #42b983;
+  margin-right: 5px;
 }
 
 nav {
