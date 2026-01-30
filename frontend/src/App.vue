@@ -7,7 +7,8 @@ import { RouterLink, RouterView } from 'vue-router'
     <header>
       <div class="wrapper">
         <div class="site-branding">
-          胖脸他哥哥 - 李佳的个人网站
+          <span class="logo-main">胖脸她哥哥</span>
+          <span class="logo-sub"> - 李佳的个人网站</span>
         </div>
         <nav>
           <RouterLink to="/">个人简历</RouterLink>
@@ -37,12 +38,17 @@ import { RouterLink, RouterView } from 'vue-router'
 }
 
 header {
-  background-color: #333;
-  color: white;
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
 }
 
 .wrapper {
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 1rem 20px;
   display: flex;
@@ -51,45 +57,67 @@ header {
 }
 
 .site-branding {
-  font-size: 1.2rem;
-  font-weight: bold;
   display: flex;
-  align-items: center;
+  align-items: baseline;
+  letter-spacing: -0.01em;
 }
 
-.site-branding .highlight {
-  font-size: 5rem;
-  color: #42b983;
-  margin-right: 5px;
+.logo-main {
+  font-size: 1.5rem;
+  font-weight: 500;
+  background: linear-gradient(135deg, var(--color-purple), var(--color-blue));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.logo-sub {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-left: 8px;
 }
 
 nav {
   display: flex;
-  gap: 20px;
+  gap: 10px;
 }
 
 nav a {
-  color: white;
+  color: var(--text-secondary);
   text-decoration: none;
-  font-weight: bold;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 8px 16px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+nav a:hover {
+  color: var(--text-primary);
+  background-color: rgba(0,0,0,0.03);
 }
 
 nav a.router-link-active {
-  color: #42b983;
+  color: #fff;
+  background-color: var(--color-blue);
+  box-shadow: 0 4px 12px rgba(139, 174, 182, 0.3);
 }
 
 main {
   flex: 1;
-  padding: 20px;
-  max-width: 1200px;
+  padding: 40px 20px;
+  max-width: 1100px;
   margin: 0 auto;
   width: 100%;
 }
 
 footer {
   text-align: center;
-  padding: 20px;
-  background-color: #f0f0f0;
-  color: #666;
+  padding: 40px 20px;
+  background-color: #fff;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  border-top: 1px solid rgba(0,0,0,0.03);
 }
 </style>
