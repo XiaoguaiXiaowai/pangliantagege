@@ -25,7 +25,7 @@ import { RouterLink, RouterView } from 'vue-router'
     </main>
 
     <footer>
-      <p>&copy; 2026 胖脸他哥哥 - 李佳的个人网站. All rights reserved.</p>
+      <p>&copy; 2026 胖脸她哥哥 - 李佳的个人网站. All rights reserved.</p>
     </footer>
   </div>
 </template>
