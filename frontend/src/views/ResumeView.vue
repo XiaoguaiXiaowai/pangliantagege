@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
+import MagicCard from '../components/MagicCard.vue'
+import Marquee from '../components/Marquee.vue'
 
 const resumeData = ref(null)
 const loading = ref(true)
@@ -37,13 +39,27 @@ const scrollToSection = (id) => {
   }
 }
 
+// Split skills for Marquee rows
+const firstRowSkills = computed(() => {
+  if (!resumeData.value || !resumeData.value.skills) return []
+  // If fewer than 4 skills, just return all for first row to ensure it's not empty
+  if (resumeData.value.skills.length < 4) return resumeData.value.skills
+  const mid = Math.ceil(resumeData.value.skills.length / 2)
+  return resumeData.value.skills.slice(0, mid)
+})
+
+const secondRowSkills = computed(() => {
+  if (!resumeData.value || !resumeData.value.skills) return []
+  if (resumeData.value.skills.length < 4) return resumeData.value.skills // Duplicate for second row if few
+  const mid = Math.ceil(resumeData.value.skills.length / 2)
+  return resumeData.value.skills.slice(mid)
+})
+
 // Intersection Observer for scroll spy
 onMounted(() => {
   fetchResumeData()
 
   const observer = new IntersectionObserver((entries) => {
-    // Find the entry that is intersecting and has the largest intersection ratio
-    // Or simply the first one that is intersecting
     const visibleEntry = entries.find(entry => entry.isIntersecting)
     if (visibleEntry) {
       activeSection.value = visibleEntry.target.id
@@ -90,7 +106,7 @@ onMounted(() => {
       <div class="main-content">
         <!-- Basic Info -->
         <section id="basic-info" class="section-card">
-          <div class="profile-header" v-if="resumeData.basic_info">
+          <div class="profile-header" v-if="resumeData && resumeData.basic_info">
             <div class="avatar-container" v-if="resumeData.basic_info.avatar">
               <img :src="resumeData.basic_info.avatar" alt="Avatar" class="avatar" />
             </div>
@@ -108,16 +124,26 @@ onMounted(() => {
           <div v-else class="empty-state">暂无基本信息</div>
         </section>
 
-        <!-- Skills -->
+        <!-- Skills (Marquee) -->
         <section id="skills" class="section-card">
           <h3>🛠 技能栈</h3>
-          <div class="skills-grid" v-if="resumeData.skills && resumeData.skills.length">
-            <div v-for="skill in resumeData.skills" :key="skill.id" class="skill-item">
-              <span class="skill-name">{{ skill.name }}</span>
-              <div class="skill-bar">
-                <div class="skill-level" :style="{ width: skill.level + '%' }"></div>
+          <div class="skills-marquee-container" v-if="resumeData && resumeData.skills && resumeData.skills.length">
+            <Marquee pauseOnHover duration="40s" class="mb-4">
+              <div v-for="skill in firstRowSkills" :key="skill.id" class="skill-card">
+                <span class="skill-name">{{ skill.name }}</span>
+                <div class="skill-bar">
+                  <div class="skill-level" :style="{ width: skill.level + '%' }"></div>
+                </div>
               </div>
-            </div>
+            </Marquee>
+            <Marquee reverse pauseOnHover duration="40s">
+              <div v-for="skill in secondRowSkills" :key="skill.id" class="skill-card">
+                <span class="skill-name">{{ skill.name }}</span>
+                <div class="skill-bar">
+                  <div class="skill-level" :style="{ width: skill.level + '%' }"></div>
+                </div>
+              </div>
+            </Marquee>
           </div>
           <div v-else class="empty-state">暂无技能信息</div>
         </section>
@@ -125,7 +151,7 @@ onMounted(() => {
         <!-- Experience -->
         <section id="experience" class="section-card">
           <h3>💼 工作经历</h3>
-          <div class="timeline" v-if="resumeData.experiences && resumeData.experiences.length">
+          <div class="timeline" v-if="resumeData && resumeData.experiences && resumeData.experiences.length">
             <div v-for="exp in resumeData.experiences" :key="exp.id" class="timeline-item">
               <div class="timeline-header">
                 <span class="company">{{ exp.company }}</span>
@@ -138,11 +164,11 @@ onMounted(() => {
            <div v-else class="empty-state">暂无工作经历</div>
         </section>
 
-        <!-- Projects -->
+        <!-- Projects (MagicCard) -->
         <section id="projects" class="section-card">
           <h3>🚀 项目经历</h3>
-          <div class="projects-list" v-if="resumeData.projects && resumeData.projects.length">
-            <div v-for="project in resumeData.projects" :key="project.id" class="project-item">
+          <div class="projects-grid" v-if="resumeData && resumeData.projects && resumeData.projects.length">
+            <MagicCard v-for="project in resumeData.projects" :key="project.id" class="project-card">
               <div class="project-header">
                 <span class="project-name">{{ project.name }}</span>
                 <span class="role-badge">{{ project.role }}</span>
@@ -155,7 +181,7 @@ onMounted(() => {
                 </span>
               </div>
               <a v-if="project.link" :href="project.link" target="_blank" class="project-link">查看项目</a>
-            </div>
+            </MagicCard>
           </div>
           <div v-else class="empty-state">暂无项目经历</div>
         </section>
@@ -163,7 +189,7 @@ onMounted(() => {
         <!-- Education -->
         <section id="education" class="section-card">
           <h3>🎓 教育背景</h3>
-          <div class="education-list" v-if="resumeData.educations && resumeData.educations.length">
+          <div class="education-list" v-if="resumeData && resumeData.educations && resumeData.educations.length">
             <div v-for="edu in resumeData.educations" :key="edu.id" class="edu-item">
               <div class="edu-header">
                 <span class="school">{{ edu.school }}</span>
@@ -276,10 +302,11 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 40px;
+  overflow: hidden; /* Prevent marquee overflow */
 }
 
 .section-card {
-  scroll-margin-top: 80px; /* Offset for sticky header if any, or just spacing */
+  scroll-margin-top: 80px; 
 }
 
 h3 {
@@ -336,45 +363,135 @@ h3 {
   color: #555;
 }
 
-/* Skills */
-.skills-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+/* Skills (Marquee) */
+.skills-marquee-container {
+  display: flex;
+  flex-direction: column;
   gap: 20px;
 }
 
-.skill-item {
-  margin-bottom: 10px;
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.skill-card {
+  width: 200px;
+  padding: 15px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .skill-name {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
   font-weight: 500;
+  text-align: center;
 }
 
 .skill-bar {
-  height: 8px;
+  height: 6px;
   background-color: #eee;
-  border-radius: 4px;
+  border-radius: 3px;
   overflow: hidden;
 }
 
 .skill-level {
   height: 100%;
   background-color: #42b983;
+  border-radius: 3px;
+}
+
+/* Projects (MagicCard Grid) */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.project-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.project-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.role-badge {
+  background-color: #e8f5e9;
+  color: #42b983;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  margin-left: 10px;
+}
+
+.project-date {
+  font-size: 0.85rem;
+  color: #999;
+  margin-bottom: 10px;
+}
+
+.project-desc {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 15px;
+  line-height: 1.5;
+  flex-grow: 1;
+}
+
+.tech-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.tech-tag {
+  background-color: #f0f0f0;
+  color: #666;
+  padding: 2px 8px;
   border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.project-link {
+  display: inline-block;
+  color: #42b983;
+  text-decoration: none;
+  font-weight: 500;
+  margin-top: auto;
+}
+
+.project-link:hover {
+  text-decoration: underline;
 }
 
 /* Timeline (Experience & Education) */
-.timeline-item, .edu-item, .project-item {
+.timeline-item, .edu-item {
   margin-bottom: 30px;
   padding-left: 20px;
   border-left: 2px solid #eee;
   position: relative;
 }
 
-.timeline-item::before, .edu-item::before, .project-item::before {
+.timeline-item::before, .edu-item::before {
   content: '';
   position: absolute;
   left: -6px;
@@ -385,105 +502,39 @@ h3 {
   border-radius: 50%;
 }
 
-.timeline-header, .edu-header, .project-header {
+.timeline-header, .edu-header {
   display: flex;
   justify-content: space-between;
   margin-bottom: 5px;
 }
 
-.company, .school, .project-name {
+.company, .school {
   font-weight: bold;
   font-size: 1.1rem;
 }
 
-.date, .project-date {
+.date {
   color: #888;
-  font-size: 0.9rem;
 }
 
-.position, .degree {
-  color: #555;
-  margin-bottom: 10px;
-  font-weight: 500;
-}
-
-.description, .project-desc {
-  color: #666;
-  line-height: 1.6;
-}
-
-/* Projects */
-.role-badge {
-  background-color: #e0f2f1;
-  color: #00695c;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 0.8rem;
-  margin-left: 10px;
-}
-
-.tech-stack {
-  margin-top: 10px;
+/* Language & Certificate */
+.language-list, .certificate-list {
   display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
-.tech-tag {
-  background-color: #f5f5f5;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  color: #666;
-}
-
-.project-link {
-  display: inline-block;
-  margin-top: 10px;
-  color: #42b983;
-  font-size: 0.9rem;
-}
-
-/* Languages */
-.language-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .language-item {
-  background-color: #f9f9f9;
-  padding: 10px 15px;
-  border-radius: 5px;
   display: flex;
-  align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
 }
 
-.language-name {
-  font-weight: bold;
-  color: #333;
-}
-
-.language-proficiency {
-  color: #666;
-  font-size: 0.9rem;
-  background-color: #eee;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-/* Certificates */
 .certificate-item {
-  margin-bottom: 20px;
-  padding: 15px;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  transition: box-shadow 0.3s;
-}
-
-.certificate-item:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
 }
 
 .certificate-header {
@@ -494,8 +545,6 @@ h3 {
 
 .certificate-name {
   font-weight: bold;
-  font-size: 1.1rem;
-  color: #333;
 }
 
 .certificate-date {
@@ -503,69 +552,9 @@ h3 {
   font-size: 0.9rem;
 }
 
-.certificate-issuer {
-  color: #666;
-}
-
 .certificate-link {
-  display: inline-block;
-  margin-top: 8px;
   color: #42b983;
+  text-decoration: none;
   font-size: 0.9rem;
-}
-
-/* Loading & Error */
-.loading, .error, .empty-state {
-  text-align: center;
-  padding: 50px;
-  color: #888;
-}
-
-.error {
-  color: #e53935;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .content-wrapper {
-    flex-direction: column;
-  }
-  
-  .sidebar {
-    width: 100%;
-    position: static;
-    border-right: none;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
-  }
-
-  .sidebar nav ul {
-    display: flex;
-    overflow-x: auto;
-    white-space: nowrap;
-    gap: 10px;
-  }
-
-  .sidebar nav li {
-    border-left: none;
-    border-bottom: 3px solid transparent;
-  }
-
-  .sidebar nav li:hover,
-  .sidebar nav li.active {
-    border-left: none;
-    border-bottom-color: #42b983;
-  }
-
-  .profile-header {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .contact-info {
-    justify-content: center;
-    flex-wrap: wrap;
-  }
 }
 </style>
