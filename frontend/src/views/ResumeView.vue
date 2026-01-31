@@ -280,22 +280,22 @@ onMounted(() => {
 }
 
 .sidebar nav li:hover {
-  background-color: rgba(188, 237, 216, 0.3); /* Mint tint */
-  color: var(--color-teal-deep);
+  background-color: rgba(167, 235, 242, 0.3); /* Luna Lightest tint */
+  color: var(--luna-darkest);
 }
 
 .sidebar nav li.active {
   background-color: #fff;
-  color: var(--color-teal-deep);
-  box-shadow: 0 4px 15px rgba(6, 87, 88, 0.08);
+  color: var(--luna-darkest);
+  box-shadow: 0 4px 15px rgba(1, 28, 64, 0.08);
   font-weight: 700;
-  border: 1px solid var(--color-mint);
+  border: 1px solid var(--luna-lightest);
 }
 
 .download-pdf {
   margin-top: 30px;
   padding-top: 20px;
-  border-top: 1px solid rgba(6, 87, 88, 0.1);
+  border-top: 1px solid rgba(167, 235, 242, 0.5);
 }
 
 .btn-pdf {
@@ -304,19 +304,19 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 14px;
-  background: linear-gradient(135deg, var(--color-teal-deep), var(--color-teal));
+  background: linear-gradient(135deg, var(--luna-dark), var(--luna-medium));
   color: #fff;
   border-radius: 18px;
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 20px rgba(0, 153, 159, 0.25);
+  box-shadow: 0 8px 20px rgba(38, 101, 140, 0.25);
 }
 
 .btn-pdf:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 25px rgba(0, 153, 159, 0.35);
+  box-shadow: 0 12px 25px rgba(38, 101, 140, 0.35);
   filter: brightness(1.1);
 }
 
@@ -341,13 +341,13 @@ onMounted(() => {
 /* Hero Card (Basic Info) */
 .hero-card {
   background: #fff;
-  background-image: radial-gradient(circle at top right, rgba(188, 237, 216, 0.2), transparent 40%);
+  background-image: radial-gradient(circle at top right, rgba(167, 235, 242, 0.3), transparent 40%);
 }
 
 h3 {
   font-size: 1.5rem;
   margin-bottom: 30px;
-  color: var(--color-teal-deep);
+  color: var(--luna-darkest);
   position: relative;
   display: inline-block;
   font-weight: 700;
@@ -360,7 +360,7 @@ h3::after {
   left: 0;
   width: 50px;
   height: 5px;
-  background: linear-gradient(to right, var(--color-teal), var(--color-mint));
+  background: linear-gradient(to right, var(--luna-medium), var(--luna-light));
   border-radius: 3px;
 }
 
@@ -376,14 +376,14 @@ h3::after {
   height: 140px;
   border-radius: 40px; /* Soft Squircle */
   object-fit: cover;
-  box-shadow: 0 15px 35px rgba(6, 87, 88, 0.15);
+  box-shadow: 0 15px 35px rgba(1, 28, 64, 0.15);
   border: 4px solid #fff;
 }
 
 .info-text h1 {
   margin: 0 0 10px 0;
   font-size: 2.5rem;
-  background: linear-gradient(135deg, var(--color-teal-deep), var(--color-teal));
+  background: linear-gradient(135deg, var(--luna-darkest), var(--luna-dark));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -393,9 +393,9 @@ h3::after {
 .info-text h2 {
   margin: 0 0 20px 0;
   font-size: 1.25rem;
-  color: var(--color-teal);
+  color: var(--luna-medium);
   font-weight: 600;
-  background: rgba(188, 237, 216, 0.3);
+  background: rgba(167, 235, 242, 0.3);
   display: inline-block;
   padding: 4px 12px;
   border-radius: 12px;
@@ -412,7 +412,7 @@ h3::after {
 }
 
 .dot {
-  color: var(--color-mint);
+  color: var(--luna-light);
   font-weight: bold;
 }
 
@@ -434,7 +434,7 @@ h3::after {
   background: #fff;
   border: 1px solid rgba(0,0,0,0.05);
   border-radius: 50px;
-  box-shadow: 0 4px 12px rgba(6, 87, 88, 0.05);
+  box-shadow: 0 4px 12px rgba(1, 28, 64, 0.05);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -446,15 +446,15 @@ h3::after {
 
 .skill-pill:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(6, 87, 88, 0.1);
+  box-shadow: 0 6px 15px rgba(1, 28, 64, 0.1);
 }
 
-/* Coloring skill pills cyclically */
-.skill-pill:nth-child(5n+1) { border-color: var(--color-teal-deep); color: var(--color-teal-deep); background: rgba(6, 87, 88, 0.05); }
-.skill-pill:nth-child(5n+2) { border-color: var(--color-teal); color: var(--color-teal); background: rgba(0, 153, 159, 0.05); }
-.skill-pill:nth-child(5n+3) { border-color: var(--color-blue-sky); color: var(--color-teal-deep); background: rgba(129, 210, 227, 0.1); }
-.skill-pill:nth-child(5n+4) { border-color: var(--color-yellow); color: #8a7f00; background: rgba(254, 238, 48, 0.1); }
-.skill-pill:nth-child(5n+5) { border-color: var(--color-mint); color: var(--color-teal-deep); background: rgba(188, 237, 216, 0.15); }
+/* Coloring skill pills with Luna palette */
+.skill-pill:nth-child(5n+1) { border-color: var(--luna-darkest); color: var(--luna-darkest); background: rgba(1, 28, 64, 0.05); }
+.skill-pill:nth-child(5n+2) { border-color: var(--luna-dark); color: var(--luna-dark); background: rgba(2, 56, 89, 0.05); }
+.skill-pill:nth-child(5n+3) { border-color: var(--luna-medium); color: var(--luna-medium); background: rgba(38, 101, 140, 0.05); }
+.skill-pill:nth-child(5n+4) { border-color: var(--luna-light); color: var(--luna-light); background: rgba(84, 172, 191, 0.1); }
+.skill-pill:nth-child(5n+5) { border-color: var(--luna-lightest); color: var(--luna-dark); background: rgba(167, 235, 242, 0.2); }
 
 .skill-name {
   font-size: 0.95rem;
@@ -484,12 +484,12 @@ h3::after {
 .project-name {
   font-weight: 700;
   font-size: 1.25rem;
-  color: var(--color-teal-deep);
+  color: var(--luna-darkest);
 }
 
 .role-badge {
-  background-color: var(--color-mint);
-  color: var(--color-teal-deep);
+  background-color: var(--luna-lightest);
+  color: var(--luna-dark);
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.8rem;
@@ -522,15 +522,15 @@ h3::after {
 .tech-tag {
   font-size: 0.8rem;
   padding: 4px 10px;
-  background-color: rgba(129, 210, 227, 0.15); /* Sky Blue tint */
-  color: var(--color-teal-deep);
+  background-color: rgba(167, 235, 242, 0.2); /* Luna Lightest tint */
+  color: var(--luna-dark);
   border-radius: 6px;
   font-weight: 500;
 }
 
 .project-link {
   display: inline-block;
-  color: var(--color-teal);
+  color: var(--luna-medium);
   font-weight: 600;
   text-decoration: none;
   margin-top: auto;
@@ -538,7 +538,7 @@ h3::after {
 }
 
 .project-link:hover {
-  color: var(--color-teal-deep);
+  color: var(--luna-darkest);
   transform: translateX(4px);
 }
 
@@ -560,7 +560,7 @@ h3::after {
   top: 0;
   bottom: -40px;
   width: 1px;
-  background: rgba(188, 237, 216, 0.5); /* Mint line */
+  background: rgba(84, 172, 191, 0.3); /* Luna Light line */
   transform: translateX(-50%);
 }
 
@@ -590,11 +590,11 @@ h3::after {
   top: 6px;
   width: 10px;
   height: 10px;
-  background: var(--color-yellow);
+  background: var(--luna-light);
   border: 3px solid #fff;
   border-radius: 50%;
   z-index: 1;
-  box-shadow: 0 0 0 3px var(--color-mint);
+  box-shadow: 0 0 0 3px rgba(167, 235, 242, 0.5); /* Luna Lightest shadow */
 }
 
 .company, .school {
@@ -603,13 +603,13 @@ h3::after {
   display: block;
   margin-bottom: 4px;
   grid-column: 2;
-  color: var(--color-teal-deep);
+  color: var(--luna-darkest);
 }
 
 .position, .degree {
   grid-column: 2;
   font-weight: 600;
-  color: var(--color-teal);
+  color: var(--luna-medium);
   margin-bottom: 12px;
   display: block;
 }
@@ -634,13 +634,13 @@ h3::after {
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
-  border: 1px solid rgba(188, 237, 216, 0.3);
+  border: 1px solid rgba(167, 235, 242, 0.5);
 }
 
 .grid-item:hover {
   background: #fff;
-  box-shadow: 0 10px 30px rgba(6, 87, 88, 0.08);
-  border-color: var(--color-teal);
+  box-shadow: 0 10px 30px rgba(1, 28, 64, 0.08);
+  border-color: var(--luna-medium);
   transform: translateY(-4px);
 }
 
@@ -648,11 +648,11 @@ h3::after {
   font-weight: 700;
   margin-bottom: 8px;
   font-size: 1.1rem;
-  color: var(--color-teal-deep);
+  color: var(--luna-darkest);
 }
 
 .grid-value {
-  color: var(--color-teal);
+  color: var(--luna-light);
   font-size: 0.95rem;
   font-weight: 600;
 }
@@ -712,7 +712,7 @@ h3::after {
     grid-template-columns: 1fr;
     gap: 10px;
     padding-left: 20px;
-    border-left: 2px solid rgba(188, 237, 216, 0.3);
+    border-left: 2px solid rgba(167, 235, 242, 0.5);
   }
   
   .timeline-item::after, .edu-item::after {
@@ -724,7 +724,7 @@ h3::after {
     text-align: left;
     padding-right: 0;
     margin-bottom: 4px;
-    color: var(--color-teal);
+    color: var(--luna-medium);
     font-weight: 600;
   }
   
@@ -732,7 +732,7 @@ h3::after {
     left: -26px; /* -20px padding - 6px approx center of line */
     right: auto;
     top: 4px;
-    box-shadow: 0 0 0 3px var(--color-mint);
+    box-shadow: 0 0 0 3px rgba(167, 235, 242, 0.5);
   }
   
   .company, .school, .position, .degree, .description {
