@@ -1,31 +1,34 @@
 :root {
-  /* Font Stack - Elegant & Modern */
+  /* 2025 Premium Color Palette */
+  --color-teal-deep: #065758;
+  --color-teal: #00999F;
+  --color-mint: #BCEDD8;
+  --color-yellow: #FEEE30;
+  --color-blue-sky: #81D2E3;
+
+  /* Semantic Colors */
+  --color-primary: var(--color-teal-deep);
+  --color-secondary: var(--color-teal);
+  --color-accent: var(--color-yellow);
+  
+  --text-primary: #065758; /* Deep Teal for primary text */
+  --text-secondary: #5A7F82; /* Muted Teal for secondary text */
+  
+  --bg-body: #F5FBF9; /* Very light mint tint */
+  --card-bg: #FFFFFF;
+  
+  --card-shadow: 0 10px 30px rgba(6, 87, 88, 0.05);
+  --card-radius: 24px;
+  --card-border: rgba(188, 237, 216, 0.3); /* Mint border */
+
+  /* Font Stack */
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.6;
   font-weight: 400;
 
-  /* Palette - Morandi / Premium Pastel */
-  --color-purple: #8B86BE;
-  --color-pink: #D7ADBC;
-  --color-yellow: #EAB668;
-  --color-green: #CCD48D;
-  --color-blue: #8BAEB6;
-  
-  --bg-color: #FAFAFA; /* Soft Off-White */
-  --text-primary: #4A4A4A; /* Dark Grey for softness */
-  --text-secondary: #888888; /* Muted Grey */
-  
-  --accent-color: var(--color-blue); /* Primary accent */
-  
-  /* Card Styling - Soft & Elevated */
-  --card-bg: #FFFFFF;
-  --card-border: rgba(0,0,0,0.03);
-  --card-shadow: 0 10px 40px -10px rgba(0,0,0,0.05);
-  --card-radius: 24px;
-  
   color-scheme: light;
   color: var(--text-primary);
-  background-color: var(--bg-color);
+  background-color: var(--bg-body);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -41,27 +44,27 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: var(--bg-color);
+  background-color: var(--bg-body);
   color: var(--text-primary);
 }
 
 a {
   font-weight: 500;
-  color: var(--color-blue);
+  color: var(--color-teal);
   text-decoration: none;
   transition: all 0.3s ease;
 }
 
 a:hover {
-  color: var(--color-purple);
+  color: var(--color-teal-deep);
   opacity: 0.8;
 }
 
 h1, h2, h3, h4, h5, h6 {
   margin: 0 0 1rem 0;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: -0.02em;
-  color: #2c3e50;
+  color: var(--color-teal-deep);
 }
 
 h1 {
