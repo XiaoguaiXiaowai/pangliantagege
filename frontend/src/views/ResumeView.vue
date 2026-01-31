@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 import axios from 'axios'
 import MagicCard from '../components/MagicCard.vue'
 import Marquee from '../components/Marquee.vue'
@@ -12,13 +12,20 @@ const activeSection = ref('')
 
 const sections = [
   { id: 'basic-info', title: '关于我' },
-  { id: 'skills', title: '技能' },
+  { id: 'keywords', title: '我的KeyWord' },
   { id: 'experience', title: '经历' },
   { id: 'projects', title: '项目' },
+  { id: 'tech-stack', title: '我的技能栈' },
   { id: 'education', title: '教育' },
   { id: 'languages', title: '语言' },
   { id: 'certificates', title: '证书' },
 ]
+
+// Refs for interaction
+const projectRefs = ref({})
+const skillRefs = ref({})
+const contentWrapperRef = ref(null)
+const lines = ref([])
 
 const fetchResumeData = async () => {
   try {
@@ -48,7 +55,7 @@ const scrollToSection = (id) => {
   }
 }
 
-// Split skills for Marquee rows
+// Split skills for Marquee rows (All keywords mixed)
 const firstRowSkills = computed(() => {
   if (!resumeData.value || !resumeData.value.skills) return []
   if (resumeData.value.skills.length < 4) return resumeData.value.skills
@@ -62,6 +69,67 @@ const secondRowSkills = computed(() => {
   const mid = Math.ceil(resumeData.value.skills.length / 2)
   return resumeData.value.skills.slice(mid)
 })
+
+// Filter Tech Skills for "My Tech Stack" section
+const techSkills = computed(() => {
+  if (!resumeData.value || !resumeData.value.skills) return []
+  // Filter mostly by tech categories or just exclude soft skills/hobbies if needed.
+  // Assuming Backend, Frontend, Tools are tech. Role is also somewhat tech related.
+  // Let's include everything except Hobbies and Strengths for the tech stack, or just specific lists.
+  // Actually, filtering by category is safer.
+  const techCategories = ['Backend', 'Frontend', 'Tools', 'Mobile', 'DevOps', 'Language']
+  return resumeData.value.skills.filter(s => techCategories.includes(s.category) || !s.category)
+})
+
+// Interaction Logic
+const handleProjectHover = (project) => {
+  if (!project.technologies || !contentWrapperRef.value) return
+
+  const techList = project.technologies.split(',').map(t => t.trim().toLowerCase())
+  const newLines = []
+  
+  // Get container rect for relative positioning
+  const containerRect = contentWrapperRef.value.getBoundingClientRect()
+
+  // Get project card rect
+  const projectEl = projectRefs.value[project.id]
+  if (!projectEl) return
+  // Use $el if it's a component, otherwise the element itself
+  const pRect = (projectEl.$el || projectEl).getBoundingClientRect()
+  
+  // Start point (bottom center of project card)
+  const x1 = pRect.left + pRect.width / 2 - containerRect.left
+  const y1 = pRect.bottom - containerRect.top
+
+  techList.forEach(techName => {
+    // Find matching skill card
+    // We assume skillRefs are keyed by skill name (lowercase for matching)
+    const skillEl = skillRefs.value[techName]
+    if (skillEl) {
+      const sRect = skillEl.getBoundingClientRect()
+      // End point (top center of skill card)
+      const x2 = sRect.left + sRect.width / 2 - containerRect.left
+      const y2 = sRect.top - containerRect.top
+      
+      newLines.push({ x1, y1, x2, y2 })
+    }
+  })
+  
+  lines.value = newLines
+}
+
+const handleProjectLeave = () => {
+  lines.value = []
+}
+
+// Helper to set refs
+const setProjectRef = (el, id) => {
+  if (el) projectRefs.value[id] = el
+}
+
+const setSkillRef = (el, name) => {
+  if (el) skillRefs.value[name.toLowerCase()] = el
+}
 
 // Intersection Observer for scroll spy
 onMounted(() => {
@@ -90,7 +158,20 @@ onMounted(() => {
     <div v-if="loading" class="loading">加载中...</div>
     <div v-else-if="error" class="error">{{ error }}</div>
     
-    <div v-else class="content-wrapper">
+    <div v-else class="content-wrapper" ref="contentWrapperRef">
+      <!-- SVG Overlay for dynamic lines -->
+      <svg class="connections-overlay">
+        <line 
+          v-for="(line, index) in lines" 
+          :key="index"
+          :x1="line.x1" 
+          :y1="line.y1" 
+          :x2="line.x2" 
+          :y2="line.y2" 
+          class="connection-line"
+        />
+      </svg>
+
       <!-- Sidebar / Navigation Rail -->
       <aside class="sidebar">
         <nav>
@@ -136,9 +217,9 @@ onMounted(() => {
           <div v-else class="empty-state">暂无基本信息</div>
         </section>
 
-        <!-- Skills (Marquee) -->
-        <section id="skills" class="section-card">
-          <h3>技能栈</h3>
+        <!-- Keywords (Marquee) - Previously Skills -->
+        <section id="keywords" class="section-card">
+          <h3>我的KeyWord</h3>
           <div class="skills-marquee-container" v-if="resumeData && resumeData.skills && resumeData.skills.length">
             <Marquee pauseOnHover duration="40s" class="mb-4">
               <div v-for="skill in firstRowSkills" :key="skill.id" class="skill-pill">
@@ -151,7 +232,7 @@ onMounted(() => {
               </div>
             </Marquee>
           </div>
-          <div v-else class="empty-state">暂无技能信息</div>
+          <div v-else class="empty-state">暂无关键词信息</div>
         </section>
 
         <!-- Experience -->
@@ -174,7 +255,14 @@ onMounted(() => {
         <section id="projects" class="section-card">
           <h3>项目经历</h3>
           <div class="projects-grid" v-if="resumeData && resumeData.projects && resumeData.projects.length">
-            <MagicCard v-for="project in resumeData.projects" :key="project.id" class="project-card">
+            <MagicCard 
+              v-for="project in resumeData.projects" 
+              :key="project.id" 
+              class="project-card"
+              :ref="(el) => setProjectRef(el, project.id)"
+              @mouseenter="handleProjectHover(project)"
+              @mouseleave="handleProjectLeave"
+            >
               <div class="project-header">
                 <span class="project-name">{{ project.name }}</span>
                 <span class="role-badge">{{ project.role }}</span>
@@ -190,6 +278,29 @@ onMounted(() => {
             </MagicCard>
           </div>
           <div v-else class="empty-state">暂无项目经历</div>
+        </section>
+
+        <!-- My Tech Stack (New Section) -->
+        <section id="tech-stack" class="section-card">
+          <h3>我的技能栈</h3>
+          <div class="tech-stack-grid" v-if="techSkills && techSkills.length">
+            <div 
+              v-for="skill in techSkills" 
+              :key="skill.id" 
+              class="tech-card"
+              :ref="(el) => setSkillRef(el, skill.name)"
+            >
+              <span class="tech-icon">⚡</span>
+              <div class="tech-info">
+                <span class="tech-name">{{ skill.name }}</span>
+                <span class="tech-level">熟练度: {{ skill.level }}%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" :style="{ width: skill.level + '%' }"></div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="empty-state">暂无技能栈信息</div>
         </section>
 
         <!-- Education -->
@@ -249,6 +360,7 @@ onMounted(() => {
   display: flex;
   width: 100%;
   gap: 50px;
+  position: relative;
 }
 
 /* Sidebar - Premium Style */
@@ -326,6 +438,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 40px;
+  min-width: 0; /* Prevent flex item from overflowing */
 }
 
 .section-card {
@@ -738,5 +851,96 @@ h3::after {
   .company, .school, .position, .degree, .description {
     grid-column: 1;
   }
+}
+
+/* Dynamic Lines Overlay */
+.connections-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5; /* Above background, below content if content has higher z-index */
+  overflow: hidden;
+}
+
+.connection-line {
+  stroke: var(--luna-light);
+  stroke-width: 2px;
+  stroke-dasharray: 5;
+  animation: dash 1s linear infinite;
+  opacity: 0.6;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+/* Tech Stack Section */
+.tech-stack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.tech-card {
+  background: #fff;
+  border: 1px solid rgba(167, 235, 242, 0.5);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  transition: all 0.3s ease;
+}
+
+.tech-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(1, 28, 64, 0.08);
+  border-color: var(--luna-medium);
+}
+
+.tech-icon {
+  font-size: 1.5rem;
+  background: rgba(167, 235, 242, 0.2);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: var(--luna-dark);
+}
+
+.tech-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tech-name {
+  font-weight: 700;
+  color: var(--luna-darkest);
+}
+
+.tech-level {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.progress-bar {
+  height: 6px;
+  background: rgba(167, 235, 242, 0.3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, var(--luna-medium), var(--luna-light));
+  border-radius: 3px;
 }
 </style>
