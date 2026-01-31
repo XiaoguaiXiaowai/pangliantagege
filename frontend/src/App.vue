@@ -38,13 +38,13 @@ import { RouterLink, RouterView } from 'vue-router'
 }
 
 header {
-  background-color: rgba(255, 255, 255, 0.85);
+  background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
   z-index: 100;
-  border-bottom: 1px solid rgba(6, 87, 88, 0.05);
+  border-bottom: 1px solid rgba(167, 235, 242, 0.3);
 }
 
 .wrapper {
@@ -65,7 +65,7 @@ header {
 .logo-main {
   font-size: 1.8rem;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--color-teal-deep), var(--color-teal));
+  background: linear-gradient(135deg, var(--luna-darkest), var(--luna-medium));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -94,14 +94,14 @@ nav a {
 }
 
 nav a:hover {
-  color: var(--color-teal-deep);
-  background-color: rgba(188, 237, 216, 0.2); /* Mint tint */
+  color: var(--luna-darkest);
+  background-color: rgba(167, 235, 242, 0.2); /* Luna Lightest tint */
 }
 
 nav a.router-link-active {
   color: #fff;
-  background-color: var(--color-teal);
-  box-shadow: 0 4px 12px rgba(0, 153, 159, 0.3);
+  background-color: var(--luna-medium);
+  box-shadow: 0 4px 12px rgba(38, 101, 140, 0.3);
 }
 
 main {
@@ -118,6 +118,6 @@ footer {
   background-color: #fff;
   color: var(--text-secondary);
   font-size: 0.85rem;
-  border-top: 1px solid rgba(6, 87, 88, 0.05);
+  border-top: 1px solid rgba(167, 235, 242, 0.3);
 }
 </style>

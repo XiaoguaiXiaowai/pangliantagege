@@ -1,25 +1,25 @@
 :root {
-  /* 2025 Premium Color Palette */
-  --color-teal-deep: #065758;
-  --color-teal: #00999F;
-  --color-mint: #BCEDD8;
-  --color-yellow: #FEEE30;
-  --color-blue-sky: #81D2E3;
+  /* 2025 Luna Color Palette */
+  --luna-lightest: #A7EBF2; /* Cyan/Light Blue */
+  --luna-light: #54ACBF;    /* Medium Cyan */
+  --luna-medium: #26658C;   /* Medium Blue */
+  --luna-dark: #023859;     /* Dark Blue */
+  --luna-darkest: #011C40;  /* Darkest Navy */
 
-  /* Semantic Colors */
-  --color-primary: var(--color-teal-deep);
-  --color-secondary: var(--color-teal);
-  --color-accent: var(--color-yellow);
+  /* Semantic Colors - Mapped to Luna Palette */
+  --color-primary: var(--luna-darkest);
+  --color-secondary: var(--luna-medium);
+  --color-accent: var(--luna-light);
   
-  --text-primary: #065758; /* Deep Teal for primary text */
-  --text-secondary: #5A7F82; /* Muted Teal for secondary text */
+  --text-primary: var(--luna-darkest);
+  --text-secondary: var(--luna-medium);
   
-  --bg-body: #F5FBF9; /* Very light mint tint */
+  --bg-body: #F4FBFC; /* Very light tint of Luna Lightest */
   --card-bg: #FFFFFF;
   
-  --card-shadow: 0 10px 30px rgba(6, 87, 88, 0.05);
+  --card-shadow: 0 10px 30px rgba(1, 28, 64, 0.08);
   --card-radius: 24px;
-  --card-border: rgba(188, 237, 216, 0.3); /* Mint border */
+  --card-border: rgba(167, 235, 242, 0.5); /* Luna Lightest border */
 
   /* Font Stack */
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -50,13 +50,13 @@ body {
 
 a {
   font-weight: 500;
-  color: var(--color-teal);
+  color: var(--color-secondary);
   text-decoration: none;
   transition: all 0.3s ease;
 }
 
 a:hover {
-  color: var(--color-teal-deep);
+  color: var(--color-primary);
   opacity: 0.8;
 }
 
@@ -64,7 +64,7 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0 0 1rem 0;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: var(--color-teal-deep);
+  color: var(--color-primary);
 }
 
 h1 {
