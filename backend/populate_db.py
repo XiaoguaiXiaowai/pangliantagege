@@ -25,12 +25,29 @@ def populate():
 
     # Skills
     if not Skill.objects.exists():
+        # Tech Skills (Hard Skills)
         Skill.objects.create(name="Python", level=90, category="Backend")
         Skill.objects.create(name="Django", level=85, category="Backend")
         Skill.objects.create(name="Vue.js", level=80, category="Frontend")
         Skill.objects.create(name="JavaScript", level=85, category="Frontend")
         Skill.objects.create(name="Docker", level=70, category="Tools")
-        print("已创建技能数据")
+        Skill.objects.create(name="Elasticsearch", level=60, category="Backend")
+        
+        # Soft Skills / Strengths
+        Skill.objects.create(name="团队协作", level=90, category="Strength")
+        Skill.objects.create(name="快速学习", level=95, category="Strength")
+        Skill.objects.create(name="问题解决", level=85, category="Strength")
+        
+        # Hobbies
+        Skill.objects.create(name="摄影", level=60, category="Hobby")
+        Skill.objects.create(name="徒步", level=70, category="Hobby")
+        Skill.objects.create(name="科幻阅读", level=80, category="Hobby")
+        
+        # Roles
+        Skill.objects.create(name="全栈开发", level=90, category="Role")
+        Skill.objects.create(name="技术博主", level=75, category="Role")
+        
+        print("已创建技能/关键词数据")
 
     # Experience
     if not Experience.objects.exists():
@@ -57,7 +74,7 @@ def populate():
             role="独立开发者",
             start_date=date(2024, 1, 1),
             description="一个基于 Markdown 的个人知识管理系统，支持全文检索和 AI 辅助写作。",
-            technologies="Python, Django, Elasticsearch, Vue 3",
+            technologies="Python, Django, Elasticsearch, Vue.js",
             link="https://github.com/example/knowledge-base"
         )
         print("已创建项目经历")

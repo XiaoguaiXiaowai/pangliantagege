@@ -1,7 +1,7 @@
 <template>
   <div class="talents-view">
-    <h1>上点儿才艺</h1>
-    <p>这里展示才艺视频或作品。</p>
+    <h1>其他</h1>
+    <p>这里展示其他内容，如才艺视频或作品。</p>
   </div>
 </template>
 

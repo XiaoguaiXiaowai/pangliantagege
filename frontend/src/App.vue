@@ -15,7 +15,7 @@ import { RouterLink, RouterView } from 'vue-router'
           <RouterLink to="/message-board">留言板</RouterLink>
           <RouterLink to="/ai-assistant">AI 助理</RouterLink>
           <RouterLink to="/tools">小工具</RouterLink>
-          <RouterLink to="/talents">才艺</RouterLink>
+          <RouterLink to="/talents">其他</RouterLink>
         </nav>
       </div>
     </header>
