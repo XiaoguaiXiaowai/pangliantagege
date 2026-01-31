@@ -85,7 +85,7 @@ const handleMouseMove = (e) => {
   bottom: 0;
   background: radial-gradient(
     600px circle at var(--mouse-x) var(--mouse-y),
-    rgba(66, 185, 131, 0.4),
+    rgba(0, 153, 159, 0.4),
     transparent 40%
   );
   opacity: 0;

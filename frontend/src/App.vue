@@ -38,13 +38,13 @@ import { RouterLink, RouterView } from 'vue-router'
 }
 
 header {
-  background-color: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
   z-index: 100;
-  border-bottom: 1px solid rgba(0,0,0,0.03);
+  border-bottom: 1px solid rgba(6, 87, 88, 0.05);
 }
 
 .wrapper {
@@ -63,9 +63,9 @@ header {
 }
 
 .logo-main {
-  font-size: 1.5rem;
-  font-weight: 500;
-  background: linear-gradient(135deg, var(--color-purple), var(--color-blue));
+  font-size: 1.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--color-teal-deep), var(--color-teal));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -86,22 +86,22 @@ nav {
 nav a {
   color: var(--text-secondary);
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.95rem;
-  padding: 8px 16px;
+  padding: 8px 18px;
   border-radius: 20px;
   transition: all 0.3s ease;
 }
 
 nav a:hover {
-  color: var(--text-primary);
-  background-color: rgba(0,0,0,0.03);
+  color: var(--color-teal-deep);
+  background-color: rgba(188, 237, 216, 0.2); /* Mint tint */
 }
 
 nav a.router-link-active {
   color: #fff;
-  background-color: var(--color-blue);
-  box-shadow: 0 4px 12px rgba(139, 174, 182, 0.3);
+  background-color: var(--color-teal);
+  box-shadow: 0 4px 12px rgba(0, 153, 159, 0.3);
 }
 
 main {
@@ -118,6 +118,6 @@ footer {
   background-color: #fff;
   color: var(--text-secondary);
   font-size: 0.85rem;
-  border-top: 1px solid rgba(0,0,0,0.03);
+  border-top: 1px solid rgba(6, 87, 88, 0.05);
 }
 </style>
