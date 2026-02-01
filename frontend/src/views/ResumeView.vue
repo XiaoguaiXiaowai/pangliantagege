@@ -26,6 +26,7 @@ const projectRefs = ref({})
 const skillRefs = ref({})
 const contentWrapperRef = ref(null)
 const lines = ref([])
+const activeTechs = ref(new Set())
 
 const fetchResumeData = async () => {
   try {
@@ -72,13 +73,10 @@ const secondRowSkills = computed(() => {
 
 // Filter Tech Skills for "My Tech Stack" section
 const techSkills = computed(() => {
-  if (!resumeData.value || !resumeData.value.skills) return []
-  // Filter mostly by tech categories or just exclude soft skills/hobbies if needed.
-  // Assuming Backend, Frontend, Tools are tech. Role is also somewhat tech related.
-  // Let's include everything except Hobbies and Strengths for the tech stack, or just specific lists.
-  // Actually, filtering by category is safer.
-  const techCategories = ['Backend', 'Frontend', 'Tools', 'Mobile', 'DevOps', 'Language']
-  return resumeData.value.skills.filter(s => techCategories.includes(s.category) || !s.category)
+  if (resumeData.value && resumeData.value.tech_stack && resumeData.value.tech_stack.length > 0) {
+    return resumeData.value.tech_stack
+  }
+  return []
 })
 
 // Interaction Logic
@@ -87,6 +85,7 @@ const handleProjectHover = (project) => {
 
   const techList = project.technologies.split(',').map(t => t.trim().toLowerCase())
   const newLines = []
+  const newActiveTechs = new Set()
   
   // Get container rect for relative positioning
   const containerRect = contentWrapperRef.value.getBoundingClientRect()
@@ -98,28 +97,36 @@ const handleProjectHover = (project) => {
   const pRect = (projectEl.$el || projectEl).getBoundingClientRect()
   
   // Start point (bottom center of project card)
-  const x1 = pRect.left + pRect.width / 2 - containerRect.left
-  const y1 = pRect.bottom - containerRect.top
+  // We want to distribute start points along the bottom edge
+  const techCount = techList.length
+  // Calculate segment width to distribute points
+  const segmentWidth = pRect.width / (techCount + 1)
+  
+  const pBottom = pRect.bottom - containerRect.top
+  const pLeft = pRect.left - containerRect.left
 
-  techList.forEach(techName => {
+  techList.forEach((techName, index) => {
     // Find matching skill card
     // We assume skillRefs are keyed by skill name (lowercase for matching)
     const skillEl = skillRefs.value[techName]
     if (skillEl) {
       const sRect = skillEl.getBoundingClientRect()
+      
+      // Start point: Distributed along bottom of project card
+      const x1 = pLeft + (segmentWidth * (index + 1))
+      const y1 = pBottom
+      
       // End point (top center of skill card)
       const x2 = sRect.left + sRect.width / 2 - containerRect.left
       const y2 = sRect.top - containerRect.top
       
       newLines.push({ x1, y1, x2, y2 })
+      newActiveTechs.add(techName)
     }
   })
   
   lines.value = newLines
-}
-
-const handleProjectLeave = () => {
-  lines.value = []
+  activeTechs.value = newActiveTechs
 }
 
 // Helper to set refs
@@ -261,7 +268,6 @@ onMounted(() => {
               class="project-card"
               :ref="(el) => setProjectRef(el, project.id)"
               @mouseenter="handleProjectHover(project)"
-              @mouseleave="handleProjectLeave"
             >
               <div class="project-header">
                 <span class="project-name">{{ project.name }}</span>
@@ -288,15 +294,13 @@ onMounted(() => {
               v-for="skill in techSkills" 
               :key="skill.id" 
               class="tech-card"
+              :class="{ 'active-tech': activeTechs.has(skill.name.toLowerCase()) }"
               :ref="(el) => setSkillRef(el, skill.name)"
             >
-              <span class="tech-icon">⚡</span>
+              <span class="tech-icon">{{ skill.icon || '⚡' }}</span>
               <div class="tech-info">
                 <span class="tech-name">{{ skill.name }}</span>
-                <span class="tech-level">熟练度: {{ skill.level }}%</span>
-              </div>
-              <div class="progress-bar">
-                <div class="progress-fill" :style="{ width: skill.level + '%' }"></div>
+                <span class="tech-level">经验: {{ skill.years }}年</span>
               </div>
             </div>
           </div>
@@ -890,9 +894,10 @@ h3::after {
   background: #fff;
   border: 1px solid rgba(167, 235, 242, 0.5);
   border-radius: 16px;
-  padding: 20px;
+  padding: 12px 20px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   gap: 15px;
   transition: all 0.3s ease;
 }
@@ -901,6 +906,13 @@ h3::after {
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(1, 28, 64, 0.08);
   border-color: var(--luna-medium);
+}
+
+.tech-card.active-tech {
+  background: rgba(167, 235, 242, 0.4); /* Deeper background for selected state */
+  border-color: var(--luna-medium);
+  box-shadow: 0 0 15px rgba(84, 172, 191, 0.3);
+  transform: translateY(-2px);
 }
 
 .tech-icon {
@@ -919,6 +931,7 @@ h3::after {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex: 1;
 }
 
 .tech-name {

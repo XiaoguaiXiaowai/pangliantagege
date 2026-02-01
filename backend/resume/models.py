@@ -24,9 +24,22 @@ class Skill(models.Model):
     category = models.CharField(max_length=50, blank=True, null=True, verbose_name='分类') # e.g. Frontend, Backend, Tools
     
     class Meta:
-        verbose_name = '技能'
-        verbose_name_plural = '技能'
+        verbose_name = '技能/关键词'
+        verbose_name_plural = '技能/关键词'
         ordering = ['-level']
+
+    def __str__(self):
+        return self.name
+
+class TechStack(models.Model):
+    name = models.CharField(max_length=50, verbose_name='技术名称')
+    years = models.IntegerField(default=1, verbose_name='经验年限(年)')
+    icon = models.CharField(max_length=50, blank=True, null=True, verbose_name='图标(Emoji/Class)', default='⚡')
+    
+    class Meta:
+        verbose_name = '技术栈'
+        verbose_name_plural = '技术栈'
+        ordering = ['-years']
 
     def __str__(self):
         return self.name

@@ -6,7 +6,7 @@ from datetime import date
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
-from resume.models import BasicInfo, Skill, Experience, Project, Education, Language, Certificate
+from resume.models import BasicInfo, Skill, TechStack, Experience, Project, Education, Language, Certificate
 
 def populate():
     print("开始填充示例数据...")
@@ -23,16 +23,8 @@ def populate():
         )
         print("已创建基本信息")
 
-    # Skills
+    # Skills (Keywords)
     if not Skill.objects.exists():
-        # Tech Skills (Hard Skills)
-        Skill.objects.create(name="Python", level=90, category="Backend")
-        Skill.objects.create(name="Django", level=85, category="Backend")
-        Skill.objects.create(name="Vue.js", level=80, category="Frontend")
-        Skill.objects.create(name="JavaScript", level=85, category="Frontend")
-        Skill.objects.create(name="Docker", level=70, category="Tools")
-        Skill.objects.create(name="Elasticsearch", level=60, category="Backend")
-        
         # Soft Skills / Strengths
         Skill.objects.create(name="团队协作", level=90, category="Strength")
         Skill.objects.create(name="快速学习", level=95, category="Strength")
@@ -47,7 +39,21 @@ def populate():
         Skill.objects.create(name="全栈开发", level=90, category="Role")
         Skill.objects.create(name="技术博主", level=75, category="Role")
         
-        print("已创建技能/关键词数据")
+        # Tech Keywords (for Marquee, simpler version)
+        Skill.objects.create(name="Python", level=90, category="Backend")
+        Skill.objects.create(name="Vue.js", level=80, category="Frontend")
+        
+        print("已创建关键词数据")
+
+    # Tech Stack (Detailed)
+    if not TechStack.objects.exists():
+        TechStack.objects.create(name="Python", years=5, icon="🐍")
+        TechStack.objects.create(name="Django", years=4, icon="🎸")
+        TechStack.objects.create(name="Vue.js", years=3, icon="💚")
+        TechStack.objects.create(name="JavaScript", years=4, icon="📜")
+        TechStack.objects.create(name="Docker", years=2, icon="🐳")
+        TechStack.objects.create(name="Elasticsearch", years=2, icon="🔍")
+        print("已创建技术栈数据")
 
     # Experience
     if not Experience.objects.exists():
