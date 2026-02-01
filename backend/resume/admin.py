@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import BasicInfo, Skill, Experience, Project, Education, Language, Certificate
+from .models import BasicInfo, Skill, TechStack, Experience, Project, Education, Language, Certificate
 
 @admin.register(BasicInfo)
 class BasicInfoAdmin(admin.ModelAdmin):
@@ -9,6 +9,10 @@ class BasicInfoAdmin(admin.ModelAdmin):
 class SkillAdmin(admin.ModelAdmin):
     list_display = ('name', 'level', 'category')
     list_filter = ('category',)
+
+@admin.register(TechStack)
+class TechStackAdmin(admin.ModelAdmin):
+    list_display = ('name', 'years', 'icon')
 
 @admin.register(Experience)
 class ExperienceAdmin(admin.ModelAdmin):
