@@ -1,32 +1,36 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+import DynamicBackground from './components/DynamicBackground.vue'
 </script>
 
 <template>
   <div class="app-container">
-    <header>
-      <div class="wrapper">
-        <div class="site-branding">
-          <span class="logo-main">胖脸她哥哥</span>
-          <span class="logo-sub"> - 李佳的个人网站</span>
+    <DynamicBackground />
+    <div class="content-overlay">
+      <header>
+        <div class="wrapper">
+          <div class="site-branding">
+            <span class="logo-main">胖脸她哥哥</span>
+            <span class="logo-sub"> - 李佳的个人网站</span>
+          </div>
+          <nav>
+            <RouterLink to="/">个人简历</RouterLink>
+            <RouterLink to="/message-board">留言板</RouterLink>
+            <RouterLink to="/ai-assistant">AI 助理</RouterLink>
+            <RouterLink to="/tools">小工具</RouterLink>
+            <RouterLink to="/talents">其他</RouterLink>
+          </nav>
         </div>
-        <nav>
-          <RouterLink to="/">个人简历</RouterLink>
-          <RouterLink to="/message-board">留言板</RouterLink>
-          <RouterLink to="/ai-assistant">AI 助理</RouterLink>
-          <RouterLink to="/tools">小工具</RouterLink>
-          <RouterLink to="/talents">其他</RouterLink>
-        </nav>
-      </div>
-    </header>
+      </header>
 
-    <main>
-      <RouterView />
-    </main>
+      <main>
+        <RouterView />
+      </main>
 
-    <footer>
-      <p>&copy; 2026 胖脸她哥哥 - 李佳的个人网站. All rights reserved.</p>
-    </footer>
+      <footer>
+        <p>&copy; 2026 胖脸她哥哥 - 李佳的个人网站. All rights reserved.</p>
+      </footer>
+    </div>
   </div>
 </template>
 
@@ -35,6 +39,14 @@ import { RouterLink, RouterView } from 'vue-router'
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+
+.content-overlay {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 header {
