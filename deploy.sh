@@ -97,14 +97,41 @@ EOF
 
 restart_services() {
   pushd "$DEST_DIR" >/dev/null
+  
+  # Create logs/run directories if they don't exist and set ownership
   mkdir -p logs run
-  # Stop if running
-  python3 stop_backend.py || true
+  chown -R www-data:www-data logs run
+
+  # Stop services (as root, to ensure we can kill any existing process)
+  # Using venv python for stop script is safer to ensure consistency
+  "$DEST_DIR/backend/venv/bin/python" stop_backend.py || true
   python3 stop_frontend.py || true
-  # Start
-  ALLOWED_HOSTS="*" DJANGO_DEBUG=false python3 start_backend.py
-  sleep 1
-  python3 start_frontend.py
+  
+  # Start backend as www-data using venv python
+  # We export variables for the command
+  echo "Starting backend as www-data..."
+  # Use su or runuser to run as www-data
+  # We use the full path to venv python
+  local venv_python="$DEST_DIR/backend/venv/bin/python"
+  
+  # Run start_backend.py as www-data
+  # We pass environment variables explicitly
+  if command -v runuser >/dev/null 2>&1; then
+    runuser -u www-data -- bash -c "export ALLOWED_HOSTS='*' DJANGO_DEBUG=false; $venv_python start_backend.py"
+  else
+    su -s /bin/bash www-data -c "export ALLOWED_HOSTS='*' DJANGO_DEBUG=false; $venv_python start_backend.py"
+  fi
+
+  sleep 2
+  
+  echo "Starting frontend as www-data..."
+  # Run start_frontend.py as www-data
+  if command -v runuser >/dev/null 2>&1; then
+    runuser -u www-data -- python3 start_frontend.py
+  else
+    su -s /bin/bash www-data -c "python3 start_frontend.py"
+  fi
+  
   popd >/dev/null
 }
 
