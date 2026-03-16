@@ -22,7 +22,8 @@ ensure_root() {
 
 install_basics() {
   apt-get update
-  DEBIAN_FRONTEND=noninteractive apt-get install -y rsync python3-venv python3-pip nginx nodejs npm
+  # nodejs from NodeSource includes npm, so we don't need to install npm separately
+  DEBIAN_FRONTEND=noninteractive apt-get install -y rsync python3-venv python3-pip nginx nodejs
 }
 
 copy_code() {
