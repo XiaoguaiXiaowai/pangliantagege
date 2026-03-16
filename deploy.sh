@@ -126,10 +126,11 @@ restart_services() {
   
   echo "Starting frontend as www-data..."
   # Run start_frontend.py as www-data
+  # We set HOME to the frontend dir to avoid permission issues with .npm cache if it tries to use /var/www
   if command -v runuser >/dev/null 2>&1; then
-    runuser -u www-data -- python3 start_frontend.py
+    runuser -u www-data -- bash -c "export HOME=$DEST_DIR/frontend; python3 start_frontend.py"
   else
-    su -s /bin/bash www-data -c "python3 start_frontend.py"
+    su -s /bin/bash www-data -c "export HOME=$DEST_DIR/frontend; python3 start_frontend.py"
   fi
   
   popd >/dev/null
@@ -137,6 +138,34 @@ restart_services() {
 
 set_permissions() {
   chown -R www-data:www-data "$DEST_DIR"
+}
+
+configure_firewall() {
+  if command -v ufw >/dev/null 2>&1; then
+    if ufw status | grep -q "Status: active"; then
+      echo "Configuring UFW firewall..."
+      ufw allow 80/tcp
+      ufw allow 8000/tcp
+      ufw allow 5173/tcp
+      ufw reload
+    fi
+  fi
+}
+
+check_services() {
+  echo "Checking services..."
+  sleep 2
+  if pgrep -f "manage.py runserver" >/dev/null; then
+    echo "Backend is running."
+  else
+    echo "WARNING: Backend failed to start. Check $DEST_DIR/logs/backend.err"
+  fi
+  
+  if pgrep -f "npm run preview" >/dev/null || pgrep -f "vite preview" >/dev/null; then
+    echo "Frontend is running."
+  else
+    echo "WARNING: Frontend failed to start. Check $DEST_DIR/logs/frontend.err"
+  fi
 }
 
 main() {
@@ -147,8 +176,18 @@ main() {
   setup_node
   write_nginx_conf
   set_permissions
+  configure_firewall
   restart_services
-  echo "Deploy finished. Site served by nginx and background processes."
+  check_services
+  
+  # Get IP address
+  IP=$(hostname -I | awk '{print $1}')
+  echo "-----------------------------------------------------"
+  echo "Deploy finished."
+  echo "Nginx (Production): http://$IP/"
+  echo "Frontend (Preview): http://$IP:5173/"
+  echo "Backend API:        http://$IP:8000/"
+  echo "-----------------------------------------------------"
 }
 
 main "$@"
