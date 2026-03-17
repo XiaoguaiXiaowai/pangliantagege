@@ -58,7 +58,11 @@ setup_python() {
 
 setup_node() {
   pushd "$DEST_DIR/frontend" >/dev/null
-  npm ci || npm install
+  # Remove node_modules and package-lock.json to ensure clean install if needed
+  # rm -rf node_modules package-lock.json
+  
+  # Use npm install instead of npm ci to be more forgiving about lockfile issues
+  npm install --legacy-peer-deps
   npm run build
   popd >/dev/null
 }
