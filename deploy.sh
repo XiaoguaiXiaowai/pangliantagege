@@ -76,8 +76,10 @@ server {
     # Static media from Django
     location /media/ {
         alias /var/pltgg/backend/media/;
+        autoindex off;
         access_log off;
         expires 30d;
+        add_header Cache-Control "public";
     }
 
     # Static files from Django (Admin CSS/JS)
