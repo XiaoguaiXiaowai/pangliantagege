@@ -22,8 +22,18 @@ ensure_root() {
 
 install_basics() {
   apt-get update
-  # nodejs from NodeSource includes npm, so we don't need to install npm separately
-  # Install build dependencies for Pillow and cryptography
+  
+  # Install prerequisites for NodeSource
+  DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates curl gnupg
+  
+  # Setup NodeSource repository for Node.js 22
+  mkdir -p /etc/apt/keyrings
+  curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg --yes
+  echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" > /etc/apt/sources.list.d/nodesource.list
+  
+  apt-get update
+  
+  # Install build dependencies and Node.js
   DEBIAN_FRONTEND=noninteractive apt-get install -y \
     rsync python3-venv python3-pip nginx nodejs \
     libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev \
