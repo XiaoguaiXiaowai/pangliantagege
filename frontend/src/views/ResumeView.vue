@@ -34,14 +34,18 @@ const fetchResumeData = async () => {
     // If in production, we proxy /api/ to the backend via Nginx.
     // In dev, we might be running vite on 5173 and backend on 8000.
     const isProd = import.meta.env.PROD
-    // If it's production, we just use relative path to hit Nginx proxy
-    const apiBaseUrl = isProd ? '/api/resume/' : 'http://127.0.0.1:8000/api/resume/'
     
-    // Fallback: If for some reason PROD flag isn't right, check hostname
-    const host = window.location.hostname
-    const finalUrl = (host === '127.0.0.1' || host === 'localhost') && !isProd
-      ? 'http://127.0.0.1:8000/api/resume/' 
-      : '/api/resume/'
+    // Explicitly check for port 5173 to force backend URL usage even if PROD flag is confusing
+    const isDevPort = window.location.port === '5173'
+    
+    let finalUrl = '/api/resume/'
+    
+    if (!isProd || isDevPort) {
+        // If local dev or explicitly on dev port, hit backend directly
+        // We assume backend is on the same hostname but port 8000
+        const hostname = window.location.hostname
+        finalUrl = `http://${hostname}:8000/api/resume/`
+    }
 
     const response = await axios.get(finalUrl)
     resumeData.value = response.data
@@ -61,11 +65,12 @@ const getImageUrl = (url) => {
   }
   
   const isProd = import.meta.env.PROD
-  const host = window.location.hostname
+  const isDevPort = window.location.port === '5173'
   
   // If local dev, prepend backend URL. If deployed (accessed via IP), use relative path.
-  if ((host === '127.0.0.1' || host === 'localhost') && !isProd) {
-    return `http://127.0.0.1:8000${url}`
+  if (!isProd || isDevPort) {
+    const hostname = window.location.hostname
+    return `http://${hostname}:8000${url}`
   }
   return url
 }

@@ -35,6 +35,9 @@ copy_code() {
     --exclude "__pycache__" \
     --exclude "frontend/node_modules" \
     "$(pwd)/" "$DEST_DIR/"
+    
+  # Create media directory if it doesn't exist
+  mkdir -p "$DEST_DIR/backend/media"
 }
 
 setup_python() {
@@ -151,6 +154,8 @@ restart_services() {
 
 set_permissions() {
   chown -R www-data:www-data "$DEST_DIR"
+  # Ensure media directory is writable
+  chmod -R 775 "$DEST_DIR/backend/media"
 }
 
 configure_firewall() {
