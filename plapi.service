@@ -1,0 +1,23 @@
+[Unit]
+Description=PangLianTaGeGe Backend API Service (plapi)
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/pltgg/backend
+Environment="DJANGO_DEBUG=False"
+Environment="ALLOWED_HOSTS=*"
+Environment="PYTHONUNBUFFERED=1"
+# Ensure the virtual environment's python is used
+ExecStart=/var/pltgg/backend/venv/bin/python manage.py runserver 0.0.0.0:8000
+Restart=always
+RestartSec=5
+
+# Logs are handled by systemd (journalctl -u plapi)
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

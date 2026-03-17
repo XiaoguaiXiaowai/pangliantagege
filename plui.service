@@ -1,0 +1,22 @@
+[Unit]
+Description=PangLianTaGeGe Frontend UI Service (plui)
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/pltgg/frontend
+# Use the system node/npm
+ExecStart=/usr/bin/npm run preview -- --host 0.0.0.0 --port 5173
+Restart=always
+RestartSec=5
+# Set HOME to avoid permission issues with .npm cache
+Environment="HOME=/var/pltgg/frontend"
+
+# Logs are handled by systemd (journalctl -u plui)
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

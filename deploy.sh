@@ -96,44 +96,40 @@ EOF
 }
 
 restart_services() {
-  pushd "$DEST_DIR" >/dev/null
+  echo "Configuring and restarting systemd services..."
   
-  # Create logs/run directories if they don't exist and set ownership
-  mkdir -p logs run
-  chown -R www-data:www-data logs run
+  # Copy service files to /etc/systemd/system/
+  cp "$DEST_DIR/plapi.service" /etc/systemd/system/
+  cp "$DEST_DIR/plui.service" /etc/systemd/system/
 
-  # Stop services (as root, to ensure we can kill any existing process)
-  # Using venv python for stop script is safer to ensure consistency
-  "$DEST_DIR/backend/venv/bin/python" stop_backend.py || true
-  python3 stop_frontend.py || true
-  
-  # Start backend as www-data using venv python
-  # We export variables for the command
-  echo "Starting backend as www-data..."
-  # Use su or runuser to run as www-data
-  # We use the full path to venv python
-  local venv_python="$DEST_DIR/backend/venv/bin/python"
-  
-  # Run start_backend.py as www-data
-  # We pass environment variables explicitly
-  if command -v runuser >/dev/null 2>&1; then
-    runuser -u www-data -- bash -c "export ALLOWED_HOSTS='*' DJANGO_DEBUG=false; $venv_python start_backend.py"
+  # Reload systemd to pick up new files
+  systemctl daemon-reload
+
+  # Check for MySQL service
+  local db_engine_env=""
+  if systemctl is-active --quiet mysql; then
+    echo "MySQL service detected. Using MySQL."
   else
-    su -s /bin/bash www-data -c "export ALLOWED_HOSTS='*' DJANGO_DEBUG=false; $venv_python start_backend.py"
+    echo "MySQL service NOT detected. Switching to SQLite for backend."
+    # We need to inject this into the service file or override it
+    # For simplicity, let's create a drop-in override if needed, or just sed the file before copy
+    # But since we already copied, let's use systemctl edit mechanism or just modify the file in place
+    if ! grep -q "DB_ENGINE=sqlite3" /etc/systemd/system/plapi.service; then
+        # Add Environment variable to [Service] section
+        sed -i '/^Environment="ALLOWED_HOSTS=\*"/a Environment="DB_ENGINE=sqlite3"' /etc/systemd/system/plapi.service
+        systemctl daemon-reload
+    fi
   fi
 
-  sleep 2
+  # Enable and restart services
+  systemctl enable plapi
+  systemctl enable plui
   
-  echo "Starting frontend as www-data..."
-  # Run start_frontend.py as www-data
-  # We set HOME to the frontend dir to avoid permission issues with .npm cache if it tries to use /var/www
-  if command -v runuser >/dev/null 2>&1; then
-    runuser -u www-data -- bash -c "export HOME=$DEST_DIR/frontend; python3 start_frontend.py"
-  else
-    su -s /bin/bash www-data -c "export HOME=$DEST_DIR/frontend; python3 start_frontend.py"
-  fi
+  echo "Restarting plapi (Backend)..."
+  systemctl restart plapi
   
-  popd >/dev/null
+  echo "Restarting plui (Frontend)..."
+  systemctl restart plui
 }
 
 set_permissions() {
@@ -154,17 +150,17 @@ configure_firewall() {
 
 check_services() {
   echo "Checking services..."
-  sleep 2
-  if pgrep -f "manage.py runserver" >/dev/null; then
-    echo "Backend is running."
+  sleep 3
+  if systemctl is-active --quiet plapi; then
+    echo "Backend (plapi) is running."
   else
-    echo "WARNING: Backend failed to start. Check $DEST_DIR/logs/backend.err"
+    echo "WARNING: Backend failed to start. Check 'journalctl -u plapi'"
   fi
   
-  if pgrep -f "npm run preview" >/dev/null || pgrep -f "vite preview" >/dev/null; then
-    echo "Frontend is running."
+  if systemctl is-active --quiet plui; then
+    echo "Frontend (plui) is running."
   else
-    echo "WARNING: Frontend failed to start. Check $DEST_DIR/logs/frontend.err"
+    echo "WARNING: Frontend failed to start. Check 'journalctl -u plui'"
   fi
 }
 
