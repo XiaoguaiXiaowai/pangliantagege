@@ -31,13 +31,23 @@ const activeTechs = ref(new Set())
 const fetchResumeData = async () => {
   try {
     // Determine the base URL dynamically based on current window location
-    // If in production, it will be the same host/port. In dev, it might be different.
-    const apiBaseUrl = import.meta.env.PROD ? '/api/resume/' : 'http://127.0.0.1:8000/api/resume/'
-    const response = await axios.get(apiBaseUrl)
+    // If in production, we proxy /api/ to the backend via Nginx.
+    // In dev, we might be running vite on 5173 and backend on 8000.
+    const isProd = import.meta.env.PROD
+    // If it's production, we just use relative path to hit Nginx proxy
+    const apiBaseUrl = isProd ? '/api/resume/' : 'http://127.0.0.1:8000/api/resume/'
+    
+    // Fallback: If for some reason PROD flag isn't right, check hostname
+    const host = window.location.hostname
+    const finalUrl = (host === '127.0.0.1' || host === 'localhost') && !isProd
+      ? 'http://127.0.0.1:8000/api/resume/' 
+      : '/api/resume/'
+
+    const response = await axios.get(finalUrl)
     resumeData.value = response.data
   } catch (err) {
     error.value = '无法加载简历数据，请稍后再试。'
-    console.error(err)
+    console.error('API Error:', err)
   } finally {
     loading.value = false
   }
@@ -49,8 +59,15 @@ const getImageUrl = (url) => {
   if (url.startsWith('http://') || url.startsWith('https://')) {
     return url
   }
-  // Otherwise, prepend the current origin (or backend origin in dev)
-  return import.meta.env.PROD ? url : `http://127.0.0.1:8000${url}`
+  
+  const isProd = import.meta.env.PROD
+  const host = window.location.hostname
+  
+  // If local dev, prepend backend URL. If deployed (accessed via IP), use relative path.
+  if ((host === '127.0.0.1' || host === 'localhost') && !isProd) {
+    return `http://127.0.0.1:8000${url}`
+  }
+  return url
 }
 
 const scrollToSection = (id) => {
