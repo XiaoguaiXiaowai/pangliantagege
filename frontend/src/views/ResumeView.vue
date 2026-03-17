@@ -38,13 +38,21 @@ const fetchResumeData = async () => {
     // Explicitly check for port 5173 to force backend URL usage even if PROD flag is confusing
     const isDevPort = window.location.port === '5173'
     
+    // Check if we are accessing via Public IP (starts with 8.) or local network
+    const hostname = window.location.hostname
+    const isPublicIP = hostname.startsWith('8.') || hostname !== '127.0.0.1' && hostname !== 'localhost' && !hostname.startsWith('192.168.')
+
     let finalUrl = '/api/resume/'
     
     if (!isProd || isDevPort) {
         // If local dev or explicitly on dev port, hit backend directly
         // We assume backend is on the same hostname but port 8000
-        const hostname = window.location.hostname
         finalUrl = `http://${hostname}:8000/api/resume/`
+    }
+    
+    // If accessing via Public IP on port 5173, force 8000 port for API
+    if (isPublicIP && isDevPort) {
+       finalUrl = `http://${hostname}:8000/api/resume/`
     }
 
     const response = await axios.get(finalUrl)
@@ -66,12 +74,19 @@ const getImageUrl = (url) => {
   
   const isProd = import.meta.env.PROD
   const isDevPort = window.location.port === '5173'
+  const hostname = window.location.hostname
+  const isPublicIP = hostname.startsWith('8.') || hostname !== '127.0.0.1' && hostname !== 'localhost' && !hostname.startsWith('192.168.')
   
   // If local dev, prepend backend URL. If deployed (accessed via IP), use relative path.
+  // But if accessing via Public IP on port 5173, force 8000 port
   if (!isProd || isDevPort) {
-    const hostname = window.location.hostname
     return `http://${hostname}:8000${url}`
   }
+  
+  if (isPublicIP && isDevPort) {
+     return `http://${hostname}:8000${url}`
+  }
+  
   return url
 }
 
