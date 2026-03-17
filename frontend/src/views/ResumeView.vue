@@ -30,7 +30,10 @@ const activeTechs = ref(new Set())
 
 const fetchResumeData = async () => {
   try {
-    const response = await axios.get('http://127.0.0.1:8000/api/resume/')
+    // Determine the base URL dynamically based on current window location
+    // If in production, it will be the same host/port. In dev, it might be different.
+    const apiBaseUrl = import.meta.env.PROD ? '/api/resume/' : 'http://127.0.0.1:8000/api/resume/'
+    const response = await axios.get(apiBaseUrl)
     resumeData.value = response.data
   } catch (err) {
     error.value = '无法加载简历数据，请稍后再试。'
@@ -38,6 +41,16 @@ const fetchResumeData = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const getImageUrl = (url) => {
+  if (!url) return ''
+  // If the URL is already absolute, return it
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+  // Otherwise, prepend the current origin (or backend origin in dev)
+  return import.meta.env.PROD ? url : `http://127.0.0.1:8000${url}`
 }
 
 const scrollToSection = (id) => {
@@ -206,7 +219,7 @@ onMounted(() => {
         <section id="basic-info" class="section-card hero-card">
           <div class="profile-header" v-if="resumeData && resumeData.basic_info">
             <div class="avatar-container" v-if="resumeData.basic_info.avatar">
-              <img :src="resumeData.basic_info.avatar" alt="Avatar" class="avatar" />
+              <img :src="getImageUrl(resumeData.basic_info.avatar)" alt="Avatar" class="avatar" />
             </div>
             <div class="info-text">
               <h1>{{ resumeData.basic_info.name }}</h1>

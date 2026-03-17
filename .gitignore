@@ -21,3 +21,6 @@ migrations
 # Frontend
 frontend/node_modules/
 frontend/dist/
+logs/backend.err
+logs/backend.out
+run/backend.pid
