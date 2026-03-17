@@ -23,7 +23,14 @@ ensure_root() {
 install_basics() {
   apt-get update
   # nodejs from NodeSource includes npm, so we don't need to install npm separately
-  DEBIAN_FRONTEND=noninteractive apt-get install -y rsync python3-venv python3-pip nginx nodejs
+  # Install build dependencies for Pillow and cryptography
+  DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    rsync python3-venv python3-pip nginx nodejs \
+    libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev \
+    libssl-dev libffi-dev python3-dev pkg-config build-essential
+    
+  # Upgrade npm to latest version to support modern package.json features (like aliases)
+  npm install -g npm@latest
 }
 
 copy_code() {
@@ -59,7 +66,7 @@ setup_python() {
 setup_node() {
   pushd "$DEST_DIR/frontend" >/dev/null
   # Remove node_modules and package-lock.json to ensure clean install if needed
-  # rm -rf node_modules package-lock.json
+  rm -rf node_modules package-lock.json
   
   # Use npm install instead of npm ci to be more forgiving about lockfile issues
   npm install --legacy-peer-deps
