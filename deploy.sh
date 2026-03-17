@@ -44,6 +44,12 @@ setup_python() {
   source "$venv_dir/bin/activate"
   pip install -U pip wheel
   pip install -r "$DEST_DIR/backend/requirements.txt"
+  
+  # Collect static files for Django admin
+  pushd "$DEST_DIR/backend" >/dev/null
+  python manage.py collectstatic --noinput
+  popd >/dev/null
+  
   deactivate
 }
 
@@ -75,9 +81,16 @@ server {
         expires 30d;
     }
 
-    # Proxy API to Django dev server
-    location /api/ {
-        proxy_pass http://127.0.0.1:8000/api/;
+    # Static files from Django (Admin CSS/JS)
+    location /static/ {
+        alias /var/pltgg/backend/staticfiles/;
+        access_log off;
+        expires 30d;
+    }
+
+    # Proxy API and Admin to Django dev server
+    location ~ ^/(api|admin)/ {
+        proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
