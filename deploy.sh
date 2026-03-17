@@ -70,10 +70,6 @@ server {
     root /var/pltgg/frontend/dist;
     index index.html;
 
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
     # Static media from Django
     location /media/ {
         alias /var/pltgg/backend/media/;
@@ -89,12 +85,20 @@ server {
     }
 
     # Proxy API and Admin to Django dev server
+    # Important: Admin URLs are dynamic, so they must be proxied
+    # But /static/admin/ is served by the static location block above
     location ~ ^/(api|admin)/ {
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    
+    # Frontend catch-all (for SPA)
+    # Must be last or have lower priority than specific locations
+    location / {
+        try_files $uri $uri/ /index.html;
     }
 }
 EOF
