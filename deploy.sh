@@ -2,16 +2,24 @@
 set -euo pipefail
 
 # Deploy script for Ubuntu 24.04
-# - Copies code to /var/pltgg
-# - Installs backend (Python) and frontend (Node) dependencies
-# - Builds frontend
-# - Configures nginx
-# - Starts/restarts backend and frontend in background
+# Usage: sudo bash deploy.sh [stg|prod]
+# Default is stg if no argument provided.
+
+ENV=${1:-stg}
 
 DEST_DIR="/var/pltgg"
 NGINX_AVAIL="/etc/nginx/sites-available"
 NGINX_ENABLED="/etc/nginx/sites-enabled"
-SITE_NAME="pangliantagege.conf"
+
+if [[ "$ENV" == "prod" ]]; then
+  SITE_NAME="pangliantagege.prod.conf"
+  DOMAIN="www.pangliantagege.com"
+  echo "Deploying to PRODUCTION environment ($DOMAIN)"
+else
+  SITE_NAME="pangliantagege.conf"
+  DOMAIN="stg.pangliantagege.com"
+  echo "Deploying to STAGING environment ($DOMAIN)"
+fi
 
 ensure_root() {
   if [[ "$EUID" -ne 0 ]]; then
@@ -85,10 +93,10 @@ setup_node() {
 }
 
 write_nginx_conf() {
-  cat > "$NGINX_AVAIL/$SITE_NAME" <<'EOF'
+  cat > "$NGINX_AVAIL/$SITE_NAME" <<EOF
 server {
     listen 80;
-    server_name _;
+    server_name $DOMAIN;
     
     # Increase body size limit to 20M to allow larger image uploads
     client_max_body_size 20M;
@@ -118,16 +126,16 @@ server {
     # But /static/admin/ is served by the static location block above
     location ~ ^/(api|admin)/ {
         proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
     }
     
     # Frontend catch-all (for SPA)
     # Must be last or have lower priority than specific locations
     location / {
-        try_files $uri $uri/ /index.html;
+        try_files \$uri \$uri/ /index.html;
     }
 }
 EOF
@@ -227,7 +235,8 @@ main() {
   # Get IP address
   IP=$(hostname -I | awk '{print $1}')
   echo "-----------------------------------------------------"
-  echo "Deploy finished."
+  echo "Deploy finished for $ENV environment."
+  echo "Domain:             http://$DOMAIN/"
   echo "Nginx (Production): http://$IP/"
   echo "Frontend (Preview): http://$IP:5173/"
   echo "Backend API:        http://$IP:8000/"
