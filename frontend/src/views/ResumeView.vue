@@ -268,7 +268,7 @@ onMounted(() => {
                 <span v-if="resumeData.basic_info.phone" class="dot">·</span>
                 <span v-if="resumeData.basic_info.phone">{{ resumeData.basic_info.phone }}</span>
               </p>
-              <p class="summary">{{ resumeData.basic_info.summary }}</p>
+              <p class="summary" style="white-space: pre-wrap;">{{ resumeData.basic_info.summary }}</p>
             </div>
           </div>
           <div v-else class="empty-state">暂无基本信息</div>
@@ -302,7 +302,7 @@ onMounted(() => {
                 <span class="date">{{ exp.start_date }} - {{ exp.end_date || '至今' }}</span>
               </div>
               <div class="position">{{ exp.position }}</div>
-              <p class="description">{{ exp.description }}</p>
+              <p class="description" style="white-space: pre-wrap;">{{ exp.description }}</p>
             </div>
           </div>
            <div v-else class="empty-state">暂无工作经历</div>
@@ -324,7 +324,7 @@ onMounted(() => {
                 <span class="role-badge">{{ project.role }}</span>
               </div>
               <p class="project-date" v-if="project.start_date">{{ project.start_date }} - {{ project.end_date || '至今' }}</p>
-              <p class="project-desc">{{ project.description }}</p>
+              <p class="project-desc" style="white-space: pre-wrap;">{{ project.description }}</p>
               <div class="tech-stack" v-if="project.technologies">
                 <span v-for="tech in project.technologies.split(',')" :key="tech" class="tech-tag">
                   {{ tech.trim() }}
