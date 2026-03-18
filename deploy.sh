@@ -63,6 +63,17 @@ copy_code() {
     
   # Create media directory if it doesn't exist
   mkdir -p "$DEST_DIR/backend/media"
+  
+  # Copy SSL certs if they exist and we are in PROD
+  if [[ "$ENV" == "prod" ]]; then
+    mkdir -p "$DEST_DIR/https"
+    if [[ -d "$(pwd)/https" ]]; then
+      cp -r "$(pwd)/https/"* "$DEST_DIR/https/"
+      # Set permissions for certs (readable by root/nginx)
+      chmod 600 "$DEST_DIR/https/"*.key
+      chmod 644 "$DEST_DIR/https/"*.pem
+    fi
+  fi
 }
 
 setup_python() {
@@ -93,10 +104,41 @@ setup_node() {
 }
 
 write_nginx_conf() {
+  # Base config content
   cat > "$NGINX_AVAIL/$SITE_NAME" <<EOF
 server {
+EOF
+
+  # SSL Configuration for PROD
+  if [[ "$ENV" == "prod" ]]; then
+    cat >> "$NGINX_AVAIL/$SITE_NAME" <<EOF
     listen 80;
     server_name $DOMAIN;
+    return 301 https://\$host\$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name $DOMAIN;
+
+    ssl_certificate /var/pltgg/https/${DOMAIN}.pem;
+    ssl_certificate_key /var/pltgg/https/${DOMAIN}_private.key;
+    
+    # Recommended SSL settings
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+EOF
+  else
+    # Non-SSL config for STG
+    cat >> "$NGINX_AVAIL/$SITE_NAME" <<EOF
+    listen 80;
+    server_name $DOMAIN;
+EOF
+  fi
+
+  # Common config (Locations)
+  cat >> "$NGINX_AVAIL/$SITE_NAME" <<EOF
     
     # Increase body size limit to 20M to allow larger image uploads
     client_max_body_size 20M;
