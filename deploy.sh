@@ -13,7 +13,7 @@ NGINX_ENABLED="/etc/nginx/sites-enabled"
 
 if [[ "$ENV" == "prod" ]]; then
   SITE_NAME="pangliantagege.prod.conf"
-  DOMAIN="www.pangliantagege.com"
+  DOMAIN="www.pangliantagege.top"
   echo "Deploying to PRODUCTION environment ($DOMAIN)"
 else
   SITE_NAME="pangliantagege.conf"
@@ -122,7 +122,7 @@ server {
     server_name $DOMAIN;
 
     ssl_certificate /var/pltgg/https/${DOMAIN}.pem;
-    ssl_certificate_key /var/pltgg/https/${DOMAIN}_private.key;
+    ssl_certificate_key /var/pltgg/https/${DOMAIN}.key;
     
     # Recommended SSL settings
     ssl_protocols TLSv1.2 TLSv1.3;
