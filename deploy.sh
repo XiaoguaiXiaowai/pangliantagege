@@ -198,6 +198,9 @@ restart_services() {
   cp "$DEST_DIR/plapi.service" /etc/systemd/system/
   cp "$DEST_DIR/plui.service" /etc/systemd/system/
 
+  # Inject CSRF_TRUSTED_ORIGINS into plapi.service
+  sed -i '/^Environment="ALLOWED_HOSTS=\*"/a Environment="CSRF_TRUSTED_ORIGINS=https://'"$DOMAIN"'"' /etc/systemd/system/plapi.service
+
   # Reload systemd to pick up new files
   systemctl daemon-reload
 
@@ -213,11 +216,15 @@ restart_services() {
     if ! grep -q "DB_ENGINE=sqlite3" /etc/systemd/system/plapi.service; then
         # Add Environment variable to [Service] section
         sed -i '/^Environment="ALLOWED_HOSTS=\*"/a Environment="DB_ENGINE=sqlite3"' /etc/systemd/system/plapi.service
-        systemctl daemon-reload
     fi
   fi
-
-  # Enable and restart services
+  
+  # Inject CSRF_TRUSTED_ORIGINS into plapi.service (always needed for HTTPS)
+  # Remove old entry if exists to avoid duplicates
+  sed -i '/CSRF_TRUSTED_ORIGINS/d' /etc/systemd/system/plapi.service
+  sed -i '/^Environment="ALLOWED_HOSTS=\*"/a Environment="CSRF_TRUSTED_ORIGINS=https://'"$DOMAIN"'"' /etc/systemd/system/plapi.service
+  
+  systemctl daemon-reload
   systemctl enable plapi
   systemctl enable plui
   
