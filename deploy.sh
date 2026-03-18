@@ -11,7 +11,7 @@ set -euo pipefail
 DEST_DIR="/var/pltgg"
 NGINX_AVAIL="/etc/nginx/sites-available"
 NGINX_ENABLED="/etc/nginx/sites-enabled"
-SITE_NAME="kubeset.conf"
+SITE_NAME="pangliantagege.conf"
 
 ensure_root() {
   if [[ "$EUID" -ne 0 ]]; then
@@ -89,6 +89,9 @@ write_nginx_conf() {
 server {
     listen 80;
     server_name _;
+    
+    # Increase body size limit to 20M to allow larger image uploads
+    client_max_body_size 20M;
 
     # Serve built frontend
     root /var/pltgg/frontend/dist;
