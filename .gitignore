@@ -24,3 +24,6 @@ frontend/dist/
 logs/backend.err
 logs/backend.out
 run/backend.pid
+logs/frontend.err
+logs/frontend.out
+run/frontend.pid
