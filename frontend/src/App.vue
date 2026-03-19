@@ -14,7 +14,8 @@ import DynamicBackground from './components/DynamicBackground.vue'
             <span class="logo-sub"> - 李佳的个人网站</span>
           </div>
           <nav>
-            <RouterLink to="/">个人简历</RouterLink>
+            <RouterLink to="/">首页</RouterLink>
+            <RouterLink to="/resume">工作简历</RouterLink>
             <RouterLink to="/message-board">留言板</RouterLink>
             <RouterLink to="/ai-assistant">AI 助理</RouterLink>
             <RouterLink to="/tools">小工具</RouterLink>

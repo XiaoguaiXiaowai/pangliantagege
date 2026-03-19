@@ -1,14 +1,20 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import ResumeView from '../views/ResumeView.vue'
+import HomeView from '../views/HomeView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
+      name: 'home',
+      component: HomeView,
+      meta: { title: '首页' }
+    },
+    {
+      path: '/resume',
       name: 'resume',
-      component: ResumeView,
-      meta: { title: '个人简历' }
+      component: () => import('../views/ResumeView.vue'),
+      meta: { title: '工作简历' }
     },
     {
       path: '/message-board',
