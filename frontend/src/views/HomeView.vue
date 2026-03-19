@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 
@@ -43,6 +43,44 @@ const features = [
   }
 ]
 
+const names = ['李 佳', '胖脸她哥哥', 'Jimmy Li']
+const currentNameIndex = ref(0)
+let nameInterval = null
+
+// Card 3D Tilt Effect
+const cardRef = ref(null)
+const cardRotation = ref({ x: 0, y: 0 })
+const isHovering = ref(false)
+
+const handleMouseMove = (e) => {
+  if (!cardRef.value) return
+  const card = cardRef.value
+  const rect = card.getBoundingClientRect()
+  
+  // Calculate mouse position relative to the center of the card
+  const x = e.clientX - rect.left - rect.width / 2
+  const y = e.clientY - rect.top - rect.height / 2
+  
+  // Adjust sensitivity (divisor). Larger divisor = less tilt
+  const sensitivityX = 20
+  const sensitivityY = 20
+  
+  cardRotation.value = {
+    x: -(y / sensitivityY),
+    y: (x / sensitivityX)
+  }
+}
+
+const handleMouseEnter = () => {
+  isHovering.value = true
+}
+
+const handleMouseLeave = () => {
+  isHovering.value = false
+  // Reset rotation when mouse leaves
+  cardRotation.value = { x: 0, y: 0 }
+}
+
 const fetchAvatar = async () => {
   try {
     const isProd = import.meta.env.PROD
@@ -75,6 +113,15 @@ const fetchAvatar = async () => {
 
 onMounted(() => {
   fetchAvatar()
+  nameInterval = setInterval(() => {
+    currentNameIndex.value = (currentNameIndex.value + 1) % names.length
+  }, 3000) // Change name every 3 seconds
+})
+
+onUnmounted(() => {
+  if (nameInterval) {
+    clearInterval(nameInterval)
+  }
 })
 </script>
 
@@ -86,63 +133,100 @@ onMounted(() => {
         <div class="orbit-container">
           <div class="orbit orbit-1">
             <div class="orbit-item" style="--angle: 0deg;">
-              <div class="orbit-content icon-box">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/9/95/Vue.js_Logo_2.svg" alt="Vue" />
+              <div class="orbit-content">
+                <div class="orbit-counter" style="--angle: 0deg;">
+                  <div class="icon-box icon-cloud"><span class="emoji-icon">☁️</span></div>
+                </div>
               </div>
             </div>
             <div class="orbit-item" style="--angle: 180deg;">
-              <div class="orbit-content dot-orange"></div>
+              <div class="orbit-content">
+                <div class="orbit-counter" style="--angle: 180deg;">
+                  <div class="dot-luna"></div>
+                </div>
+              </div>
             </div>
           </div>
           
           <div class="orbit orbit-2">
             <div class="orbit-item" style="--angle: 90deg;">
-              <div class="orbit-content icon-box">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" alt="Python" />
+              <div class="orbit-content">
+                <div class="orbit-counter" style="--angle: 90deg;">
+                  <div class="icon-box icon-ai"><span class="emoji-icon">🤖</span></div>
+                </div>
               </div>
             </div>
-            <div class="orbit-item" style="--angle: 270deg;">
-              <div class="orbit-content dot-blue"></div>
+            <div class="orbit-item" style="--angle: 210deg;">
+              <div class="orbit-content">
+                <div class="orbit-counter" style="--angle: 210deg;">
+                  <div class="icon-box icon-music"><span class="emoji-icon">🎵</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="orbit-item" style="--angle: 330deg;">
+              <div class="orbit-content">
+                <div class="orbit-counter" style="--angle: 330deg;">
+                  <div class="dot-luna-small"></div>
+                </div>
+              </div>
             </div>
           </div>
           
           <div class="orbit orbit-3">
             <div class="orbit-item" style="--angle: 45deg;">
-              <div class="orbit-content icon-box">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg" alt="Linux" />
+              <div class="orbit-content">
+                <div class="orbit-counter" style="--angle: 45deg;">
+                  <div class="icon-box icon-tech"><span class="emoji-icon">💻</span></div>
+                </div>
               </div>
             </div>
-            <div class="orbit-item" style="--angle: 225deg;">
-              <div class="orbit-content dot-orange-large"></div>
+            <div class="orbit-item" style="--angle: 165deg;">
+              <div class="orbit-content">
+                <div class="orbit-counter" style="--angle: 165deg;">
+                  <div class="icon-box icon-ops"><span class="emoji-icon">⚙️</span></div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-
-        <!-- Avatar Layer -->
-        <div class="avatar-layer">
-          <div class="avatar-container">
-            <img v-if="avatarUrl" :src="avatarUrl" alt="李佳" class="avatar-img" />
-            <div v-else class="avatar-placeholder">
-              <span>LJ</span>
+            <div class="orbit-item" style="--angle: 285deg;">
+              <div class="orbit-content">
+                <div class="orbit-counter" style="--angle: 285deg;">
+                  <div class="dot-luna-large"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Central Intro Card -->
-        <div class="intro-card">
+        <div 
+          class="intro-card"
+          ref="cardRef"
+          @mousemove="handleMouseMove"
+          @mouseenter="handleMouseEnter"
+          @mouseleave="handleMouseLeave"
+          :style="{
+            transform: `perspective(1000px) scale(${isHovering ? 1.05 : 1}) rotateX(${cardRotation.x}deg) rotateY(${cardRotation.y}deg)`,
+            transition: isHovering ? 'transform 0.1s ease-out' : 'transform 0.5s ease-out'
+          }"
+        >
           <div class="card-header">
             <span class="label-text">My name is:</span>
-            <h1 class="name-text">李 佳</h1>
+            <div class="name-text-wrapper">
+              <transition name="fade-slide" mode="out-in">
+                <h1 :key="names[currentNameIndex]" class="name-text">{{ names[currentNameIndex] }}</h1>
+              </transition>
+            </div>
           </div>
           <div class="divider"></div>
           <div class="card-body">
             <span class="label-text">I'm a:</span>
             <ul class="role-list">
-              <li>资深云运维工程师 (SRE)</li>
-              <li>独立全栈开发者</li>
-              <li>系统架构设计者</li>
-              <li>十年+IT行业老兵</li>
-              <li>技术探索者</li>
+              <li>资深云架构运维工程师 (偏SRE)</li>
+              <li>日语口语流利的项目经理</li>
+              <li>AI增强型全栈开发者</li>
+              <li>各种小工具的开发爱好者</li>
+              <li>一脸好奇的AI技术探索者</li>
+              <li>自娱自乐的独立音乐人</li>
             </ul>
           </div>
         </div>
@@ -200,46 +284,49 @@ onMounted(() => {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  width: 500px;
-  height: 500px;
+  transform: translate(-50%, -50%) rotateX(65deg);
+  width: 1350px;
+  height: 1350px;
   pointer-events: none;
   z-index: 0;
+  transform-style: preserve-3d;
 }
 
 .orbit {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  border: 1px dashed rgba(167, 235, 242, 0.6);
+  border: 1.5px dashed rgba(167, 235, 242, 0.6);
   border-radius: 50%;
-  animation: spin linear infinite;
+  transform-style: preserve-3d;
 }
 
 .orbit-1 {
-  width: 280px;
-  height: 280px;
-  animation-duration: 25s;
+  width: 780px;
+  height: 780px;
+  animation: spin-orbit 25s linear infinite;
 }
 
 .orbit-2 {
-  width: 380px;
-  height: 380px;
-  animation-duration: 35s;
-  animation-direction: reverse;
+  width: 1020px;
+  height: 1020px;
+  animation: spin-orbit-reverse 35s linear infinite;
 }
 
 .orbit-3 {
-  width: 480px;
-  height: 480px;
-  animation-duration: 45s;
+  width: 1275px;
+  height: 1275px;
+  animation: spin-orbit 45s linear infinite;
 }
 
-@keyframes spin {
-  100% {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
+@keyframes spin-orbit {
+  0% { transform: translate(-50%, -50%) rotateZ(0deg); }
+  100% { transform: translate(-50%, -50%) rotateZ(360deg); }
+}
+
+@keyframes spin-orbit-reverse {
+  0% { transform: translate(-50%, -50%) rotateZ(0deg); }
+  100% { transform: translate(-50%, -50%) rotateZ(-360deg); }
 }
 
 .orbit-item {
@@ -248,114 +335,95 @@ onMounted(() => {
   left: 50%;
   width: 100%;
   height: 100%;
-  transform: translate(-50%, -50%) rotate(var(--angle));
+  transform: translate(-50%, -50%) rotateZ(var(--angle));
+  transform-style: preserve-3d;
 }
 
 .orbit-content {
   position: absolute;
-  top: -15px; /* Adjust based on icon size */
+  top: 0;
   left: 50%;
-  transform: translateX(-50%);
-  /* Counter spin */
-  animation: counter-spin linear infinite;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
 }
 
-.orbit-1 .orbit-content { animation-duration: 25s; }
-.orbit-2 .orbit-content { animation-duration: 35s; animation-direction: reverse; }
-.orbit-3 .orbit-content { animation-duration: 45s; }
+.orbit-1 .orbit-content { animation: counter-spin-orbit 25s linear infinite; }
+.orbit-2 .orbit-content { animation: counter-spin-orbit-reverse 35s linear infinite; }
+.orbit-3 .orbit-content { animation: counter-spin-orbit 45s linear infinite; }
 
-@keyframes counter-spin {
-  100% {
-    transform: translateX(-50%) rotate(-360deg);
-  }
+@keyframes counter-spin-orbit {
+  0% { transform: rotateZ(0deg); }
+  100% { transform: rotateZ(-360deg); }
+}
+
+@keyframes counter-spin-orbit-reverse {
+  0% { transform: rotateZ(0deg); }
+  100% { transform: rotateZ(360deg); }
+}
+
+.orbit-counter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-style: preserve-3d;
+  transform: rotateZ(calc(var(--angle) * -1)) rotateX(-65deg);
 }
 
 .icon-box {
-  width: 40px;
-  height: 40px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   background: #fff;
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  top: -20px;
+  box-shadow: 0 6px 22px rgba(167, 235, 242, 0.4);
+  border: 1.5px solid var(--luna-light);
 }
 
-.icon-box img {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
+.icon-cloud { width: 67.5px; height: 67.5px; font-size: 1.8rem; }
+.icon-ai { width: 82.5px; height: 82.5px; font-size: 2.25rem; }
+.icon-music { width: 52.5px; height: 52.5px; font-size: 1.5rem; }
+.icon-tech { width: 97.5px; height: 97.5px; font-size: 2.7rem; }
+.icon-ops { width: 60px; height: 60px; font-size: 1.65rem; }
+
+.emoji-icon {
+  line-height: 1;
 }
 
-.dot-orange {
-  width: 12px;
-  height: 12px;
-  background-color: #ff9800;
-  border-radius: 50%;
-  top: -6px;
+.dot-luna {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 21px; height: 21px; background-color: var(--luna-medium);
+  border-radius: 50%; box-shadow: 0 0 15px var(--luna-medium);
 }
 
-.dot-blue {
-  width: 10px;
-  height: 10px;
-  background-color: #03a9f4;
-  border-radius: 50%;
-  top: -5px;
+.dot-luna-small {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 15px; height: 15px; background-color: var(--luna-dark);
+  border-radius: 50%; box-shadow: 0 0 12px var(--luna-dark);
 }
 
-.dot-orange-large {
-  width: 24px;
-  height: 24px;
-  background-color: #ff9800;
-  border-radius: 50%;
-  top: -12px;
-  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.4);
-}
-
-/* Avatar Layer */
-.avatar-layer {
-  position: absolute;
-  left: -20px;
-  bottom: 0px;
-  z-index: 2;
-}
-
-.avatar-container {
-  width: 130px;
-  height: 130px;
-  border-radius: 50%;
-  border: 4px solid #fff;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  background: var(--luna-light);
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.avatar-placeholder {
-  font-size: 2rem;
-  font-weight: bold;
-  color: #fff;
+.dot-luna-large {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 30px; height: 30px; background-color: var(--luna-light);
+  border-radius: 50%; box-shadow: 0 0 22px var(--luna-light);
 }
 
 /* Central Card */
 .intro-card {
   position: relative;
   z-index: 1;
-  background: #fff;
-  border-radius: 16px;
-  padding: 40px;
-  width: 380px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 20px;
+  padding: 45px;
+  width: 460px;
   box-shadow: 0 20px 40px rgba(1, 28, 64, 0.08);
-  border: 1px solid rgba(167, 235, 242, 0.3);
+  border: 1px solid rgba(167, 235, 242, 0.5);
 }
 
 .card-header {
@@ -365,27 +433,50 @@ onMounted(() => {
 .label-text {
   font-size: 0.9rem;
   font-weight: 700;
-  color: var(--luna-dark);
+  color: var(--text-secondary);
   display: block;
   margin-bottom: 8px;
 }
 
+.name-text-wrapper {
+  height: 4.5rem; /* Fixed height to prevent layout shift during transition */
+  display: flex;
+  align-items: center;
+}
+
 .name-text {
-  font-size: 3rem;
+  font-size: 3.5rem;
   font-weight: 800;
   margin: 0;
-  background: linear-gradient(135deg, #ff9800, #ff5722);
+  background: linear-gradient(135deg, var(--luna-darkest), var(--luna-medium));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   line-height: 1.2;
+  letter-spacing: 2px;
+}
+
+/* Name Transition Effects */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-20px);
 }
 
 .divider {
   height: 2px;
-  background: var(--luna-darkest);
+  background: linear-gradient(to right, var(--luna-darkest), var(--luna-light), transparent);
   width: 100%;
-  margin: 20px 0;
+  margin: 25px 0;
 }
 
 .card-body {
@@ -402,13 +493,13 @@ onMounted(() => {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .role-list li {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   color: var(--luna-darkest);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .navigation-grid {
