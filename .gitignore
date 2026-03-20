@@ -27,3 +27,4 @@ run/backend.pid
 logs/frontend.err
 logs/frontend.out
 run/frontend.pid
+doc/tmpmemo.txt
