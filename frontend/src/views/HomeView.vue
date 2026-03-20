@@ -13,9 +13,15 @@ const navigateTo = (path) => {
 const features = [
   {
     title: '工作简历',
-    description: '查看我的详细个人信息、工作经历、项目经验以及技能栈。',
+    description: '查看我的详细工作经历、项目经验以及技能栈。',
     path: '/resume',
-    icon: '📄'
+    icon: '💼'
+  },
+  {
+    title: '音乐小空间',
+    description: '记录我的音乐作品和一些演出视频，音乐是我生活中的重要部分。',
+    path: '/music',
+    icon: '🎸'
   },
   {
     title: '留言板',
@@ -27,19 +33,19 @@ const features = [
     title: 'AI 助理',
     description: '与集成先进大语言模型的智能助理对话，获取信息与帮助。',
     path: '/ai-assistant',
-    icon: '🤖'
+    icon: '🛸'
   },
   {
     title: '小工具',
-    description: '我开发的一些实用在线小工具，旨在提高日常工作效率。',
+    description: '我开发的一些实用小工具，旨在提高日常工作效率。',
     path: '/tools',
     icon: '🛠️'
   },
   {
     title: '其他',
-    description: '分享我的业余爱好、才艺展示以及其他有趣的内容。',
+    description: '可以看着背景的两个小球发呆。',
     path: '/talents',
-    icon: '✨'
+    icon: '🎱'
   }
 ]
 
@@ -135,7 +141,7 @@ onUnmounted(() => {
             <div class="orbit-item" style="--angle: 0deg;">
               <div class="orbit-content">
                 <div class="orbit-counter" style="--angle: 0deg;">
-                  <div class="icon-box icon-cloud"><span class="emoji-icon">☁️</span></div>
+                  <div class="icon-box icon-cloud"><span class="emoji-icon">⛅️</span></div>
                 </div>
               </div>
             </div>
@@ -152,14 +158,14 @@ onUnmounted(() => {
             <div class="orbit-item" style="--angle: 90deg;">
               <div class="orbit-content">
                 <div class="orbit-counter" style="--angle: 90deg;">
-                  <div class="icon-box icon-ai"><span class="emoji-icon">🤖</span></div>
+                  <div class="icon-box icon-ai"><span class="emoji-icon">🛸</span></div>
                 </div>
               </div>
             </div>
             <div class="orbit-item" style="--angle: 210deg;">
               <div class="orbit-content">
                 <div class="orbit-counter" style="--angle: 210deg;">
-                  <div class="icon-box icon-music"><span class="emoji-icon">🎵</span></div>
+                  <div class="icon-box icon-music"><span class="emoji-icon">🎸</span></div>
                 </div>
               </div>
             </div>
@@ -176,14 +182,14 @@ onUnmounted(() => {
             <div class="orbit-item" style="--angle: 45deg;">
               <div class="orbit-content">
                 <div class="orbit-counter" style="--angle: 45deg;">
-                  <div class="icon-box icon-tech"><span class="emoji-icon">💻</span></div>
+                  <div class="icon-box icon-tech"><span class="emoji-icon">💼</span></div>
                 </div>
               </div>
             </div>
             <div class="orbit-item" style="--angle: 165deg;">
               <div class="orbit-content">
                 <div class="orbit-counter" style="--angle: 165deg;">
-                  <div class="icon-box icon-ops"><span class="emoji-icon">⚙️</span></div>
+                  <div class="icon-box icon-ops"><span class="emoji-icon">🛠️</span></div>
                 </div>
               </div>
             </div>

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'tools',
     'talents',
     'resume',
+    'music',
 ]
 
 MIDDLEWARE = [

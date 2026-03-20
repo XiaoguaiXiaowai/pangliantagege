@@ -16,6 +16,7 @@ import DynamicBackground from './components/DynamicBackground.vue'
           <nav>
             <RouterLink to="/">首页</RouterLink>
             <RouterLink to="/resume">工作简历</RouterLink>
+            <RouterLink to="/music">音乐小空间</RouterLink>
             <RouterLink to="/message-board">留言板</RouterLink>
             <RouterLink to="/ai-assistant">AI 助理</RouterLink>
             <RouterLink to="/tools">小工具</RouterLink>
@@ -76,7 +77,7 @@ header {
 }
 
 .logo-main {
-  font-size: 1.8rem;
+  font-size: 2.0rem;
   font-weight: 800;
   background: linear-gradient(135deg, var(--luna-darkest), var(--luna-medium));
   -webkit-background-clip: text;

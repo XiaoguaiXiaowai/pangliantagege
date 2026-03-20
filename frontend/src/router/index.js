@@ -35,6 +35,12 @@ const router = createRouter({
       meta: { title: '小工具' }
     },
     {
+      path: '/music',
+      name: 'music-space',
+      component: () => import('../views/MusicSpaceView.vue'),
+      meta: { title: '音乐小空间' }
+    },
+    {
       path: '/talents',
       name: 'talents',
       component: () => import('../views/TalentsView.vue'),
