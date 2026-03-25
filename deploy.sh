@@ -209,6 +209,9 @@ server {
     ssl_ciphers HIGH:!aNULL:!MD5;
     ssl_prefer_server_ciphers on;
 
+    # 增加 HSTS 等安全头，确保跳转的安全性
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+
     return 301 https://www.pangliantagege.top$request_uri;
 }
 EOF
@@ -388,6 +391,12 @@ main() {
   echo "Deploy finished for $ENV environment."
   echo "Domain:             http://$DOMAIN/"
   echo "Nginx (Production): http://$IP/"
+  
+  if [[ "$ENV" == "prod" ]]; then
+    echo "Redirect setup:     pangliantagege.top -> www.pangliantagege.top (Configured)"
+    echo "⚠️  IMPORTANT: Please ensure your DNS provider has an 'A' record for '@' pointing to $IP"
+  fi
+  
   echo "Frontend (Preview): http://$IP:5173/"
   echo "Backend API:        http://$IP:8000/"
   echo "-----------------------------------------------------"
