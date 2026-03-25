@@ -103,6 +103,13 @@ setup_node() {
   popd >/dev/null
 }
 
+write_ratelimit_conf() {
+  # Define global rate limit zone in http context
+  cat > /etc/nginx/conf.d/pltgg_ratelimit.conf <<'EOF'
+limit_req_zone $binary_remote_addr zone=api_limit:10m rate=30r/m;
+EOF
+}
+
 write_nginx_conf() {
   local conf="$NGINX_AVAIL/$SITE_NAME"
   : > "$conf"
@@ -162,8 +169,9 @@ server {
         expires 30d;
     }
 
-    # Proxy API and Admin to Django dev server
-    location ~ ^/(api|admin)/ {
+    # Proxy API to Django; apply rate limit
+    location ^~ /api/ {
+        limit_req zone=api_limit burst=20 nodelay;
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
@@ -171,6 +179,19 @@ server {
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
     
+    # Proxy Admin to Django; optional Basic Auth if htpasswd exists
+    location ^~ /admin/ {
+        if (-f /etc/nginx/.admin_htpasswd) {
+            auth_basic "Restricted";
+            auth_basic_user_file /etc/nginx/.admin_htpasswd;
+        }
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
     # Frontend catch-all (for SPA)
     location / {
         try_files \$uri \$uri/ /index.html;
@@ -228,10 +249,9 @@ server {
         expires 30d;
     }
 
-    # Proxy API and Admin to Django dev server
-    # Important: Admin URLs are dynamic, so they must be proxied
-    # But /static/admin/ is served by the static location block above
-    location ~ ^/(api|admin)/ {
+    # Proxy API to Django; apply rate limit
+    location ^~ /api/ {
+        limit_req zone=api_limit burst=20 nodelay;
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
@@ -239,6 +259,19 @@ server {
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
     
+    # Proxy Admin to Django; optional Basic Auth if htpasswd exists
+    location ^~ /admin/ {
+        if (-f /etc/nginx/.admin_htpasswd) {
+            auth_basic "Restricted";
+            auth_basic_user_file /etc/nginx/.admin_htpasswd;
+        }
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
     # Frontend catch-all (for SPA)
     # Must be last or have lower priority than specific locations
     location / {
@@ -252,6 +285,7 @@ EOF
   if [[ -e "$NGINX_ENABLED/default" ]]; then
     rm -f "$NGINX_ENABLED/default"
   fi
+  write_ratelimit_conf
   nginx -t
   systemctl reload nginx
 }
