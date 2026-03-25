@@ -18,10 +18,10 @@ const features = [
     icon: '💼'
   },
   {
-    title: '音乐小空间',
+    title: '音乐作品',
     description: '记录我的音乐作品和一些演出视频，音乐是我生活中的重要部分。',
     path: '/music',
-    icon: '🎸'
+    icon: '🎵'
   },
   {
     title: '留言板',

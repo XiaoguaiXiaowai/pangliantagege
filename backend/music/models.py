@@ -4,6 +4,7 @@ class MusicWork(models.Model):
     TYPE_CHOICES = (
         ('audio', '音频作品'),
         ('video', '演出视频'),
+        ('photo', '演出照片'),
     )
     
     title = models.CharField(max_length=200, verbose_name="作品名称")

@@ -3,6 +3,8 @@ import { ref, onMounted, computed, nextTick } from 'vue'
 import axios from 'axios'
 import MagicCard from '../components/MagicCard.vue'
 import Marquee from '../components/Marquee.vue'
+import axios from 'axios'
+axios.defaults.withCredentials = true
 
 const resumeData = ref(null)
 const loading = ref(true)
@@ -59,7 +61,11 @@ const fetchResumeData = async () => {
     resumeData.value = response.data
   } catch (err) {
     error.value = '无法加载简历数据，请稍后再试。'
-    console.error('API Error:', err)
+    if (err?.response?.status === 401) {
+      window.location.href = '/login'
+    } else {
+      console.error('API Error:', err)
+    }
   } finally {
     loading.value = false
   }
