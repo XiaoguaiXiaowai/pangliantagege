@@ -104,20 +104,17 @@ setup_node() {
 }
 
 write_nginx_conf() {
-  # Base config content
-  cat > "$NGINX_AVAIL/$SITE_NAME" <<EOF
-server {
-EOF
+  local conf="$NGINX_AVAIL/$SITE_NAME"
+  : > "$conf"
 
-  # SSL Configuration for PROD
   if [[ "$ENV" == "prod" ]]; then
-    cat >> "$NGINX_AVAIL/$SITE_NAME" <<EOF
+    cat >> "$conf" <<EOF
+server {
     listen 80;
     server_name $DOMAIN;
     return 301 https://\$host\$request_uri;
 }
 
-# Redirect non-www apex to www (HTTP)
 server {
     listen 80;
     server_name pangliantagege.top;
@@ -135,11 +132,49 @@ server {
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
     ssl_prefer_server_ciphers on;
+
+    # Increase body size limit to 20M to allow larger image uploads
+    client_max_body_size 20M;
+
+    # Serve built frontend
+    root /var/pltgg/frontend/dist;
+    index index.html;
+
+    # Static media from Django
+    location /media/ {
+        alias /var/pltgg/backend/media/;
+        autoindex off;
+        access_log off;
+        expires 30d;
+        add_header Cache-Control "public";
+    }
+
+    # Static files from Django (Admin CSS/JS)
+    location /static/ {
+        alias /var/pltgg/backend/staticfiles/;
+        access_log off;
+        expires 30d;
+    }
+
+    # Proxy API and Admin to Django dev server
+    location ~ ^/(api|admin)/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+    
+    # Frontend catch-all (for SPA)
+    location / {
+        try_files \$uri \$uri/ /index.html;
+    }
+}
 EOF
 
     # Optional: HTTPS redirect for apex domain if cert present
     if [[ -f "/var/pltgg/https/pangliantagege.top.pem" && -f "/var/pltgg/https/pangliantagege.top.key" ]]; then
-      cat >> "$NGINX_AVAIL/$SITE_NAME" <<'EOF'
+      cat >> "$conf" <<'EOF'
 server {
     listen 443 ssl;
     server_name pangliantagege.top;
@@ -159,15 +194,11 @@ EOF
     fi
   else
     # Non-SSL config for STG
-    cat >> "$NGINX_AVAIL/$SITE_NAME" <<EOF
+    cat >> "$conf" <<EOF
+server {
     listen 80;
     server_name $DOMAIN;
-EOF
-  fi
 
-  # Common config (Locations)
-  cat >> "$NGINX_AVAIL/$SITE_NAME" <<EOF
-    
     # Increase body size limit to 20M to allow larger image uploads
     client_max_body_size 20M;
 
@@ -209,8 +240,8 @@ EOF
     }
 }
 EOF
-
-  ln -sf "$NGINX_AVAIL/$SITE_NAME" "$NGINX_ENABLED/$SITE_NAME"
+  fi
+  ln -sf "$conf" "$NGINX_ENABLED/$SITE_NAME"
   # Optionally disable default site
   if [[ -e "$NGINX_ENABLED/default" ]]; then
     rm -f "$NGINX_ENABLED/default"
