@@ -3,7 +3,6 @@ import { ref, onMounted, computed, nextTick } from 'vue'
 import axios from 'axios'
 import MagicCard from '../components/MagicCard.vue'
 import Marquee from '../components/Marquee.vue'
-import axios from 'axios'
 axios.defaults.withCredentials = true
 
 const resumeData = ref(null)
