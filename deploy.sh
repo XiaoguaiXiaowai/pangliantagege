@@ -179,12 +179,8 @@ server {
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
     
-    # Proxy Admin to Django; optional Basic Auth if htpasswd exists
+    # Proxy Admin to Django; optional Basic Auth if htpasswd exists (handled by deploy script)
     location ^~ /admin/ {
-        if (-f /etc/nginx/.admin_htpasswd) {
-            auth_basic "Restricted";
-            auth_basic_user_file /etc/nginx/.admin_htpasswd;
-        }
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
@@ -259,12 +255,8 @@ server {
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
     
-    # Proxy Admin to Django; optional Basic Auth if htpasswd exists
+    # Proxy Admin to Django; optional Basic Auth if htpasswd exists (handled by deploy script)
     location ^~ /admin/ {
-        if (-f /etc/nginx/.admin_htpasswd) {
-            auth_basic "Restricted";
-            auth_basic_user_file /etc/nginx/.admin_htpasswd;
-        }
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
@@ -284,6 +276,10 @@ EOF
   # Optionally disable default site
   if [[ -e "$NGINX_ENABLED/default" ]]; then
     rm -f "$NGINX_ENABLED/default"
+  fi
+  # Inject Basic Auth into /admin if htpasswd file exists
+  if [[ -f /etc/nginx/.admin_htpasswd ]]; then
+    sed -i '/location \^~ \/admin\/ {/a \        auth_basic "Restricted";\n        auth_basic_user_file /etc/nginx/.admin_htpasswd;' "$conf"
   fi
   write_ratelimit_conf
   nginx -t
