@@ -11,7 +11,7 @@ Environment="DJANGO_DEBUG=False"
 Environment="ALLOWED_HOSTS=*"
 Environment="PYTHONUNBUFFERED=1"
 # Ensure the virtual environment's python is used
-ExecStart=/var/pltgg/backend/venv/bin/python manage.py runserver 0.0.0.0:8000
+ExecStart=/var/pltgg/backend/venv/bin/python manage.py runserver 127.0.0.1:8000
 Restart=always
 RestartSec=5
 

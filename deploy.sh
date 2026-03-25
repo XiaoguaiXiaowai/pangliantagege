@@ -133,6 +133,12 @@ server {
     ssl_ciphers HIGH:!aNULL:!MD5;
     ssl_prefer_server_ciphers on;
 
+    # Security headers
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+
     # Increase body size limit to 20M to allow larger image uploads
     client_max_body_size 20M;
 
@@ -305,8 +311,14 @@ configure_firewall() {
     if ufw status | grep -q "Status: active"; then
       echo "Configuring UFW firewall..."
       ufw allow 80/tcp
-      ufw allow 8000/tcp
-      ufw allow 5173/tcp
+      if [[ "$ENV" == "prod" ]]; then
+        ufw allow 443/tcp
+        # Do NOT expose backend port 8000 in production
+      else
+        # For staging/dev, allow dev ports
+        ufw allow 8000/tcp
+        ufw allow 5173/tcp
+      fi
       ufw reload
     fi
   fi
