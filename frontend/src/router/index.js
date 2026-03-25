@@ -51,6 +51,12 @@ const router = createRouter({
       name: 'talents',
       component: () => import('../views/TalentsView.vue'),
       meta: { title: '才艺' }
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('../views/NotFoundView.vue'),
+      meta: { title: '页面不存在' }
     }
   ]
 })
