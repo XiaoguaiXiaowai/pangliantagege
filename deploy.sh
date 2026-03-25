@@ -117,6 +117,13 @@ EOF
     return 301 https://\$host\$request_uri;
 }
 
+# Redirect non-www apex to www (HTTP)
+server {
+    listen 80;
+    server_name pangliantagege.top;
+    return 301 https://www.pangliantagege.top\$request_uri;
+}
+
 server {
     listen 443 ssl;
     server_name $DOMAIN;
@@ -129,6 +136,27 @@ server {
     ssl_ciphers HIGH:!aNULL:!MD5;
     ssl_prefer_server_ciphers on;
 EOF
+
+    # Optional: HTTPS redirect for apex domain if cert present
+    if [[ -f "/var/pltgg/https/pangliantagege.top.pem" && -f "/var/pltgg/https/pangliantagege.top.key" ]]; then
+      cat >> "$NGINX_AVAIL/$SITE_NAME" <<'EOF'
+server {
+    listen 443 ssl;
+    server_name pangliantagege.top;
+
+    ssl_certificate /var/pltgg/https/pangliantagege.top.pem;
+    ssl_certificate_key /var/pltgg/https/pangliantagege.top.key;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    return 301 https://www.pangliantagege.top$request_uri;
+}
+EOF
+    else
+      echo "NOTE: HTTPS cert for apex domain (pangliantagege.top) not found. HTTPS redirect for apex will not work until cert is provided."
+    fi
   else
     # Non-SSL config for STG
     cat >> "$NGINX_AVAIL/$SITE_NAME" <<EOF
@@ -293,4 +321,3 @@ main() {
 }
 
 main "$@"
-
