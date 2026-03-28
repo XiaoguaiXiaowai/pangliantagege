@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import axios from 'axios'
 import MagicCard from '../components/MagicCard.vue'
 import Marquee from '../components/Marquee.vue'
@@ -13,7 +13,7 @@ const activeSection = ref('')
 
 const sections = [
   { id: 'basic-info', title: '关于我' },
-  { id: 'keywords', title: '我的KeyWord' },
+  { id: 'keywords', title: '我的标签' },
   { id: 'experience', title: '经历' },
   { id: 'projects', title: '项目' },
   { id: 'tech-stack', title: '我的技能栈' },
@@ -28,6 +28,302 @@ const skillRefs = ref({})
 const contentWrapperRef = ref(null)
 const lines = ref([])
 const activeTechs = ref(new Set())
+
+const titleWrapperRef = ref(null)
+const titleMeasureRef = ref(null)
+const isTitleOverflowing = ref(false)
+let titleResizeObserver = null
+
+// Summary Carousel
+const currentSummaryIndex = ref(0)
+let summaryInterval = null
+let summaryScrollInterval = null
+let summaryScrollTimeout = null
+const isSummaryHovered = ref(false)
+const summaryDescRef = ref(null)
+
+const summarySlides = computed(() => {
+  if (!resumeData.value?.basic_info) return []
+  const info = resumeData.value.basic_info
+  const slides = []
+  if (info.summary_experience) slides.push({ title: '工作经验', content: info.summary_experience, icon: '' })
+  if (info.summary_skills) slides.push({ title: '专业能力', content: info.summary_skills, icon: '' })
+  if (info.summary_management) slides.push({ title: '团队管理', content: info.summary_management, icon: '' })
+  
+  if (slides.length === 0 && info.summary) {
+    slides.push({ title: '个人简介', content: info.summary, icon: '📝' })
+  }
+  return slides
+})
+
+const startSummaryRotation = () => {
+  if (summaryInterval) clearInterval(summaryInterval)
+  if (summaryScrollInterval) clearInterval(summaryScrollInterval)
+  if (summaryScrollTimeout) clearTimeout(summaryScrollTimeout)
+  
+  if (summarySlides.value.length <= 1) return
+
+  const wrapperEl = summaryDescRef.value
+  if (wrapperEl) {
+    wrapperEl.scrollTop = 0
+  }
+
+  const INITIAL_WAIT_MS = 3000
+  const SCROLL_SPEED_MS = 50
+  const SCROLL_STEP_PX = 1
+  const END_WAIT_MS = 2000
+
+  const processSummarySlide = () => {
+    const el = summaryDescRef.value
+    if (!el) {
+      summaryInterval = setTimeout(() => {
+        currentSummaryIndex.value = (currentSummaryIndex.value + 1) % summarySlides.value.length
+        startSummaryRotation()
+      }, 5000)
+      return
+    }
+
+    const needsScroll = el.scrollHeight > (el.clientHeight + 2)
+
+    if (!needsScroll) {
+      summaryInterval = setTimeout(() => {
+        currentSummaryIndex.value = (currentSummaryIndex.value + 1) % summarySlides.value.length
+        startSummaryRotation()
+      }, 5000)
+    } else {
+      summaryScrollTimeout = setTimeout(() => {
+        summaryScrollInterval = setInterval(() => {
+          if (el.scrollTop + el.clientHeight >= el.scrollHeight - 1) {
+            clearInterval(summaryScrollInterval)
+            summaryScrollTimeout = setTimeout(() => {
+              currentSummaryIndex.value = (currentSummaryIndex.value + 1) % summarySlides.value.length
+              startSummaryRotation()
+            }, END_WAIT_MS)
+          } else {
+            el.scrollTop += SCROLL_STEP_PX
+          }
+        }, SCROLL_SPEED_MS)
+      }, INITIAL_WAIT_MS)
+    }
+  }
+
+  nextTick(() => {
+    setTimeout(processSummarySlide, 600)
+  })
+}
+
+const pauseSummaryRotation = () => {
+  if (summaryInterval) clearInterval(summaryInterval)
+  if (summaryScrollInterval) clearInterval(summaryScrollInterval)
+  if (summaryScrollTimeout) clearTimeout(summaryScrollTimeout)
+}
+
+const handleSummaryMouseEnter = () => {
+  isSummaryHovered.value = true
+  pauseSummaryRotation()
+}
+
+const handleSummaryMouseLeave = () => {
+  isSummaryHovered.value = false
+  startSummaryRotation()
+}
+
+const setSummaryIndex = (index) => {
+  currentSummaryIndex.value = index
+  if (!isSummaryHovered.value) {
+    startSummaryRotation()
+  }
+}
+
+// Project Carousel
+const projectCarouselState = ref({})
+let projectIntervals = {}
+let projectScrollIntervals = {}
+let projectScrollTimeouts = {}
+const projectDescRefs = ref({})
+
+const setProjectDescRef = (el, projectId) => {
+  if (el) {
+    projectDescRefs.value[projectId] = el
+  }
+}
+
+const roleWrapperRefs = ref([])
+const projectRoleOverflows = ref({})
+let roleResizeObserver = null
+
+const checkRoleOverflows = () => {
+  roleWrapperRefs.value.forEach(wrapper => {
+    if (wrapper) {
+      const id = wrapper.dataset.id
+      const measure = wrapper.querySelector('.role-badge-measure')
+      if (measure) {
+        // Calculate max width dynamically based on remaining space
+        const headerEl = wrapper.closest('.project-header')
+        // Role badge is now fixed to 33.33% of header width minus padding/borders roughly
+        const availableWidth = (headerEl.clientWidth * 0.3333) - 24 // 24px for padding
+        projectRoleOverflows.value[id] = measure.scrollWidth > availableWidth
+      }
+    }
+  })
+}
+
+const getProjectSlides = (project) => {
+  const slides = []
+  if (project.bg_description) slides.push({ title: '项目背景', content: project.bg_description, icon: '🎯' })
+  if (project.duty_description) slides.push({ title: '项目职责', content: project.duty_description, icon: '🛡️' })
+  if (project.solution_description) slides.push({ title: '解决方案', content: project.solution_description, icon: '💡' })
+  if (project.result_description) slides.push({ title: '项目成果', content: project.result_description, icon: '🏆' })
+  
+  if (slides.length === 0 && project.description) {
+    slides.push({ title: '项目描述', content: project.description, icon: '📝' })
+  }
+  return slides
+}
+
+const initProjectCarousels = () => {
+  if (!resumeData.value?.projects) return
+  resumeData.value.projects.forEach(project => {
+    const slides = getProjectSlides(project)
+    if (slides.length > 0) {
+      projectCarouselState.value[project.id] = {
+        currentIndex: 0,
+        isHovered: false,
+        slides: slides
+      }
+      startProjectRotation(project.id)
+    }
+  })
+}
+
+const startProjectRotation = (projectId) => {
+  if (projectIntervals[projectId]) clearInterval(projectIntervals[projectId])
+  if (projectScrollIntervals[projectId]) clearInterval(projectScrollIntervals[projectId])
+  if (projectScrollTimeouts[projectId]) clearTimeout(projectScrollTimeouts[projectId])
+
+  const state = projectCarouselState.value[projectId]
+  if (!state || state.slides.length <= 1) return
+
+  // Wrapper element
+  const wrapper = projectDescRefs.value[projectId]
+  
+  if (wrapper) {
+    // Reset scroll position when starting a new rotation cycle for this slide
+    wrapper.scrollTop = 0
+  }
+
+  // Define the base time to show the first screen
+  const INITIAL_WAIT_MS = 3000
+  const SCROLL_SPEED_MS = 50 // 50ms per tick
+  const SCROLL_STEP_PX = 1   // 1px per tick
+  const END_WAIT_MS = 2000   // Wait at the bottom before switching
+
+  const processSlide = () => {
+    const wrapperEl = projectDescRefs.value[projectId]
+    if (!wrapperEl) {
+      // If ref is not ready, just fallback to simple interval
+      projectIntervals[projectId] = setTimeout(() => {
+        state.currentIndex = (state.currentIndex + 1) % state.slides.length
+        startProjectRotation(projectId) // recursively call for next slide
+      }, 5000)
+      return
+    }
+
+    // A tiny bit of extra tolerance to prevent precision errors
+    const needsScroll = wrapperEl.scrollHeight > (wrapperEl.clientHeight + 2)
+
+    if (!needsScroll) {
+      // Normal behavior: wait 5s then switch
+      projectIntervals[projectId] = setTimeout(() => {
+        state.currentIndex = (state.currentIndex + 1) % state.slides.length
+        startProjectRotation(projectId)
+      }, 5000)
+    } else {
+      // Needs scrolling behavior
+      projectScrollTimeouts[projectId] = setTimeout(() => {
+        // Start scrolling
+        projectScrollIntervals[projectId] = setInterval(() => {
+          // If hovered during scroll, it will be handled by pauseProjectRotation
+          if (wrapperEl.scrollTop + wrapperEl.clientHeight >= wrapperEl.scrollHeight - 1) {
+            // Reached bottom
+            clearInterval(projectScrollIntervals[projectId])
+            projectScrollTimeouts[projectId] = setTimeout(() => {
+              state.currentIndex = (state.currentIndex + 1) % state.slides.length
+              startProjectRotation(projectId)
+            }, END_WAIT_MS)
+          } else {
+            wrapperEl.scrollTop += SCROLL_STEP_PX
+          }
+        }, SCROLL_SPEED_MS)
+      }, INITIAL_WAIT_MS)
+    }
+  }
+
+  // Need nextTick because Vue might be transitioning the DOM element
+  nextTick(() => {
+    // wait a tiny bit for transition to finish so scrollHeight is accurate
+    // Increased timeout from 300ms to 600ms to ensure the new slide content is fully rendered and layout is updated
+    setTimeout(processSlide, 600) 
+  })
+}
+
+const pauseProjectRotation = (projectId) => {
+  if (projectIntervals[projectId]) clearInterval(projectIntervals[projectId])
+  if (projectScrollIntervals[projectId]) clearInterval(projectScrollIntervals[projectId])
+  if (projectScrollTimeouts[projectId]) clearTimeout(projectScrollTimeouts[projectId])
+}
+
+const handleProjectCarouselMouseEnter = (projectId) => {
+  if (projectCarouselState.value[projectId]) {
+    projectCarouselState.value[projectId].isHovered = true
+    pauseProjectRotation(projectId)
+  }
+}
+
+const handleProjectCarouselMouseLeave = (projectId) => {
+  if (projectCarouselState.value[projectId]) {
+    projectCarouselState.value[projectId].isHovered = false
+    startProjectRotation(projectId)
+  }
+}
+
+const setProjectCarouselIndex = (projectId, index) => {
+  if (projectCarouselState.value[projectId]) {
+    projectCarouselState.value[projectId].currentIndex = index
+    if (!projectCarouselState.value[projectId].isHovered) {
+      startProjectRotation(projectId)
+    }
+  }
+}
+
+const checkTitleOverflow = () => {
+  if (titleWrapperRef.value && titleMeasureRef.value) {
+    const parent = titleWrapperRef.value.parentElement
+    if (parent) {
+      isTitleOverflowing.value = titleMeasureRef.value.scrollWidth > parent.clientWidth
+    } else {
+      isTitleOverflowing.value = titleMeasureRef.value.scrollWidth > titleWrapperRef.value.clientWidth
+    }
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('resize', checkTitleOverflow)
+  window.addEventListener('resize', checkRoleOverflows)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkTitleOverflow)
+  window.removeEventListener('resize', checkRoleOverflows)
+  if (titleResizeObserver) {
+    titleResizeObserver.disconnect()
+  }
+  if (roleResizeObserver) {
+    roleResizeObserver.disconnect()
+  }
+  pauseSummaryRotation()
+  Object.keys(projectIntervals).forEach(id => pauseProjectRotation(id))
+})
 
 const fetchResumeData = async () => {
   try {
@@ -58,6 +354,28 @@ const fetchResumeData = async () => {
 
     const response = await axios.get(finalUrl)
     resumeData.value = response.data
+    startSummaryRotation()
+    initProjectCarousels()
+    await nextTick()
+    setTimeout(() => {
+        checkTitleOverflow()
+        if (titleWrapperRef.value && titleWrapperRef.value.parentElement && !titleResizeObserver) {
+          titleResizeObserver = new ResizeObserver(() => {
+            checkTitleOverflow()
+          })
+          titleResizeObserver.observe(titleWrapperRef.value.parentElement)
+        }
+        
+        checkRoleOverflows()
+        if (roleWrapperRefs.value.length > 0 && !roleResizeObserver) {
+           roleResizeObserver = new ResizeObserver(() => {
+             checkRoleOverflows()
+           })
+           // Observe the project grid container for resize events
+           const grid = document.querySelector('.projects-grid')
+           if (grid) roleResizeObserver.observe(grid)
+        }
+      }, 100)
   } catch (err) {
     error.value = '无法加载简历数据，请稍后再试。'
     if (err?.response?.status === 401) {
@@ -265,15 +583,57 @@ onMounted(() => {
             </div>
             <div class="info-text">
               <h1>{{ resumeData.basic_info.name }}</h1>
-              <h2>{{ resumeData.basic_info.title }}</h2>
+              <div class="title-wrapper" ref="titleWrapperRef" :class="{ 'is-overflowing': isTitleOverflowing }">
+                <h2 class="title-measure" ref="titleMeasureRef">{{ resumeData.basic_info.title }}</h2>
+                <Marquee v-if="isTitleOverflowing" pauseOnHover duration="15s" gap="30px" class="title-marquee">
+                  <h2 class="title-text">{{ resumeData.basic_info.title }}</h2>
+                </Marquee>
+                <h2 v-else class="title-text">{{ resumeData.basic_info.title }}</h2>
+              </div>
               <p class="contact-info">
+                <span v-if="resumeData.basic_info.gender">{{ resumeData.basic_info.gender }}</span>
+                <span v-if="resumeData.basic_info.gender" class="dot">·</span>
+                <span v-if="resumeData.basic_info.age">{{ resumeData.basic_info.age }}岁</span>
+                <span v-if="resumeData.basic_info.age" class="dot">·</span>
                 <span>{{ resumeData.basic_info.location }}</span>
                 <span class="dot">·</span>
                 <span>{{ resumeData.basic_info.email }}</span>
                 <span v-if="resumeData.basic_info.phone" class="dot">·</span>
                 <span v-if="resumeData.basic_info.phone">{{ resumeData.basic_info.phone }}</span>
               </p>
-              <p class="summary" style="white-space: pre-wrap;">{{ resumeData.basic_info.summary }}</p>
+              
+              <div 
+                class="summary-carousel" 
+                @mouseenter="handleSummaryMouseEnter" 
+                @mouseleave="handleSummaryMouseLeave"
+                v-if="summarySlides.length > 0"
+              >
+                <div class="summary-carousel-header">
+                  <span class="summary-title">
+                    {{ summarySlides[currentSummaryIndex].icon }} {{ summarySlides[currentSummaryIndex].title }}
+                  </span>
+                  <span class="summary-status" :class="{ 'is-paused': isSummaryHovered }" v-if="summarySlides.length > 1">
+                    {{ isSummaryHovered ? '⏸️' : '🔄' }}
+                  </span>
+                </div>
+                
+                <div class="summary-content-wrapper" ref="summaryDescRef">
+                  <transition name="fade-slide" mode="out-in">
+                    <p :key="currentSummaryIndex" class="summary" style="white-space: pre-wrap;">{{ summarySlides[currentSummaryIndex].content }}</p>
+                  </transition>
+                </div>
+
+                <div class="summary-indicators" v-if="summarySlides.length > 1">
+                  <span 
+                    v-for="(slide, index) in summarySlides" 
+                    :key="index"
+                    class="indicator-dot"
+                    :class="{ active: index === currentSummaryIndex }"
+                    @click="setSummaryIndex(index)"
+                  ></span>
+                </div>
+              </div>
+
             </div>
           </div>
           <div v-else class="empty-state">暂无基本信息</div>
@@ -281,7 +641,7 @@ onMounted(() => {
 
         <!-- Keywords (Marquee) - Previously Skills -->
         <section id="keywords" class="section-card">
-          <h3>我的KeyWord</h3>
+          <h3>我的标签</h3>
           <div class="skills-marquee-container" v-if="resumeData && resumeData.skills && resumeData.skills.length">
             <Marquee pauseOnHover duration="40s" class="mb-4">
               <div v-for="skill in firstRowSkills" :key="skill.id" class="skill-pill">
@@ -326,10 +686,51 @@ onMounted(() => {
             >
               <div class="project-header">
                 <span class="project-name">{{ project.name }}</span>
-                <span class="role-badge">{{ project.role }}</span>
+                <div class="role-badge-wrapper" ref="roleWrapperRefs" :data-id="project.id">
+                  <span class="role-badge-measure">{{ project.role }}</span>
+                  <Marquee v-if="projectRoleOverflows[project.id]" pauseOnHover duration="10s" gap="20px" class="role-marquee">
+                    <span class="role-badge-text">{{ project.role }}</span>
+                  </Marquee>
+                  <span v-else class="role-badge-text">{{ project.role }}</span>
+                </div>
               </div>
               <p class="project-date" v-if="project.start_date">{{ project.start_date }} - {{ project.end_date || '至今' }}</p>
-              <p class="project-desc" style="white-space: pre-wrap;">{{ project.description }}</p>
+              
+              <div 
+                class="summary-carousel project-desc-carousel" 
+                @mouseenter="handleProjectCarouselMouseEnter(project.id)" 
+                @mouseleave="handleProjectCarouselMouseLeave(project.id)"
+                v-if="projectCarouselState[project.id] && projectCarouselState[project.id].slides.length > 0"
+              >
+                <div class="summary-carousel-header">
+                  <span class="summary-title">
+                    {{ projectCarouselState[project.id].slides[projectCarouselState[project.id].currentIndex].icon }} {{ projectCarouselState[project.id].slides[projectCarouselState[project.id].currentIndex].title }}
+                  </span>
+                  <span class="summary-status" :class="{ 'is-paused': projectCarouselState[project.id].isHovered }" v-if="projectCarouselState[project.id].slides.length > 1">
+                    {{ projectCarouselState[project.id].isHovered ? '⏸️' : '🔄' }}
+                  </span>
+                </div>
+                
+                <div 
+                  class="summary-content-wrapper project-desc-wrapper"
+                  :ref="(el) => setProjectDescRef(el, project.id)"
+                >
+                  <transition name="fade-slide" mode="out-in">
+                    <p :key="projectCarouselState[project.id].currentIndex" class="summary" style="white-space: pre-wrap;">{{ projectCarouselState[project.id].slides[projectCarouselState[project.id].currentIndex].content }}</p>
+                  </transition>
+                </div>
+
+                <div class="summary-indicators" v-if="projectCarouselState[project.id].slides.length > 1">
+                  <span 
+                    v-for="(slide, index) in projectCarouselState[project.id].slides" 
+                    :key="index"
+                    class="indicator-dot"
+                    :class="{ active: index === projectCarouselState[project.id].currentIndex }"
+                    @click="setProjectCarouselIndex(project.id, index)"
+                  ></span>
+                </div>
+              </div>
+
               <div class="tech-stack" v-if="project.technologies">
                 <span v-for="tech in project.technologies.split(',')" :key="tech" class="tech-tag">
                   {{ tech.trim() }}
@@ -540,7 +941,7 @@ h3::after {
 .profile-header {
   display: flex;
   gap: 40px;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .avatar {
@@ -550,6 +951,11 @@ h3::after {
   object-fit: cover;
   box-shadow: 0 15px 35px rgba(1, 28, 64, 0.15);
   border: 4px solid #fff;
+}
+
+.info-text {
+  flex: 1;
+  min-width: 0;
 }
 
 .info-text h1 {
@@ -562,15 +968,43 @@ h3::after {
   font-weight: 800;
 }
 
-.info-text h2 {
+.title-wrapper {
+  max-width: 100%;
   margin: 0 0 20px 0;
+  background: rgba(167, 235, 242, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  display: inline-flex;
+  position: relative;
+  align-items: center;
+}
+
+.title-wrapper.is-overflowing {
+  width: 100%;
+}
+
+.title-marquee {
+  width: 100%;
+}
+
+.title-measure {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  margin: 0;
+}
+
+.title-text {
   font-size: 1.25rem;
   color: var(--luna-medium);
   font-weight: 600;
-  background: rgba(167, 235, 242, 0.3);
-  display: inline-block;
   padding: 4px 12px;
-  border-radius: 12px;
+  margin: 0;
+  white-space: nowrap;
 }
 
 .contact-info {
@@ -588,10 +1022,129 @@ h3::after {
   font-weight: bold;
 }
 
+.summary-carousel {
+  margin-top: 15px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(167, 235, 242, 0.4);
+  border-radius: 16px;
+  padding: 20px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.summary-carousel:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--luna-light);
+  box-shadow: 0 4px 15px rgba(167, 235, 242, 0.2);
+}
+
+.summary-carousel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px dashed rgba(167, 235, 242, 0.5);
+  padding-bottom: 8px;
+}
+
+.summary-title {
+  font-weight: 700;
+  color: var(--luna-darkest);
+  font-size: 1.1rem;
+}
+
+.summary-status {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  transition: all 0.3s ease;
+  background: rgba(167, 235, 242, 0.2);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.summary-status.is-paused {
+  color: var(--luna-dark);
+  background: rgba(255, 200, 0, 0.2);
+  opacity: 1;
+  font-weight: 600;
+}
+
+.summary-content-wrapper {
+  /* 5 lines * 1.8 line-height * 1.05rem font-size ≈ 9.45rem */
+  height: 9.45rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 5px;
+  display: block;
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar for summary */
+.summary-content-wrapper::-webkit-scrollbar {
+  width: 4px;
+}
+
+.summary-content-wrapper::-webkit-scrollbar-track {
+  background: rgba(167, 235, 242, 0.2);
+  border-radius: 4px;
+}
+
+.summary-content-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(38, 101, 140, 0.3);
+  border-radius: 4px;
+}
+
+.summary-content-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(38, 101, 140, 0.6);
+}
+
 .summary {
   line-height: 1.8;
   color: var(--text-primary);
   font-size: 1.05rem;
+  margin: 0;
+  width: 100%;
+}
+
+.summary-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.indicator-dot {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(167, 235, 242, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator-dot.active {
+  background: var(--luna-medium);
+  width: 32px;
+}
+
+.indicator-dot:hover {
+  background: var(--luna-light);
+}
+
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.4s ease;
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 
 /* Skills (Pills) */
@@ -651,23 +1204,49 @@ h3::after {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 15px;
+  gap: 15px;
 }
 
 .project-name {
-  font-weight: 700;
   font-size: 1.25rem;
+  font-weight: 700;
   color: var(--luna-darkest);
+  flex: 1;
+  min-width: 0;
+  white-space: normal;
+  word-break: break-word;
 }
 
-.role-badge {
-  background-color: var(--luna-lightest);
-  color: var(--luna-dark);
+.role-badge-wrapper {
+  background: linear-gradient(135deg, var(--luna-light), var(--luna-medium));
+  color: #fff;
   padding: 4px 12px;
   border-radius: 20px;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(38, 101, 140, 0.2);
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  width: 33.33%;
+  flex-shrink: 0;
+  position: relative;
+  margin-top: 2px;
+}
+
+.role-marquee {
+  width: 100%;
+}
+
+.role-badge-measure {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
   white-space: nowrap;
-  margin-left: 10px;
-  font-weight: 700;
+}
+
+.role-badge-text {
+  white-space: nowrap;
 }
 
 .project-date {
@@ -682,6 +1261,50 @@ h3::after {
   margin-bottom: 20px;
   line-height: 1.6;
   flex-grow: 1;
+}
+
+.project-desc-carousel {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-desc-wrapper {
+  /* 8 lines * 1.6 line-height * 0.9rem font-size ≈ 11.52rem */
+  height: 11.52rem; 
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 5px;
+  display: block; /* Override default flex */
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar for project description */
+.project-desc-wrapper::-webkit-scrollbar {
+  width: 4px;
+}
+
+.project-desc-wrapper::-webkit-scrollbar-track {
+  background: rgba(167, 235, 242, 0.2);
+  border-radius: 4px;
+}
+
+.project-desc-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(38, 101, 140, 0.3);
+  border-radius: 4px;
+}
+
+.project-desc-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(38, 101, 140, 0.6);
+}
+
+.project-desc-carousel .summary {
+  font-size: 0.9rem;
+  line-height: 1.6;
 }
 
 .tech-stack {

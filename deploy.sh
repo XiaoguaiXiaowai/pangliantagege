@@ -87,6 +87,7 @@ setup_python() {
   # Collect static files for Django admin
   pushd "$DEST_DIR/backend" >/dev/null
   python manage.py collectstatic --noinput
+  python manage.py migrate
   popd >/dev/null
   
   deactivate
