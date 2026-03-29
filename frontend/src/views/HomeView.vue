@@ -15,37 +15,43 @@ const features = [
     title: '工作简历',
     description: '查看我的详细工作经历、项目经验以及技能栈。',
     path: '/resume',
-    icon: '💼'
+    icon: '💼',
+    wip: false
   },
   {
     title: '音乐作品',
-    description: '记录我的音乐作品和一些演出视频，音乐是我生活中的重要部分。',
+    description: '记录我的音乐作品和一些演出照片、视频。',
     path: '/music',
-    icon: '🎵'
+    icon: '🎵',
+    wip: false
   },
   {
     title: '留言板',
-    description: '欢迎在这里留下您的足迹，与我交流或分享您的想法。',
+    description: '<开发中>欢迎在这里留下您的足迹，与我交流或分享您的想法。',
     path: '/message-board',
-    icon: '💬'
+    icon: '💬',
+    wip: true
   },
   {
     title: 'AI 助理',
-    description: '与集成先进大语言模型的智能助理对话，获取信息与帮助。',
+    description: '<开发中>与集成先进大语言模型的智能助理对话，获取信息与帮助。',
     path: '/ai-assistant',
-    icon: '🛸'
+    icon: '🛸',
+    wip: true
   },
   {
     title: '小工具',
-    description: '我开发的一些实用小工具，旨在提高日常工作效率。',
+    description: '<开发中>我开发的一些实用小工具，旨在提高日常工作效率。',
     path: '/tools',
-    icon: '🛠️'
+    icon: '🛠️',
+    wip: true
   },
   {
     title: '其他',
-    description: '可以看着背景的两个小球发呆。',
+    description: '忙里偷闲，可以看着背景的两个小球发发呆。',
     path: '/talents',
-    icon: '🎱'
+    icon: '🎱',
+    wip: false
   }
 ]
 
@@ -244,14 +250,19 @@ onUnmounted(() => {
         v-for="feature in features" 
         :key="feature.title" 
         class="nav-card"
-        @click="navigateTo(feature.path)"
+        :class="{ 'disabled-card': feature.wip }"
+        @click="!feature.wip && navigateTo(feature.path)"
       >
         <div class="card-icon">{{ feature.icon }}</div>
         <div class="card-content">
-          <h3>{{ feature.title }}</h3>
+          <h3>
+            {{ feature.title }}
+            <span v-if="feature.wip" class="wip-badge">WIP</span>
+          </h3>
           <p>{{ feature.description }}</p>
         </div>
-        <div class="card-arrow">→</div>
+        <div class="card-arrow" v-if="!feature.wip">→</div>
+        <div class="card-arrow lock-icon" v-else>🔒</div>
       </div>
     </section>
   </div>
@@ -571,6 +582,22 @@ onUnmounted(() => {
   font-weight: 700;
   color: var(--luna-darkest);
   margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wip-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #f0f4f8, #e2e8f0);
+  color: var(--luna-medium);
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(167, 235, 242, 0.5);
+  box-shadow: 0 2px 4px rgba(1, 28, 64, 0.05);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .card-content p {
@@ -587,9 +614,44 @@ onUnmounted(() => {
   transition: transform 0.3s ease;
 }
 
-.nav-card:hover .card-arrow {
+.card-arrow.lock-icon {
+  font-size: 1.2rem;
+  opacity: 0.5;
+}
+
+.nav-card:hover:not(.disabled-card) .card-arrow {
   transform: translateX(5px);
   color: var(--luna-medium);
+}
+
+.nav-card.disabled-card {
+  cursor: not-allowed;
+  background: rgba(248, 250, 252, 0.6);
+  border-color: rgba(226, 232, 240, 0.8);
+  opacity: 0.85;
+}
+
+.nav-card.disabled-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.nav-card.disabled-card::before {
+  display: none;
+}
+
+.nav-card.disabled-card .card-icon {
+  background: rgba(226, 232, 240, 0.5);
+  filter: grayscale(100%);
+  opacity: 0.7;
+}
+
+.nav-card.disabled-card .card-content h3 {
+  color: #64748b;
+}
+
+.nav-card.disabled-card .card-content p {
+  color: #94a3b8;
 }
 
 @media (max-width: 768px) {
