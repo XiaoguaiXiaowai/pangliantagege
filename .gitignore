@@ -27,3 +27,6 @@ logs/frontend.err
 logs/frontend.out
 run/frontend.pid
 doc/tmpmemo.txt
+
+#media
+backend/media/
