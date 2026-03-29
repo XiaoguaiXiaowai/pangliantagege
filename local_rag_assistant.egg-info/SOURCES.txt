@@ -1,0 +1,15 @@
+pyproject.toml
+app/__init__.py
+app/main.py
+app/api/routes/system.py
+app/core/config.py
+app/core/runtime.py
+app/rag/preflight.py
+app/schemas/system.py
+app/services/ollama_client.py
+doc/开发计划.md
+local_rag_assistant.egg-info/PKG-INFO
+local_rag_assistant.egg-info/SOURCES.txt
+local_rag_assistant.egg-info/dependency_links.txt
+local_rag_assistant.egg-info/requires.txt
+local_rag_assistant.egg-info/top_level.txt
