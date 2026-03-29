@@ -1,8 +1,14 @@
+from typing import List, Dict, Optional
+
 from pydantic import BaseModel, Field
 
 
 class ChatRequest(BaseModel):
     question: str = Field(..., description="用户提问")
+    chat_history: Optional[List[Dict[str, str]]] = Field(
+        default=None, 
+        description="对话历史，格式如 [{'role': 'user', 'content': 'hi'}, {'role': 'assistant', 'content': 'hello'}]"
+    )
 
 
 class ChatResponse(BaseModel):

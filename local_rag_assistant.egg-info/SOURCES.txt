@@ -1,10 +1,15 @@
 pyproject.toml
 app/__init__.py
 app/main.py
+app/api/routes/rag.py
 app/api/routes/system.py
 app/core/config.py
 app/core/runtime.py
+app/rag/chain.py
 app/rag/preflight.py
+app/rag/loaders/processor.py
+app/rag/vector_store/manager.py
+app/schemas/rag.py
 app/schemas/system.py
 app/services/ollama_client.py
 doc/开发计划.md

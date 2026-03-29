@@ -88,7 +88,10 @@ async def chat(
     rag_chain: RAGChain = Depends(get_rag_chain),
 ) -> dict[str, object]:
     try:
-        result = await rag_chain.ainvoke(request.question)
+        result = await rag_chain.ainvoke(
+            question=request.question,
+            chat_history=request.chat_history
+        )
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rag-api
+  labels:
+    app: rag-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rag-api
+  template:
+    metadata:
+      labels:
+        app: rag-api
+    spec:
+      containers:
+      - name: api
+        image: local-rag-assistant:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+        env:
+        - name: APP_ENV
+          value: "production"
+        # K8s 内部如果要访问宿主机上的 Ollama，可以填宿主机 IP 或者用 hostNetwork 的方式
+        # 这里用一个占位符，实际部署时根据情况修改
+        - name: OLLAMA_BASE_URL
+          value: "http://host.docker.internal:11434"
+        - name: OLLAMA_CHAT_MODEL
+          value: "llama3.2:3b"
+        - name: OLLAMA_EMBED_MODEL
+          value: "nomic-embed-text"
+        volumeMounts:
+        - name: data-volume
+          mountPath: /app/data
+      volumes:
+      - name: data-volume
+        hostPath:
+          path: /tmp/rag-data
+          type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rag-api-svc
+spec:
+  selector:
+    app: rag-api
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
+  type: NodePort

@@ -15,7 +15,9 @@ dependencies = [
     "langchain-text-splitters>=0.3,<0.4",
     "pymupdf>=1.24,<2.0",
     "beautifulsoup4>=4.12,<5.0",
+    "unstructured[md]>=0.14.2,<0.23.0",
     "python-multipart>=0.0.12,<0.1",
+    "prometheus-fastapi-instrumentator>=7.0.0,<8.0",
     "pydantic-settings>=2.7,<3.0",
     "uvicorn[standard]>=0.30,<1.0",
 ]
@@ -24,8 +26,14 @@ dependencies = [
 dev = [
     "mypy>=1.14,<2.0",
     "pytest>=8.3,<9.0",
+    "pytest-asyncio>=0.23,<1.0",
     "ruff>=0.11,<1.0",
+    "locust>=2.30,<3.0",
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
