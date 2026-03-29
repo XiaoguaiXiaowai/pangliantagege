@@ -37,17 +37,20 @@ class Skill(models.Model):
         return self.name
 
 class TechStack(models.Model):
-    name = models.CharField(max_length=50, verbose_name='技术名称')
-    years = models.IntegerField(default=1, verbose_name='经验年限(年)')
+    major_category = models.CharField(max_length=100, verbose_name='大分类', default='未分类')
+    minor_category = models.CharField(max_length=100, verbose_name='小分类', default='未分类')
+    name = models.CharField(max_length=100, verbose_name='技能内容')
+    experience = models.CharField(max_length=50, verbose_name='经验年限', default='1年')
     icon = models.CharField(max_length=50, blank=True, null=True, verbose_name='图标(Emoji/Class)', default='⚡')
+    order = models.IntegerField(default=0, verbose_name='排序')
     
     class Meta:
         verbose_name = '技术栈'
         verbose_name_plural = '技术栈'
-        ordering = ['-years']
+        ordering = ['order', 'major_category', 'minor_category', 'id']
 
     def __str__(self):
-        return self.name
+        return f"{self.major_category} - {self.minor_category} - {self.name}"
 
 class Experience(models.Model):
     company = models.CharField(max_length=100, verbose_name='公司/组织')
@@ -77,11 +80,12 @@ class Project(models.Model):
     result_description = models.TextField(verbose_name='项目成果', blank=True, null=True)
     technologies = models.CharField(max_length=200, blank=True, null=True, verbose_name='使用技术')
     link = models.URLField(blank=True, null=True, verbose_name='项目链接')
+    order = models.IntegerField(default=0, verbose_name='显示顺序(从小到大)')
 
     class Meta:
         verbose_name = '项目经历'
         verbose_name_plural = '项目经历'
-        ordering = ['-start_date']
+        ordering = ['order', '-start_date']
 
     def __str__(self):
         return self.name
@@ -100,17 +104,6 @@ class Education(models.Model):
 
     def __str__(self):
         return self.school
-
-class Language(models.Model):
-    name = models.CharField(max_length=50, verbose_name='语言')
-    proficiency = models.CharField(max_length=50, verbose_name='熟练程度') # e.g. Native, Fluent, Intermediate
-
-    class Meta:
-        verbose_name = '语言能力'
-        verbose_name_plural = '语言能力'
-
-    def __str__(self):
-        return self.name
 
 class Certificate(models.Model):
     name = models.CharField(max_length=100, verbose_name='证书名称')

@@ -6,7 +6,7 @@ from datetime import date
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
-from resume.models import BasicInfo, Skill, TechStack, Experience, Project, Education, Language, Certificate
+from resume.models import BasicInfo, Skill, TechStack, Experience, Project, Education, Certificate
 
 def populate():
     print("开始填充示例数据...")
@@ -96,11 +96,7 @@ def populate():
         )
         print("已创建教育背景")
 
-    # Languages
-    if not Language.objects.exists():
-        Language.objects.create(name="中文", proficiency="母语")
-        Language.objects.create(name="英语", proficiency="流利 (CET-6)")
-        print("已创建语言能力")
+    
 
     # Certificates
     if not Certificate.objects.exists():

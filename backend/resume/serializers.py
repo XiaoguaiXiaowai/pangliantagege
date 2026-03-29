@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import BasicInfo, Skill, TechStack, Experience, Project, Education, Language, Certificate
+from .models import BasicInfo, Skill, TechStack, Experience, Project, Education, Certificate
 
 class BasicInfoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,11 +29,6 @@ class ProjectSerializer(serializers.ModelSerializer):
 class EducationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Education
-        fields = '__all__'
-
-class LanguageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Language
         fields = '__all__'
 
 class CertificateSerializer(serializers.ModelSerializer):

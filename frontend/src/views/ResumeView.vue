@@ -12,21 +12,19 @@ const error = ref(null)
 const activeSection = ref('')
 
 const sections = [
-  { id: 'basic-info', title: '关于我' },
+  { id: 'basic-info', title: '基本信息' },
   { id: 'keywords', title: '我的标签' },
-  { id: 'experience', title: '经历' },
-  { id: 'projects', title: '项目' },
-  { id: 'tech-stack', title: '我的技能栈' },
-  { id: 'education', title: '教育' },
-  { id: 'languages', title: '语言' },
-  { id: 'certificates', title: '证书' },
+  { id: 'tech-stack', title: '技能概况' },
+  { id: 'certificates', title: '获得证书' },
+  { id: 'experience', title: '工作经历' },
+  { id: 'projects', title: '项目经历' },
+  { id: 'education', title: '教育背景' },
 ]
 
 // Refs for interaction
 const projectRefs = ref({})
 const skillRefs = ref({})
 const contentWrapperRef = ref(null)
-const lines = ref([])
 const activeTechs = ref(new Set())
 
 const titleWrapperRef = ref(null)
@@ -445,60 +443,67 @@ const secondRowSkills = computed(() => {
 })
 
 // Filter Tech Skills for "My Tech Stack" section
-const techSkills = computed(() => {
-  if (resumeData.value && resumeData.value.tech_stack && resumeData.value.tech_stack.length > 0) {
-    return resumeData.value.tech_stack
+const groupedTechSkills = computed(() => {
+  if (!resumeData.value?.tech_stack || resumeData.value.tech_stack.length === 0) return []
+  
+  const tech_stack = resumeData.value.tech_stack;
+  const grouped = {};
+  
+  tech_stack.forEach(skill => {
+    if (!grouped[skill.major_category]) {
+      grouped[skill.major_category] = {};
+    }
+    if (!grouped[skill.major_category][skill.minor_category]) {
+      grouped[skill.major_category][skill.minor_category] = [];
+    }
+    grouped[skill.major_category][skill.minor_category].push(skill);
+  });
+  
+  const result = [];
+  for (const major in grouped) {
+    const minorGroups = [];
+    let minMajorOrder = Infinity;
+    
+    for (const minor in grouped[major]) {
+      const skills = grouped[major][minor];
+      skills.sort((a, b) => a.order - b.order);
+      const minMinorOrder = Math.min(...skills.map(s => s.order));
+      minMajorOrder = Math.min(minMajorOrder, minMinorOrder);
+      
+      minorGroups.push({
+        name: minor,
+        skills: skills,
+        order: minMinorOrder
+      });
+    }
+    
+    minorGroups.sort((a, b) => a.order - b.order);
+    
+    result.push({
+      name: major,
+      minorGroups: minorGroups,
+      order: minMajorOrder
+    });
   }
-  return []
+  
+  result.sort((a, b) => a.order - b.order);
+  return result;
 })
 
 // Interaction Logic
 const handleProjectHover = (project) => {
-  if (!project.technologies || !contentWrapperRef.value) return
+  if (!project.technologies) return
 
   const techList = project.technologies.split(',').map(t => t.trim().toLowerCase())
-  const newLines = []
   const newActiveTechs = new Set()
   
-  // Get container rect for relative positioning
-  const containerRect = contentWrapperRef.value.getBoundingClientRect()
-
-  // Get project card rect
-  const projectEl = projectRefs.value[project.id]
-  if (!projectEl) return
-  // Use $el if it's a component, otherwise the element itself
-  const pRect = (projectEl.$el || projectEl).getBoundingClientRect()
-  
-  // Start point (bottom center of project card)
-  // We want to distribute start points along the bottom edge
-  const techCount = techList.length
-  // Calculate segment width to distribute points
-  const segmentWidth = pRect.width / (techCount + 1)
-  
-  const pBottom = pRect.bottom - containerRect.top
-  const pLeft = pRect.left - containerRect.left
-
-  techList.forEach((techName, index) => {
-    // Find matching skill card
-    // We assume skillRefs are keyed by skill name (lowercase for matching)
-    const skillEl = skillRefs.value[techName]
-    if (skillEl) {
-      const sRect = skillEl.getBoundingClientRect()
-      
-      // Start point: Distributed along bottom of project card
-      const x1 = pLeft + (segmentWidth * (index + 1))
-      const y1 = pBottom
-      
-      // End point (top center of skill card)
-      const x2 = sRect.left + sRect.width / 2 - containerRect.left
-      const y2 = sRect.top - containerRect.top
-      
-      newLines.push({ x1, y1, x2, y2 })
+  techList.forEach((techName) => {
+    // Only highlight if the skill card exists
+    if (skillRefs.value[techName]) {
       newActiveTechs.add(techName)
     }
   })
   
-  lines.value = newLines
   activeTechs.value = newActiveTechs
 }
 
@@ -539,19 +544,6 @@ onMounted(() => {
     <div v-else-if="error" class="error">{{ error }}</div>
     
     <div v-else class="content-wrapper" ref="contentWrapperRef">
-      <!-- SVG Overlay for dynamic lines -->
-      <svg class="connections-overlay">
-        <line 
-          v-for="(line, index) in lines" 
-          :key="index"
-          :x1="line.x1" 
-          :y1="line.y1" 
-          :x2="line.x2" 
-          :y2="line.y2" 
-          class="connection-line"
-        />
-      </svg>
-
       <!-- Sidebar / Navigation Rail -->
       <aside class="sidebar">
         <nav>
@@ -657,6 +649,48 @@ onMounted(() => {
           <div v-else class="empty-state">暂无关键词信息</div>
         </section>
 
+        <!-- Tech Stack -->
+        <section id="tech-stack" class="section-card">
+          <h3>技能概况</h3>
+          <div class="tech-major-grid" v-if="groupedTechSkills && groupedTechSkills.length">
+            <div v-for="(majorGroup, mIndex) in groupedTechSkills" :key="majorGroup.name" class="tech-major-card">
+              <div class="major-header">
+                <h4>{{ majorGroup.name }}</h4>
+              </div>
+              <div class="major-content">
+                <div class="skills-wrapper">
+                  <template v-for="(minorGroup, sIndex) in majorGroup.minorGroups" :key="minorGroup.name">
+                    <div v-for="(skill, skillIndex) in minorGroup.skills" :key="skill.id" 
+                         class="skill-pill"
+                         :class="{ 'active-tech': activeTechs.has(skill.name.toLowerCase()) }"
+                         :ref="(el) => setSkillRef(el, skill.name)">
+                      <span class="skill-name">{{ skill.name }}</span>
+                      <span class="skill-exp">{{ skill.experience }}</span>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div v-else class="empty-state">暂无技能栈信息</div>
+        </section>
+
+        <!-- Certificates -->
+        <section id="certificates" class="section-card">
+          <h3>获得证书</h3>
+          <div class="honor-certificate-list" v-if="resumeData && resumeData.certificates && resumeData.certificates.length">
+            <div v-for="cert in resumeData.certificates" :key="cert.id" class="honor-certificate-card">
+              <div class="cert-inner">
+                <div class="cert-icon">
+                  <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+                </div>
+                <span class="cert-name">{{ cert.name }}</span>
+              </div>
+            </div>
+          </div>
+          <div v-else class="empty-state">暂无认证经历信息</div>
+        </section>
+
         <!-- Experience -->
         <section id="experience" class="section-card">
           <h3>工作经历</h3>
@@ -683,6 +717,7 @@ onMounted(() => {
               class="project-card"
               :ref="(el) => setProjectRef(el, project.id)"
               @mouseenter="handleProjectHover(project)"
+              @mouseleave="activeTechs = new Set()"
             >
               <div class="project-header">
                 <span class="project-name">{{ project.name }}</span>
@@ -742,27 +777,6 @@ onMounted(() => {
           <div v-else class="empty-state">暂无项目经历</div>
         </section>
 
-        <!-- My Tech Stack (New Section) -->
-        <section id="tech-stack" class="section-card">
-          <h3>我的技能栈</h3>
-          <div class="tech-stack-grid" v-if="techSkills && techSkills.length">
-            <div 
-              v-for="skill in techSkills" 
-              :key="skill.id" 
-              class="tech-card"
-              :class="{ 'active-tech': activeTechs.has(skill.name.toLowerCase()) }"
-              :ref="(el) => setSkillRef(el, skill.name)"
-            >
-              <span class="tech-icon">{{ skill.icon || '⚡' }}</span>
-              <div class="tech-info">
-                <span class="tech-name">{{ skill.name }}</span>
-                <span class="tech-level">经验: {{ skill.years }}年</span>
-              </div>
-            </div>
-          </div>
-          <div v-else class="empty-state">暂无技能栈信息</div>
-        </section>
-
         <!-- Education -->
         <section id="education" class="section-card">
           <h3>教育背景</h3>
@@ -776,33 +790,6 @@ onMounted(() => {
             </div>
           </div>
           <div v-else class="empty-state">暂无教育背景</div>
-        </section>
-
-        <!-- Languages -->
-        <section id="languages" class="section-card">
-          <h3>语言能力</h3>
-          <div class="grid-list" v-if="resumeData && resumeData.languages && resumeData.languages.length">
-            <div v-for="lang in resumeData.languages" :key="lang.id" class="grid-item">
-              <span class="grid-name">{{ lang.name }}</span>
-              <span class="grid-value">{{ lang.proficiency }}</span>
-            </div>
-          </div>
-          <div v-else class="empty-state">暂无语言能力信息</div>
-        </section>
-
-        <!-- Certificates -->
-        <section id="certificates" class="section-card">
-          <h3>证书</h3>
-          <div class="grid-list" v-if="resumeData && resumeData.certificates && resumeData.certificates.length">
-            <div v-for="cert in resumeData.certificates" :key="cert.id" class="grid-item certificate">
-              <div class="cert-info">
-                <span class="grid-name">{{ cert.name }}</span>
-                <span class="grid-sub">{{ cert.issuer }}</span>
-              </div>
-              <span class="grid-date">{{ cert.date }}</span>
-            </div>
-          </div>
-          <div v-else class="empty-state">暂无证书信息</div>
         </section>
       </div>
     </div>
@@ -1187,13 +1174,13 @@ h3::after {
 
 /* Projects Grid */
 .projects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 30px;
+  column-count: 2;
+  column-gap: 30px;
 }
 
 .project-card {
-  height: 100%;
+  break-inside: avoid;
+  margin-bottom: 30px;
   display: flex;
   flex-direction: column;
   background: #fff;
@@ -1339,12 +1326,12 @@ h3::after {
 
 /* Timeline (Experience & Education) */
 .timeline-item, .edu-item {
-  margin-bottom: 40px;
+  margin-bottom: 70px;
   padding-left: 0;
   border-left: none;
   display: grid;
   grid-template-columns: 140px 1fr;
-  gap: 30px;
+  gap: 20px;
   position: relative;
 }
 
@@ -1353,7 +1340,7 @@ h3::after {
   position: absolute;
   left: 140px;
   top: 0;
-  bottom: -40px;
+  bottom: -70px;
   width: 1px;
   background: rgba(84, 172, 191, 0.3); /* Luna Light line */
   transform: translateX(-50%);
@@ -1381,7 +1368,7 @@ h3::after {
 .date::after {
   content: '';
   position: absolute;
-  right: -5px; /* Half of gap (30/2) - half of dot (10/2) approx */
+  right: -5px; /* Center dot on the right edge of the 140px column */
   top: 6px;
   width: 10px;
   height: 10px;
@@ -1413,56 +1400,70 @@ h3::after {
   grid-column: 2;
   color: var(--text-primary);
   line-height: 1.7;
+  margin: 0; /* Remove default paragraph margin */
 }
 
-/* Grid List (Language & Certificate) */
-.grid-list {
+/* Honor Certificates */
+.honor-certificate-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
 }
 
-.grid-item {
-  background: #fff;
-  padding: 24px;
-  border-radius: 20px;
+.honor-certificate-card {
+  background: linear-gradient(145deg, #fff, #f8fbfd);
+  padding: 8px;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(1, 28, 64, 0.05);
+  border: 1px solid rgba(167, 235, 242, 0.4);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.honor-certificate-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--luna-light), var(--luna-medium));
+}
+
+.honor-certificate-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(1, 28, 64, 0.1);
+  border-color: var(--luna-medium);
+}
+
+.cert-inner {
+  border: 1px dashed rgba(38, 101, 140, 0.2);
+  border-radius: 10px;
+  padding: 24px 20px;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(167, 235, 242, 0.5);
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.5);
 }
 
-.grid-item:hover {
-  background: #fff;
-  box-shadow: 0 10px 30px rgba(1, 28, 64, 0.08);
-  border-color: var(--luna-medium);
-  transform: translateY(-4px);
-}
-
-.grid-name {
-  font-weight: 700;
+.cert-icon {
+  color: var(--luna-medium);
+  background: rgba(167, 235, 242, 0.2);
+  padding: 12px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 8px;
-  font-size: 1.1rem;
+}
+
+.cert-name {
+  font-weight: 700;
+  font-size: 1.15rem;
   color: var(--luna-darkest);
-}
-
-.grid-value {
-  color: var(--luna-light);
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.grid-sub {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-}
-
-.grid-date {
-  margin-top: auto;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  text-align: right;
-  font-weight: 500;
+  text-align: center;
+  line-height: 1.4;
 }
 
 /* Responsive */
@@ -1535,103 +1536,105 @@ h3::after {
   }
 }
 
-/* Dynamic Lines Overlay */
-.connections-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 5; /* Above background, below content if content has higher z-index */
-  overflow: hidden;
+/* 删除了动态连线相关的样式 */
+
+/* Tech Stack Nested Cards Styles */
+.tech-major-grid {
+  column-count: 2;
+  column-gap: 24px;
 }
 
-.connection-line {
-  stroke: var(--luna-light);
-  stroke-width: 2px;
-  stroke-dasharray: 5;
-  animation: dash 1s linear infinite;
-  opacity: 0.6;
-}
-
-@keyframes dash {
-  to {
-    stroke-dashoffset: -10;
-  }
-}
-
-/* Tech Stack Section */
-.tech-stack-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 20px;
-}
-
-.tech-card {
-  background: #fff;
-  border: 1px solid rgba(167, 235, 242, 0.5);
+.tech-major-card {
+  background: #ffffff;
+  border: 1px solid rgba(167, 235, 242, 0.4);
   border-radius: 16px;
-  padding: 12px 20px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(1, 28, 64, 0.04);
   transition: all 0.3s ease;
+  break-inside: avoid; /* 防止卡片被跨列截断 */
+  margin-bottom: 24px; /* 卡片之间的垂直间距 */
+  display: flex;
+  flex-direction: column;
 }
 
-.tech-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(1, 28, 64, 0.08);
-  border-color: var(--luna-medium);
-}
-
-.tech-card.active-tech {
-  background: rgba(167, 235, 242, 0.4); /* Deeper background for selected state */
-  border-color: var(--luna-medium);
-  box-shadow: 0 0 15px rgba(84, 172, 191, 0.3);
+.tech-major-card:hover {
+  box-shadow: 0 8px 24px rgba(1, 28, 64, 0.08);
+  border-color: rgba(167, 235, 242, 0.8);
   transform: translateY(-2px);
 }
 
-.tech-icon {
-  font-size: 1.5rem;
-  background: rgba(167, 235, 242, 0.2);
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  color: var(--luna-dark);
+.major-header {
+  background: linear-gradient(135deg, rgba(167, 235, 242, 0.2) 0%, rgba(84, 172, 191, 0.05) 100%); /* 使用Luna主题蓝绿色调 */
+  padding: 16px 24px;
+  border-bottom: 1px solid rgba(167, 235, 242, 0.3);
 }
 
-.tech-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex: 1;
-}
-
-.tech-name {
+.major-header h4 {
+  margin: 0;
+  color: var(--luna-darkest); /* 使用网站主色调 */
+  font-size: 1.15rem;
   font-weight: 700;
+}
+
+.major-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.skills-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px; /* 减小间距 */
+}
+
+.skill-pill {
+  display: inline-flex;
+  align-items: center;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 16px; /* 稍微减小圆角 */
+  padding: 6px 12px; /* 减小内边距 */
+  transition: all 0.3s ease;
+  cursor: default;
+  width: fit-content; /* 仅占用内容所需宽度 */
+}
+
+.skill-pill:hover {
+  background: rgba(167, 235, 242, 0.1);
+  border-color: var(--luna-light);
+  transform: translateY(-2px);
+}
+
+.skill-pill.active-tech {
+  background: rgba(167, 235, 242, 0.25);
+  border-color: var(--luna-medium);
+  box-shadow: 0 0 10px rgba(84, 172, 191, 0.2);
+}
+
+.skill-name {
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.skill-exp {
+  background: var(--luna-light);
   color: var(--luna-darkest);
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-.tech-level {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-}
-
-.progress-bar {
-  height: 6px;
-  background: rgba(167, 235, 242, 0.3);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(to right, var(--luna-medium), var(--luna-light));
-  border-radius: 3px;
+@media (max-width: 768px) {
+  .projects-grid {
+    column-count: 1;
+  }
+  .tech-major-grid {
+    column-count: 1;
+  }
 }
 </style>

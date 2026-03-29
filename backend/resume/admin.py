@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import BasicInfo, Skill, TechStack, Experience, Project, Education, Language, Certificate
+from .models import BasicInfo, Skill, TechStack, Experience, Project, Education, Certificate
 
 @admin.register(BasicInfo)
 class BasicInfoAdmin(admin.ModelAdmin):
@@ -12,7 +12,10 @@ class SkillAdmin(admin.ModelAdmin):
 
 @admin.register(TechStack)
 class TechStackAdmin(admin.ModelAdmin):
-    list_display = ('name', 'years', 'icon')
+    list_display = ('name', 'major_category', 'minor_category', 'experience', 'order')
+    search_fields = ('name', 'major_category', 'minor_category')
+    list_filter = ('major_category',)
+    list_editable = ('order',)
 
 @admin.register(Experience)
 class ExperienceAdmin(admin.ModelAdmin):
@@ -21,15 +24,12 @@ class ExperienceAdmin(admin.ModelAdmin):
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('name', 'role', 'start_date', 'end_date')
+    list_display = ('name', 'role', 'start_date', 'end_date', 'order')
+    list_editable = ('order',)
 
 @admin.register(Education)
 class EducationAdmin(admin.ModelAdmin):
     list_display = ('school', 'degree', 'major', 'start_date', 'end_date')
-
-@admin.register(Language)
-class LanguageAdmin(admin.ModelAdmin):
-    list_display = ('name', 'proficiency')
 
 @admin.register(Certificate)
 class CertificateAdmin(admin.ModelAdmin):
