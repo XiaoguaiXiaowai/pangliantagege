@@ -28,5 +28,6 @@ logs/frontend.out
 run/frontend.pid
 doc/tmpmemo.txt
 
-#media
+#github
 backend/media/
+doc/
