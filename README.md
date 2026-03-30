@@ -1,4 +1,4 @@
-# 基于 RAG 的本地化 AI 助手 (Local RAG Assistant)
+# 基于 RAG 的本地化 AI 助手 (rag-ai-01)
 
 🚀 **一个具备生产级架构、完全本地运行的检索增强生成（RAG）智能问答系统。**
 
@@ -45,7 +45,7 @@
 
 ```bash
 git clone <your-repo-url>
-cd local-rag-assistant
+cd rag-ai-01
 docker compose up -d --build
 ```
 

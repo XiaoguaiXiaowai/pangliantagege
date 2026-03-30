@@ -52,6 +52,6 @@ jobs:
         with:
           context: .
           push: false # 这里配置为 false，因为这只是一个本地项目示例，不真实推送到 Docker Hub
-          tags: local-rag-assistant:latest
+          tags: rag-ai-01:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max

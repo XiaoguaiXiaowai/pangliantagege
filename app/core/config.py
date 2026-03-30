@@ -9,7 +9,7 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
-    app_name: str = Field(default="基于 RAG 的本地化 AI 助手", alias="APP_NAME")
+    app_name: str = Field(default="rag-ai-01", alias="APP_NAME")
     app_env: str = Field(default="local", alias="APP_ENV")
     app_host: str = Field(default="0.0.0.0", alias="APP_HOST")
     app_port: int = Field(default=8000, alias="APP_PORT")
@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     ollama_chat_model: str = Field(default="llama3.2:3b", alias="OLLAMA_CHAT_MODEL")
     ollama_embed_model: str = Field(default="nomic-embed-text", alias="OLLAMA_EMBED_MODEL")
     chroma_collection_name: str = Field(
-        default="local-rag-assistant", alias="CHROMA_COLLECTION_NAME"
+        default="rag-ai-01", alias="CHROMA_COLLECTION_NAME"
     )
     chroma_persist_directory: Path = Field(
         default=ROOT_DIR / "data" / "vector_store",

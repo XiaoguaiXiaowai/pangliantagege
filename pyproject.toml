@@ -1,5 +1,5 @@
 [project]
-name = "local-rag-assistant"
+name = "rag-ai-01"
 version = "0.1.0"
 description = "A local RAG assistant built with FastAPI, Ollama, LangChain, and Chroma."
 readme = "doc/开发计划.md"

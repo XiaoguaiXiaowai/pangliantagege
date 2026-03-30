@@ -3,20 +3,20 @@ kind: Deployment
 metadata:
   name: rag-api
   labels:
-    app: rag-api
+    app: rag-ai-01
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: rag-api
+      app: rag-ai-01
   template:
     metadata:
       labels:
-        app: rag-api
+        app: rag-ai-01
     spec:
       containers:
       - name: api
-        image: local-rag-assistant:latest
+        image: rag-ai-01:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
@@ -46,7 +46,7 @@ metadata:
   name: rag-api-svc
 spec:
   selector:
-    app: rag-api
+    app: rag-ai-01
   ports:
   - protocol: TCP
     port: 8000
