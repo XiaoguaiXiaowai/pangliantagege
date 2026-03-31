@@ -34,10 +34,10 @@ const features = [
   },
   {
     title: 'AI 助理',
-    description: '<开发中>与集成先进大语言模型的智能助理对话，获取信息与帮助。',
+    description: '与集成先进大语言模型的智能助理对话，获取信息与帮助。',
     path: '/ai-assistant',
     icon: '🛸',
-    wip: true
+    wip: false
   },
   {
     title: '小工具',

@@ -23,10 +23,7 @@ import DynamicBackground from './components/DynamicBackground.vue'
               <span class="wip-badge">WIP</span>
             </div>
             
-            <div class="nav-item-wrapper disabled-nav">
-              <span class="nav-text">AI 助理</span>
-              <span class="wip-badge">WIP</span>
-            </div>
+            <RouterLink to="/ai-assistant">AI 助理</RouterLink>
             
             <div class="nav-item-wrapper disabled-nav">
               <span class="nav-text">小工具</span>
