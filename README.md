@@ -1,4 +1,4 @@
-# 胖脸哥的个人网站 (PangLianTeGeGe)
+# 胖脸她哥哥 - 李佳的个人网站 (PangLianTeGeGe)
 
 👋 欢迎来到我的个人网站项目仓库！
 
