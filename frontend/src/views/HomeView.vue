@@ -26,18 +26,18 @@ const features = [
     wip: false
   },
   {
+    title: 'AI助理',
+    description: '基于私域RAG模型的智能助手，可以通过她来确认我的更多的信息。',
+    path: '/ai-assistant',
+    icon: '🛸',
+    wip: false
+  },
+  {
     title: '留言板',
     description: '<开发中>欢迎在这里留下您的足迹，与我交流或分享您的想法。',
     path: '/message-board',
     icon: '💬',
     wip: true
-  },
-  {
-    title: 'AI 助理',
-    description: '与集成先进大语言模型的智能助理对话，获取信息与帮助。',
-    path: '/ai-assistant',
-    icon: '🛸',
-    wip: false
   },
   {
     title: '小工具',

@@ -24,4 +24,5 @@ urlpatterns = [
     path('api/', include('resume.urls')),
     path('api/music/', include('music.urls')),
     path('api/auth/', include('users.urls_api')),
+    path('api/ai/', include('ai_assistant.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

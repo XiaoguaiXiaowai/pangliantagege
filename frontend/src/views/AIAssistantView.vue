@@ -5,14 +5,48 @@ import axios from 'axios'
 const messages = ref([
   {
     role: 'assistant',
-    content: '你好！我是基于本地大语言模型的 AI 助理。请问有什么我可以帮你的吗？'
+    content: '你好！我是基于私域RAG模型的李佳的智能助手。请问有什么我可以帮你的吗？'
   }
 ])
 const inputMessage = ref('')
 const isLoading = ref(false)
 const chatContainer = ref(null)
 
+// Connection status state: 'checking' | 'connected' | 'error'
+const connectionStatus = ref('checking')
+
 const chatHistory = ref([])
+
+// Check RAG service connection status
+const checkConnectionStatus = async () => {
+  connectionStatus.value = 'checking'
+  try {
+    const isProd = import.meta.env.PROD
+    const isDevPort = window.location.port === '5173'
+    const hostname = window.location.hostname
+    
+    // We ping the Django backend which will check the RAG service
+    let healthApiUrl = '/api/ai/health/'
+    
+    if (!isProd || isDevPort) {
+        healthApiUrl = `http://${hostname}:8000/api/ai/health/`
+    }
+
+    const response = await axios.get(healthApiUrl, { timeout: 3000 })
+    if (response.data && response.data.status === 'ok') {
+      connectionStatus.value = 'connected'
+    } else {
+      connectionStatus.value = 'error'
+    }
+  } catch (error) {
+    console.error('Failed to check RAG service connection:', error)
+    connectionStatus.value = 'error'
+  }
+}
+
+onMounted(() => {
+  checkConnectionStatus()
+})
 
 const scrollToBottom = async () => {
   await nextTick()
@@ -120,11 +154,16 @@ const handleKeydown = (e) => {
       <div class="chat-header">
         <div class="header-title">
           <span class="emoji-icon">🛸</span>
-          <h2>本地大模型 AI 助理</h2>
+          <h2>私域RAG智能助手</h2>
         </div>
-        <div class="header-status">
+        <div class="header-status" :class="connectionStatus">
           <span class="status-dot"></span>
-          <span>服务已连接</span>
+          <span>
+            {{ 
+              connectionStatus === 'checking' ? '服务链接中' : 
+              (connectionStatus === 'connected' ? '服务已连接' : '服务链接失败') 
+            }}
+          </span>
         </div>
       </div>
 
@@ -136,7 +175,7 @@ const handleKeydown = (e) => {
           :class="msg.role === 'user' ? 'message-user' : 'message-assistant'"
         >
           <div class="avatar">
-            {{ msg.role === 'user' ? '👤' : '🤖' }}
+            {{ msg.role === 'user' ? '👤' : '👧' }}
           </div>
           <div class="message-bubble" :class="{ 'error-msg': msg.isError }">
             <div class="message-content">{{ msg.content }}</div>
@@ -144,7 +183,7 @@ const handleKeydown = (e) => {
         </div>
         
         <div v-if="isLoading" class="message-wrapper message-assistant">
-          <div class="avatar">🤖</div>
+          <div class="avatar">👧</div>
           <div class="message-bubble loading-bubble">
             <div class="typing-indicator">
               <span></span><span></span><span></span>
@@ -232,19 +271,54 @@ const handleKeydown = (e) => {
   align-items: center;
   gap: 8px;
   font-size: 0.85rem;
-  color: #10b981;
   font-weight: 600;
-  background: rgba(16, 185, 129, 0.1);
   padding: 4px 12px;
   border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+/* Status: Connected (Green) */
+.header-status.connected {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+.header-status.connected .status-dot {
+  background-color: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+/* Status: Checking (Yellow/Orange) */
+.header-status.checking {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+}
+.header-status.checking .status-dot {
+  background-color: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+  animation: pulse-dot 1.5s infinite;
+}
+
+/* Status: Error (Red) */
+.header-status.error {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+.header-status.error .status-dot {
+  background-color: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
 }
 
 .status-dot {
   width: 8px;
   height: 8px;
-  background-color: #10b981;
   border-radius: 50%;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+  transition: all 0.3s ease;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.8); opacity: 0.5; }
 }
 
 .chat-messages {

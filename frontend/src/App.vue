@@ -18,12 +18,12 @@ import DynamicBackground from './components/DynamicBackground.vue'
             <RouterLink to="/resume">工作简历</RouterLink>
             <RouterLink to="/music">音乐作品</RouterLink>
             
+            <RouterLink to="/ai-assistant">AI助理</RouterLink>
+
             <div class="nav-item-wrapper disabled-nav">
               <span class="nav-text">留言板</span>
               <span class="wip-badge">WIP</span>
             </div>
-            
-            <RouterLink to="/ai-assistant">AI 助理</RouterLink>
             
             <div class="nav-item-wrapper disabled-nav">
               <span class="nav-text">小工具</span>
