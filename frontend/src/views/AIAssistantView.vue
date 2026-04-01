@@ -44,9 +44,13 @@ const sendMessage = async () => {
     // 默认使用相对路径，借助 Vite 代理或 Nginx 解决跨域问题
     let apiUrl = '/api/chat'
     
-    // 如果在非开发环境且没有使用网关代理，可以尝试直连
+    // 如果在非开发环境且没有使用网关代理，强制指向初始指定的 RAG 服务器 IP (后续可通过 Nginx 动态代理覆盖)
     if (!isProd && !isDevPort && hostname !== 'localhost' && hostname !== '127.0.0.1') {
-      apiUrl = `http://${hostname}:8001/api/chat`
+      apiUrl = `http://139.28.178.226:8001/api/chat`
+    } else if (isProd) {
+      // 生产环境下，通常我们希望直接打给 Prod 服务器自己的 Nginx，让 Nginx 去代理到动态的 MacBook IP
+      // 这里保持相对路径 '/api/chat'，让 Prod 的 Nginx 接管
+      apiUrl = '/api/chat'
     }
 
     const payload = {

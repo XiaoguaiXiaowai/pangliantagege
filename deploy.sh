@@ -189,6 +189,23 @@ server {
         proxy_set_header X-Forwarded-Proto \$scheme;
     }
 
+    # Proxy AI Chat requests to dynamically updated RAG AI backend (MacBook)
+    location ^~ /api/chat {
+        proxy_pass http://139.28.178.226:8001; # RAG_MAC_IP_MARKER
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        
+        # CORS headers for potential cross-origin requests
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range';
+        if (\$request_method = 'OPTIONS') {
+            return 204;
+        }
+    }
+
     # Frontend catch-all (for SPA)
     location / {
         try_files \$uri \$uri/ /index.html;
@@ -266,6 +283,23 @@ server {
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+
+    # Proxy AI Chat requests to dynamically updated RAG AI backend (MacBook)
+    location ^~ /api/chat {
+        proxy_pass http://139.28.178.226:8001; # RAG_MAC_IP_MARKER
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        
+        # CORS headers for potential cross-origin requests
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range';
+        if (\$request_method = 'OPTIONS') {
+            return 204;
+        }
     }
 
     # Frontend catch-all (for SPA)
