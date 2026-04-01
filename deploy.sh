@@ -46,9 +46,6 @@ install_basics() {
     rsync python3-venv python3-pip nginx nodejs \
     libjpeg-dev zlib1g-dev libpng-dev libfreetype6-dev \
     libssl-dev libffi-dev python3-dev pkg-config build-essential
-    
-  # Upgrade npm to latest version to support modern package.json features (like aliases)
-  npm install -g npm@latest
 }
 
 copy_code() {
