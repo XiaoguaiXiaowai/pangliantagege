@@ -32,4 +32,4 @@ doc/tmpmemo.txt
 backend/media/
 doc/
 doc/tmpmemo.txt
-scripts/
+scripts/rag_ip_update_*.log
