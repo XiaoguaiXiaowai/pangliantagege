@@ -118,7 +118,7 @@ onMounted(() => {
       <section v-if="audioWorks.length > 0" class="work-section">
         <div class="section-header">
           <h2>部分原创音乐</h2>
-          <p class="section-desc">木有技巧，全是感情</p>
+          <p class="section-desc">妹有技巧，全是感情</p>
         </div>
         
         <div class="works-grid">
@@ -181,7 +181,7 @@ onMounted(() => {
       <section v-if="photoWorks.length > 0" class="work-section">
         <div class="section-header">
           <h2>部分演出照片</h2>
-          <p class="section-desc">一些珍贵的舞台回忆，定格在这些瞬间。</p>
+          <p class="section-desc">一些珍贵的舞台回忆</p>
         </div>
         
         <div class="works-grid">

@@ -5,7 +5,7 @@ import axios from 'axios'
 const messages = ref([
   {
     role: 'assistant',
-    content: '你好！我是基于私域RAG模型的李佳的智能助手。请问有什么我可以帮你的吗？'
+    content: '嘿！我是李佳的专属AI助手——胖脸3号，就住在他 MacBook 里，靠 RAG 技术随时待命！想知道李佳的啥事儿？快问我！'
   }
 ])
 const inputMessage = ref('')
@@ -124,7 +124,7 @@ const sendMessage = async () => {
 
   } catch (error) {
     console.error('AI Request Error:', error)
-    let errorMsg = '请求失败，请检查本地 AI 服务是否已启动 (端口 8001)。'
+    let errorMsg = '完了，李佳可能把Macbook关了，我看看能不能联系到他，你稍等一下后再更新一下哈～'
     if (error.response && error.response.data && error.response.data.detail) {
       errorMsg += ` 错误信息: ${JSON.stringify(error.response.data.detail)}`
     }

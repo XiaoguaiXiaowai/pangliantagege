@@ -234,10 +234,10 @@ onUnmounted(() => {
             <span class="label-text">I'm a:</span>
             <ul class="role-list">
               <li>资深云架构运维工程师 (偏SRE)</li>
-              <li>日语口语流利的项目经理</li>
+              <li>对日项目技术负责人、项目管理者</li>
               <li>AI增强型全栈开发者</li>
-              <li>各种小工具的开发爱好者</li>
-              <li>一脸好奇的AI技术探索者</li>
+              <li>小工具开发爱好者</li>
+              <li>AI相关技术探索者</li>
               <li>自娱自乐的独立音乐人</li>
             </ul>
           </div>
