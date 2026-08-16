@@ -35,6 +35,10 @@ services:
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
+      # 服务器内存仅 1.6G：关闭 performance_schema + 缩小 buffer pool，
+      # 把 mysqld 内存占用从 ~500MB 降到 ~250MB，避免 OOM 与 swap 风暴
+      - --performance-schema=OFF
+      - --innodb-buffer-pool-size=64M
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
