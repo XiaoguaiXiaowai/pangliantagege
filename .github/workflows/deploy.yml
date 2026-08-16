@@ -19,8 +19,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  # 必须转小写：Docker 镜像仓库名不允许大写（github.repository 保留原始大小写）
-  IMAGE_BASE: ghcr.io/${{ lower(github.repository) }}
+  # 硬编码小写（Docker 镜像仓库名不允许大写；与服务器 docker.env 的 IMAGE_REPO 保持一致）
+  IMAGE_BASE: ghcr.io/xiaoguaixiaowai/pangliantagege
 
 jobs:
   build:
