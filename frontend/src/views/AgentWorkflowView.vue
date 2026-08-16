@@ -23,10 +23,9 @@ echarts.use([
 ])
 
 // ============================================================
-// 作品在线地址（占位）—— 部署上线后只需改这一行
+// 作品在线地址
 // ============================================================
-const PROJECT_URL = 'https://your-demo.example.com'
-const isUrlPlaceholder = /your-demo|example\.com|待定|todo/i.test(PROJECT_URL)
+const PROJECT_URL = 'https://playground.pangliantagege.top'
 
 // ---------------- 三大支柱 ----------------
 const pillars = [
@@ -327,7 +326,6 @@ onBeforeUnmount(() => {
         </a>
         <a class="btn-ghost" href="#capabilities">8 大工程能力 ↓</a>
       </div>
-      <p v-if="isUrlPlaceholder" class="hero-hint">🔗 在线 Demo 部署完成后，链接将在此开放</p>
 
       <div class="hero-stats">
         <div class="stat">
@@ -578,14 +576,6 @@ onBeforeUnmount(() => {
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
   opacity: 1;
-}
-
-.hero-hint {
-  position: relative;
-  z-index: 1;
-  margin: 10px 0 0;
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.55);
 }
 
 .hero-stats {
