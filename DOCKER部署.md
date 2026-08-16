@@ -228,3 +228,73 @@ A: 当前按需求暂不代理。恢复步骤：① `docker.env` 设置 `RAG_PRO
 
 **Q: 与旧的 deploy.sh / systemd 部署冲突吗？**
 A: 不冲突，旧方案保留未动。注意二者不能同时运行（都会占用 80/443、8000 端口），切换前先停掉旧服务。
+
+---
+
+## 6. 服务器实测部署记录（8.140.233.55，2026-08-16）
+
+> 本仓库已在生产服务器完成 Docker 化部署并验证通过。以下为实测拓扑与关键步骤，新服务器可照此复现。
+
+### 6.1 实际拓扑（宿主机 nginx 作共享网关）
+
+```
+Internet → 宿主机 nginx (80/443, TLS)      ← 唯一入口（nginx 1.24 + 手动证书）
+             ├─ www.pangliantagege.top → 127.0.0.1:8080 → pltgg-frontend 容器
+             │      (nginx: 静态页 + /media /static + 反代 /api /admin)
+             │              └→ pltgg-backend 容器 (gunicorn)
+             │                      └→ pltgg-db 容器 (MySQL 8, 内存瘦身)
+             └─ playground.pangliantagege.top → aiepg 容器 (3000/8001, 独立项目)
+```
+
+服务器 nginx 配置：`deploy/pangliantagege.docker.conf`（本仓库已归档），
+替换了原 `pangliantagege.prod.conf`（systemd 部署版）。`/api/chat`（RAG）按需求未代理。
+
+### 6.2 部署步骤（复现）
+
+```bash
+# 1. 代码同步
+git push prod master                       # 本地 → 服务器 bare repo
+ssh root@8.140.233.55 'cd /opt/git/pltgg && git pull'
+
+# 2. 环境变量（服务器上生成强密码）
+ssh root@8.140.233.55 'cd /opt/git/pltgg && vim docker.env'
+
+# 3. 镜像：本地为 ARM 架构！必须构建 amd64 版再传输
+docker buildx build --platform linux/amd64 -t pltgg-backend:latest ./backend
+docker buildx build --platform linux/amd64 -t pltgg-frontend:latest ./frontend
+docker save pltgg-backend:latest pltgg-frontend:latest | gzip \
+  | ssh root@8.140.233.55 'gunzip | docker load'
+
+# 4. 网络与容器
+ssh root@8.140.233.55 'docker network create edge-net  # 首次
+cd /opt/git/pltgg && docker compose --env-file docker.env up -d db
+# 等待 healthy 后导入数据（宿主机 MySQL → 容器 MySQL）
+mysqldump -uroot -pXXX --single-transaction --set-gtid-purged=OFF pangliantagege \
+  | docker compose --env-file docker.env exec -T db mysql -uroot -pYYY pangliantagege
+docker compose --env-file docker.env up -d'
+
+# 5. nginx 切换 + 停旧服务
+ssh root@8.140.233.55 'ln -sf /etc/nginx/sites-available/pangliantagege.docker.conf /etc/nginx/sites-enabled/
+rm -f /etc/nginx/sites-enabled/pangliantagege.prod.conf /etc/nginx/sites-enabled/pangliantagege.conf
+nginx -t && systemctl reload nginx
+systemctl disable --now plapi plui'          # 旧 systemd 服务
+```
+
+### 6.3 踩坑记录（重要）
+
+| 问题 | 原因 | 解决 |
+|---|---|---|
+| 部署后服务器卡死、SSH 无响应、主站超时 | 1.6G 内存上 MySQL 容器初始化 + 旧栈满载 → swap 风暴，反复 OOM | 阿里云 API 强制重启；停旧 plapi/plui 释放 230MB；MySQL 瘦身（见下）；**先停旧服务再起新容器** |
+| MySQL 容器 unhealthy / 数据文件损坏 | 首次初始化被风暴/重启中断 | `docker compose down -v` 清卷重建（无数据损失，卷内本无数据） |
+| `exec format error` 容器起不来 | Mac(ARM) 构建的镜像传到 x86_64 服务器 | `buildx build --platform linux/amd64` 重新构建传输 |
+| MySQL 内存占用过大 | performance_schema 默认开启 | compose 加 `--performance-schema=OFF --innodb-buffer-pool-size=64M`（~500MB→~250MB） |
+| playground 502 | 强制重启后 aiepg 容器未自启（restart 策略默认 no）；且其 compose 与运行中容器不一致（端口 8001→8000） | `docker start` 旧容器 + `docker-compose.override.yml` 恢复 8001 映射（未改 aiepg 源码） |
+| `edge-net` external 网络缺失 | 服务器首次部署 | `docker network create edge-net` |
+
+### 6.4 运维备忘
+
+- **主站证书手动维护**（用户选择）：`/var/pltgg/https/*.pem`，2026-09-06 到期，到期前需手动替换并 `systemctl reload nginx`。
+- **主域名 apex（pangliantagege.top）无 DNS A 记录**：不影响 www 访问，但 apex 的 https 跳转暂不可达；需要时去阿里云 DNS 添加。
+- **宿主机 MySQL 仍运行**（数据已迁移到容器，保留作备份/回滚用；book_demo 项目可能依赖，勿直接停）。
+- **内存基线**：1.6G 物理 + 4G swap，7 个容器满载 ~1.3G，运行稳定；扩容前勿再加重量级容器。
+- **回滚**：旧代码在 `/var/pltgg`（systemd 部署完整保留），`systemctl enable --now plapi plui` + 恢复旧 nginx 配置即可切回。
