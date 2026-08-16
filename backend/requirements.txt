@@ -1,4 +1,6 @@
-Django>=4.2
+# 锁定 Django 5.2.x：迁移文件均由 5.2.7 生成；5.2 支持 MySQL 8.0，
+# 6.x 需要 MySQL 8.4+，且与现有代码/迁移未经充分验证
+Django>=5.2,<5.3
 djangorestframework
 django-cors-headers
 pymysql

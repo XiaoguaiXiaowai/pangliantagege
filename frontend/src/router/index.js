@@ -23,10 +23,14 @@ const router = createRouter({
       meta: { title: '留言板' }
     },
     {
+      path: '/agent-workflow',
+      name: 'agent-workflow',
+      component: () => import('../views/AgentWorkflowView.vue'),
+      meta: { title: '企业级Agent' }
+    },
+    {
       path: '/ai-assistant',
-      name: 'ai-assistant',
-      component: () => import('../views/AIAssistantView.vue'),
-      meta: { title: 'AI 助理' }
+      redirect: '/agent-workflow'
     },
     {
       path: '/tools',

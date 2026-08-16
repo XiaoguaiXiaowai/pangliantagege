@@ -30,6 +30,10 @@ doc/tmpmemo.txt
 
 #github
 backend/media/
+backend/staticfiles/
 doc/
 doc/tmpmemo.txt
 scripts/rag_ip_update_*.log
+
+# Docker 部署
+docker.env

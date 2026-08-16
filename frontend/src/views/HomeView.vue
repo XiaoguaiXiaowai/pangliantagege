@@ -26,10 +26,10 @@ const features = [
     wip: false
   },
   {
-    title: 'AI助理',
-    description: '基于私域RAG模型的智能助手，可以通过她来确认我的更多的信息。',
-    path: '/ai-assistant',
-    icon: '🛸',
+    title: '企业级Agent',
+    description: '企业级混合Agent工作流作品——让AI可靠、可控、可审计地接进企业业务。',
+    path: '/agent-workflow',
+    icon: '🤖',
     wip: false
   },
   {

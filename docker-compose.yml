@@ -1,0 +1,106 @@
+# ============================================================
+# PangLianTaGeGe 个人网站 - Docker Compose 编排
+#
+# 拓扑：
+#   Internet -> [gateway/ 共享网关 nginx :80/:443 TLS]  (独立 compose 项目)
+#                 └─> pltgg-frontend (nginx: 静态页面 + 反代 API)
+#                       └─> pltgg-backend (gunicorn/Django)
+#                             └─> pltgg-db (MySQL 8)
+#
+# 使用方式：
+#   cp docker.env.example docker.env   # 修改密码等配置
+#   docker network create edge-net     # 共享网关网络（首次）
+#   docker compose --env-file docker.env up -d --build
+#
+# 数据目录（宿主机）：
+#   ./backend/media      上传的媒体文件（必须保留，勿删）
+#   ./backend/staticfiles collectstatic 产物（可随时重新生成）
+# ============================================================
+
+name: pltgg
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: pltgg-db
+    restart: unless-stopped
+    # 服务器内存仅 1.6G（+4G swap），限制容器内存防止 OOM
+    mem_limit: 768m
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_NAME:-pangliantagege}
+      MYSQL_USER: ${DB_USER:-pltgg}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-root}
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    networks:
+      - pltgg-net
+
+  backend:
+    build: ./backend
+    image: pltgg-backend:latest
+    container_name: pltgg-backend
+    restart: unless-stopped
+    mem_limit: 512m
+    environment:
+      DJANGO_DEBUG: "false"
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-www.pangliantagege.top,pangliantagege.top,localhost,127.0.0.1}
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-https://www.pangliantagege.top,https://pangliantagege.top}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-https://www.pangliantagege.top,https://pangliantagege.top}
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: ${DB_NAME:-pangliantagege}
+      DB_USER: ${DB_USER:-pltgg}
+      DB_PASSWORD: ${DB_PASSWORD:-root}
+      # RAG AI 服务地址（host:port），可选；留空时健康检查回退 127.0.0.1:8001
+      RAG_PROXY_TARGET: ${RAG_PROXY_TARGET:-}
+    volumes:
+      # 媒体文件与静态文件挂载到宿主机，供前端 nginx 直接服务
+      - ./backend/media:/app/media
+      - ./backend/staticfiles:/app/staticfiles
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - pltgg-net
+
+  frontend:
+    build: ./frontend
+    image: pltgg-frontend:latest
+    container_name: pltgg-frontend
+    restart: unless-stopped
+    ports:
+      # 仅绑定本机回环地址，供宿主机 nginx 反代（不暴露公网）
+      - "127.0.0.1:8080:80"
+    volumes:
+      - ./backend/media:/var/www/media:ro
+      - ./backend/staticfiles:/var/www/static:ro
+    depends_on:
+      - backend
+    networks:
+      pltgg-net:
+        aliases:
+          - pltgg-frontend
+      edge-net:
+        aliases:
+          - pltgg-frontend
+
+volumes:
+  mysql_data:
+
+networks:
+  pltgg-net:
+    name: pltgg-net
+  # 共享网关网络：由 gateway/ 项目创建（docker network create edge-net 或先启动 gateway）
+  edge-net:
+    external: true

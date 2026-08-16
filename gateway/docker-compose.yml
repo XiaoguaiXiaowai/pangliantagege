@@ -1,0 +1,48 @@
+# ============================================================
+# 共享网关 (Gateway) —— 多个 Docker 项目共用的 HTTPS 入口
+#
+# 为什么需要它？
+#   两个（或多个）容器项目要共用同一套域名和 HTTPS 证书时，
+#   不能让每个项目各自占用 80/443 —— 端口只能被一个容器绑定。
+#   正确做法：一个网关 nginx 容器独占 80/443 和证书挂载，
+#   按 server_name 把请求转发到各项目自己的容器。
+#
+# 网络拓扑：
+#   Internet -> gateway (80/443, TLS 证书)
+#                 ├─ www.pangliantagege.top  -> pltgg-frontend (本项目)
+#                 └─ 另一个项目域名          -> 该项目容器 (示例见 nginx.conf)
+#
+# 接入新项目三步：
+#   1. 把新项目的 compose 文件里声明外部网络 edge-net（external: true）
+#   2. 在 gateway/nginx.conf 中按模板添加 server 块
+#   3. 证书文件放入 ../https/ 目录（本网关已挂载）
+#
+# 使用：
+#   docker compose up -d          # 创建 edge-net 网络并启动网关
+#   或：
+#   docker network create edge-net
+#   HTTP_PORT=8080 HTTPS_PORT=8443 docker compose up -d   # 自定义端口（本地联调）
+# ============================================================
+
+name: gateway
+
+services:
+  gateway:
+    image: nginx:1.27-alpine
+    container_name: gateway-nginx
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      # 网关配置（含两个项目的 server 块）
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # 证书目录（本项目与第二个项目共用这一份挂载）
+      - ../https:/etc/nginx/https:ro
+    networks:
+      - edge-net
+
+networks:
+  # 共享网络：由 docker network create edge-net 创建（或见 scripts/docker-deploy.sh 自动兜底）
+  edge-net:
+    external: true

@@ -86,6 +86,33 @@ npm run dev
 
 ---
 
+## 🐳 Docker 部署（推荐生产方式）
+
+本项目提供完整的 Docker Compose 部署方案（`Dockerfile` + `docker-compose.yml` + `gateway/` 共享网关）：
+
+```
+Internet ── 80/443 ──▶ gateway/ (共享网关 nginx, TLS 证书唯一入口)
+                        ├─ www.pangliantagege.top ──▶ pltgg-frontend (nginx)
+                        │                              └─▶ pltgg-backend (gunicorn/Django)
+                        │                                    └─▶ pltgg-db (MySQL 8)
+                        └─ 其他项目域名 ──▶ 其他项目容器（可选，共用同一套证书）
+```
+
+快速开始：
+
+```bash
+cp docker.env.example docker.env   # 修改密码等配置
+docker network create edge-net     # 共享网关网络（首次）
+docker compose --env-file docker.env up -d --build   # 启动 db + backend + frontend
+bash scripts/docker-deploy.sh init-db                # 导入数据快照（可选）
+cd gateway && docker compose up -d && cd ..          # 启动 HTTPS 入口网关
+```
+
+> 📖 完整文档（含**两个项目共用域名与 HTTPS 证书**的接入步骤、数据备份、常见问题）见
+> [`DOCKER部署.md`](DOCKER部署.md)。旧的 `deploy.sh`（systemd 部署）保留未动。
+
+---
+
 ## 📁 目录结构
 
 ```text
@@ -98,14 +125,21 @@ pangliantagege/
 │   ├── tools/              # 小工具模块 App
 │   ├── ai_assistant/       # AI 助理模块 App
 │   ├── media/              # 上传的媒体文件(头像、PDF、音乐等)
+│   ├── Dockerfile          # 后端镜像（Docker 部署）
 │   └── requirements.txt    # 后端依赖
 ├── frontend/               # Vue 3 前端目录
 │   ├── src/
 │   │   ├── components/     # 可复用组件 (MagicCard, Marquee等)
 │   │   ├── views/          # 页面视图 (ResumeView等)
 │   │   └── assets/         # 静态资源与全局样式
+│   ├── Dockerfile          # 前端镜像（多阶段构建，nginx 托管）
+│   ├── nginx.conf          # 前端容器 nginx 配置
 │   └── package.json        # 前端依赖
-└── doc/                    # 项目设计文档
+├── gateway/                # 共享网关（80/443 TLS 入口，多项目共用证书）
+├── docker-compose.yml      # Docker 编排（db + backend + frontend）
+├── docker.env.example      # Docker 部署环境变量模板
+├── scripts/docker-deploy.sh# Docker 部署辅助脚本
+└── doc/                    # 项目设计文档（含 Docker 部署说明）
 ```
 
 ## 📄 许可证

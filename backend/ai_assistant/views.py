@@ -5,13 +5,23 @@ import os
 
 def get_rag_ip_from_nginx():
     """
-    尝试从 Nginx 配置文件中读取动态更新的 RAG_MAC_IP_MARKER IP 地址。
-    如果读取失败或在本地开发环境，则回退到默认的 127.0.0.1。
+    获取 RAG AI 服务地址，优先级：
+      1. 环境变量 RAG_PROXY_TARGET（格式 host:port）—— Docker 部署推荐方式
+      2. 宿主机 Nginx 配置文件中的 RAG_MAC_IP_MARKER（旧 systemd 部署方式）
+      3. 默认 127.0.0.1:8001
     """
     nginx_conf_path = '/etc/nginx/sites-available/pangliantagege.prod.conf'
     default_ip = '127.0.0.1'
     default_port = 8001
-    
+
+    rag_target = os.getenv('RAG_PROXY_TARGET', '')
+    if rag_target:
+        try:
+            host, port = rag_target.rsplit(':', 1)
+            return host, int(port)
+        except ValueError:
+            print(f"Invalid RAG_PROXY_TARGET: {rag_target}, fallback to nginx conf")
+
     if os.path.exists(nginx_conf_path):
         try:
             with open(nginx_conf_path, 'r') as f:
