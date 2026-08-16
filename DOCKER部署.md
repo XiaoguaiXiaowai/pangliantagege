@@ -298,3 +298,57 @@ systemctl disable --now plapi plui'          # 旧 systemd 服务
 - **宿主机 MySQL 仍运行**（数据已迁移到容器，保留作备份/回滚用；book_demo 项目可能依赖，勿直接停）。
 - **内存基线**：1.6G 物理 + 4G swap，7 个容器满载 ~1.3G，运行稳定；扩容前勿再加重量级容器。
 - **回滚**：旧代码在 `/var/pltgg`（systemd 部署完整保留），`systemctl enable --now plapi plui` + 恢复旧 nginx 配置即可切回。
+
+---
+
+## 7. GitHub Actions 自动部署
+
+代码 push 到 GitHub master 后，自动构建镜像并部署到生产服务器；也可在 GitHub Actions 页面手动触发。
+
+### 7.1 流水线结构
+
+```
+push master (或手动触发)
+   └─ job build  (ubuntu runner, amd64)
+        ├─ 构建 backend 镜像 → ghcr.io/<user>/pangliantagege/pltgg-backend:latest
+        └─ 构建 frontend 镜像 → ghcr.io/<user>/pangliantagege/pltgg-frontend:latest
+   └─ job deploy (needs build)
+        ├─ 受限 SSH → 服务器执行 scripts/remote-deploy.sh
+        │     [1] git fetch GitHub master + reset --hard（代码同步，public 仓库免密）
+        │     [2] docker compose pull backend frontend（ghcr 公开镜像）
+        │     [3] up -d --force-recreate（容器内自动 migrate + collectstatic）
+        │     [4] docker image prune 清理旧镜像
+        └─ 健康检查：线上 /api/resume/ 返回 200 才算成功
+```
+
+### 7.2 涉及文件
+
+| 文件 | 作用 |
+|---|---|
+| `.github/workflows/deploy.yml` | Actions 流水线（构建推 ghcr + SSH 部署 + 健康检查） |
+| `scripts/remote-deploy.sh` | 服务器端部署脚本（部署位置 `/opt/git/pltgg/scripts/`） |
+| `scripts/ssh-gate.sh` | 部署密钥 SSH 门卫：只放行 git 操作与部署脚本，**无法开 shell** |
+| `docker-compose.yml` | 镜像名 `${IMAGE_REPO:-pltgg}/...`，生产由 docker.env 的 `IMAGE_REPO` 指向 ghcr |
+
+### 7.3 一次性配置（服务器已就绪，以下为 GitHub 侧）
+
+1. **仓库 Secrets**（Settings → Secrets and variables → Actions → New repository secret）：
+   - `PROD_HOST` = `8.140.233.55`
+   - `PROD_SSH_KEY` = 部署专用私钥（ed25519，公钥已安装到服务器且受 ssh-gate 限制）
+2. **首次运行后把 ghcr 包设为 public**（否则服务器 pull 会被 denied）：
+   GitHub 仓库页面 → Packages → 点开 `pangliantagege/pltgg-backend` 和 `pltgg-frontend` →
+   Package settings → Danger Zone → Change visibility → Public
+3. 手动触发一次：Actions 页面 → Deploy to Production → Run workflow
+
+### 7.4 日常使用
+
+```bash
+# 部署新版本 = 正常提交并推送
+git add . && git commit -m "..." && git push github master
+# 回滚 = revert 后 push
+git revert HEAD && git push github master
+```
+
+> 服务器上不要手动改 `/opt/git/pltgg` 下的文件（`git reset --hard` 会覆盖）；
+> `docker.env` 与 `backend/media` 已 gitignore，不受影响。
+> 本地测试不受影响：本地 `docker.env` 不设 `IMAGE_REPO`，compose 仍用本地构建的镜像。
