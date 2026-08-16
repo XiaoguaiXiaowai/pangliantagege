@@ -52,7 +52,8 @@ services:
 
   backend:
     build: ./backend
-    image: pltgg-backend:latest
+    # 镜像名可被 IMAGE_REPO 覆盖（生产服务器 docker.env 指向 ghcr.io），本地默认 pltgg
+    image: ${IMAGE_REPO:-pltgg}/pltgg-backend:latest
     container_name: pltgg-backend
     restart: unless-stopped
     mem_limit: 512m
@@ -80,7 +81,7 @@ services:
 
   frontend:
     build: ./frontend
-    image: pltgg-frontend:latest
+    image: ${IMAGE_REPO:-pltgg}/pltgg-frontend:latest
     container_name: pltgg-frontend
     restart: unless-stopped
     ports:

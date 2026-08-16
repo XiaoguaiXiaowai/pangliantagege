@@ -1,0 +1,91 @@
+# ============================================================
+# PangLianTaGeGe 生产自动部署 (GitHub Actions)
+#
+# 触发：push 到 master 自动执行；也可在 Actions 页面手动触发
+# 流程：
+#   1. build  —— ubuntu runner(amd64) 构建两个镜像 → 推送到 ghcr.io
+#   2. deploy —— SSH 到生产服务器执行 remote-deploy.sh（受限部署密钥）
+#   3. check  —— 部署后验证线上 API 可用
+#
+# 服务器所需配置见 DOCKER部署.md「GitHub Actions 自动部署」章节
+# ============================================================
+
+name: Deploy to Production
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_BASE: ghcr.io/${{ github.repository }}
+
+jobs:
+  build:
+    name: Build & push images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.IMAGE_BASE }}/pltgg-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build & push frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.IMAGE_BASE }}/pltgg-frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to production server
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run remote deploy script
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: root
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script_timeout: 10m
+          script: |
+            /opt/git/pltgg/scripts/remote-deploy.sh
+
+      - name: Health check
+        run: |
+          sleep 8
+          for i in 1 2 3 4 5; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 https://www.pangliantagege.top/api/resume/ || true)
+            echo "attempt $i: /api/resume/ -> HTTP $code"
+            [ "$code" = "200" ] && break
+            sleep 8
+          done
+          [ "$code" = "200" ] || { echo "部署后健康检查失败"; exit 1; }
+          curl -s -o /dev/null -w "首页 HTTP %{http_code}\n" --max-time 15 https://www.pangliantagege.top/
+          curl -s -o /dev/null -w "playground HTTP %{http_code}\n" --max-time 15 https://playground.pangliantagege.top/
