@@ -19,17 +19,17 @@ const features = [
     wip: false
   },
   {
-    title: '音乐作品',
-    description: '记录我的音乐作品和一些演出照片、视频。',
-    path: '/music',
-    icon: '🎵',
-    wip: false
-  },
-  {
     title: '企业级Agent',
     description: '企业级混合Agent工作流作品——让AI可靠、可控、可审计地接进企业业务。',
     path: '/agent-workflow',
     icon: '🤖',
+    wip: false
+  },
+  {
+    title: '音乐作品',
+    description: '记录我的音乐作品和一些演出照片、视频。',
+    path: '/music',
+    icon: '🎵',
     wip: false
   },
   {

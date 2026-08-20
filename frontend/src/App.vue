@@ -16,10 +16,8 @@ import DynamicBackground from './components/DynamicBackground.vue'
           <nav>
             <RouterLink to="/">首页</RouterLink>
             <RouterLink to="/resume">工作简历</RouterLink>
-            <RouterLink to="/music">音乐作品</RouterLink>
-            
             <RouterLink to="/agent-workflow">企业级Agent</RouterLink>
-
+            <RouterLink to="/music">音乐作品</RouterLink>
             <div class="nav-item-wrapper disabled-nav">
               <span class="nav-text">留言板</span>
               <span class="wip-badge">WIP</span>
