@@ -1,26 +1,5 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
-// ECharts 按需引入，只打包本页用到的图表与组件
-import * as echarts from 'echarts/core'
-import { BarChart, PieChart, GraphChart } from 'echarts/charts'
-import {
-  GridComponent,
-  TooltipComponent,
-  LegendComponent,
-  TitleComponent
-} from 'echarts/components'
-import { CanvasRenderer } from 'echarts/renderers'
-
-echarts.use([
-  BarChart,
-  PieChart,
-  GraphChart,
-  GridComponent,
-  TooltipComponent,
-  LegendComponent,
-  TitleComponent,
-  CanvasRenderer
-])
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 // ============================================================
 // 作品在线地址
@@ -79,227 +58,38 @@ const capabilities = [
   { num: '⑧', title: '预算', desc: '步数 / Token / 时间三重预算，触顶即终止防跑飞', tags: ['步数', 'Token', '时间'] }
 ]
 
-// ---------------- 技术栈 ----------------
-const techStack = [
-  { icon: '🐍', name: 'Python + FastAPI', why: '轻量结构化后端，可逐行讲解' },
-  { icon: '🎛️', name: '自研状态机', why: '显式 TRANSITIONS 表，不套 LangGraph 黑盒' },
-  { icon: '🤖', name: 'OpenAI Agents SDK', why: 'Triage → 子 Agent handoff + 原生 HITL 中断/恢复' },
-  { icon: '🗄️', name: 'SQLite + 文件系统', why: '状态外部化，单机零成本' },
-  { icon: '⚛️', name: 'Next.js 14', why: '贴近真实企业栈，与后端解耦' },
-  { icon: '🐳', name: 'Docker Compose + Nginx', why: '阿里云单机 HTTPS 一键上线' }
-]
+// ---------------- 架构图 iframe 高度自适应 ----------------
+// 完整模式（非 embed）嵌入 archify 架构图：Light/Classic/Present/Export、PATH·MAP·LENS、
+// 悬停灰化与连线动效、点击关系透镜详情均为图内原生功能。
+// iframe 同源，读取其文档高度，让外层卡片贴合内容高度。
+const archFrameRef = ref(null)
+let heightTimer = null
 
-// ---------------- 图表 ----------------
-const rerankChartRef = ref(null)
-const donutChartRef = ref(null)
-const graphChartRef = ref(null)
-let charts = []
-
-const initCharts = () => {
-  // ① RAG rerank 前后对比柱状图
-  if (rerankChartRef.value) {
-    const chart = echarts.init(rerankChartRef.value)
-    chart.setOption({
-      tooltip: {
-        trigger: 'axis',
-        valueFormatter: (v) => `${(v * 100).toFixed(1)}%`
-      },
-      legend: { data: ['rerank 关闭', 'rerank 开启'], top: 0, textStyle: { color: '#5a6b7c' } },
-      grid: { left: 44, right: 16, top: 42, bottom: 28 },
-      xAxis: {
-        type: 'category',
-        data: ['recall@1', 'MRR', 'nDCG@3'],
-        axisTick: { show: false },
-        axisLine: { lineStyle: { color: '#c8dbe6' } },
-        axisLabel: { color: '#51697d' }
-      },
-      yAxis: {
-        type: 'value',
-        max: 1,
-        axisLabel: { formatter: (v) => `${Math.round(v * 100)}%`, color: '#51697d' },
-        splitLine: { lineStyle: { color: '#e8f1f6' } }
-      },
-      series: [
-        {
-          name: 'rerank 关闭',
-          type: 'bar',
-          data: [0.812, 0.896, 0.923],
-          barWidth: 30,
-          itemStyle: { color: '#A7EBF2', borderColor: '#54ACBF', borderWidth: 1, borderRadius: [4, 4, 0, 0] },
-          label: { show: true, position: 'top', formatter: (p) => `${(p.value * 100).toFixed(1)}%`, color: '#7a8b9c', fontSize: 11 }
-        },
-        {
-          name: 'rerank 开启',
-          type: 'bar',
-          data: [1.0, 1.0, 1.0],
-          barWidth: 30,
-          itemStyle: {
-            color: {
-              type: 'linear',
-              x: 0, y: 0, x2: 0, y2: 1,
-              colorStops: [
-                { offset: 0, color: '#26658C' },
-                { offset: 1, color: '#023859' }
-              ]
-            },
-            borderRadius: [4, 4, 0, 0],
-            shadowColor: 'rgba(2, 56, 89, 0.35)',
-            shadowBlur: 10
-          },
-          label: { show: true, position: 'top', formatter: '100.0%', color: '#023859', fontSize: 11, fontWeight: 700 }
-        }
-      ]
-    })
-    charts.push(chart)
-  }
-
-  // ② 8 大能力环形图（居中，扇区外直接标注名称）
-  if (donutChartRef.value) {
-    const chart = echarts.init(donutChartRef.value)
-    const donutColors = ['#A7EBF2', '#8FD8E6', '#77C3D6', '#5EAEC4', '#54ACBF', '#3E86A8', '#26658C', '#023859']
-    chart.setOption({
-      tooltip: {
-        trigger: 'item',
-        formatter: (p) => `${p.name}：已落地 ✅`
-      },
-      color: donutColors,
-      series: [
-        {
-          type: 'pie',
-          radius: ['50%', '72%'],
-          center: ['50%', '46%'],
-          data: [
-            { name: '① 流程定义', value: 1 },
-            { name: '② 业务入口', value: 1 },
-            { name: '③ 核心 LOOP', value: 1 },
-            { name: '④ 业务出口', value: 1 },
-            { name: '⑤ 工具层 MPC-Skill', value: 1 },
-            { name: '⑥ Trace', value: 1 },
-            { name: '⑦ 监控评估', value: 1 },
-            { name: '⑧ 预算', value: 1 }
-          ],
-          label: {
-            show: true,
-            position: 'outside',
-            fontSize: 10.5,
-            color: '#44566a',
-            formatter: '{b}'
-          },
-          labelLine: { length: 12, length2: 8, lineStyle: { color: '#9db8cc' } },
-          avoidLabelOverlap: true,
-          itemStyle: { borderColor: '#fff', borderWidth: 2 },
-          emphasis: { scale: true, scaleSize: 6 }
-        }
-      ],
-      title: {
-        text: '8/8',
-        subtext: '工程能力落地',
-        left: 'center',
-        top: '35%',
-        textAlign: 'center',
-        textStyle: { fontSize: 30, fontWeight: 800, color: '#011C40' },
-        subtextStyle: { fontSize: 11, color: '#26658C' }
-      }
-    })
-    charts.push(chart)
-  }
-
-  // ③ 工单状态机流转图（坐标按容器宽度自适应）
-  const opt = buildGraphOption()
-  if (graphChartRef.value) {
-    graphChart = echarts.init(graphChartRef.value)
-    graphChart.setOption(opt)
-    charts.push(graphChart)
-  }
-}
-
-let graphChart = null
-
-const buildGraphOption = () => {
-  const W = Math.max(graphChartRef.value.clientWidth, 960)
-    const fx = (f) => W * f
-    return {
-      tooltip: {
-        trigger: 'item',
-        formatter: (p) => {
-          if (p.dataType === 'edge') return p.data.label || ''
-          return `${p.data.name}`
-        }
-      },
-      animationDuration: 900,
-      series: [
-        {
-          type: 'graph',
-          layout: 'none',
-          roam: false,
-          symbol: 'roundRect',
-          symbolSize: [104, 42],
-          label: { show: true, position: 'inside', fontSize: 11.5, fontWeight: 600, color: '#fff' },
-          edgeLabel: {
-            show: true,
-            fontSize: 10.5,
-            lineHeight: 14,
-            color: '#023859',
-            backgroundColor: '#ffffff',
-            borderColor: 'rgba(84, 172, 191, 0.55)',
-            borderWidth: 1,
-            borderRadius: 10,
-            padding: [3, 7],
-            shadowBlur: 8,
-            shadowColor: 'rgba(1, 28, 64, 0.18)',
-            shadowOffsetY: 2,
-            formatter: (p) => p.data.label || ''
-          },
-          lineStyle: { color: '#9db8cc', width: 1.8, curveness: 0.06 },
-          emphasis: {
-            focus: 'adjacency',
-            lineStyle: { width: 2.6, color: '#26658C' },
-            label: { fontSize: 12.5 }
-          },
-          data: [
-            { id: 'created', name: '已创建', x: fx(0.07), y: 60, itemStyle: { color: '#26658C' } },
-            { id: 'triaged', name: '已分级', x: fx(0.24), y: 60, itemStyle: { color: '#26658C' } },
-            { id: 'gathering', name: '装配中', x: fx(0.41), y: 60, itemStyle: { color: '#26658C' } },
-            { id: 'agent_running', name: '执行中', x: fx(0.58), y: 60, itemStyle: { color: '#023859' } },
-            { id: 'done', name: '已完成', x: fx(0.75), y: 60, itemStyle: { color: '#023859' } },
-            { id: 'archived', name: '已归档', x: fx(0.92), y: 60, itemStyle: { color: '#54ACBF' } },
-            { id: 'awaiting_approval', name: '待审批', x: fx(0.58), y: 215, itemStyle: { color: '#f59e0b' } },
-            { id: 'running', name: '继续执行', x: fx(0.75), y: 215, itemStyle: { color: '#f59e0b' } },
-            { id: 'failed', name: '已失败', x: fx(0.41), y: 215, itemStyle: { color: '#ef4444' } }
-          ],
-          links: [
-            { source: 'created', target: 'triaged', label: '意图分类\n+ 风险分级' },
-            { source: 'triaged', target: 'gathering', label: '装配上下文' },
-            { source: 'gathering', target: 'agent_running', label: 'LOOP 执行' },
-            { source: 'agent_running', target: 'awaiting_approval', label: '高风险工具\n→ HITL 中断', lineStyle: { color: '#f59e0b' } },
-            { source: 'awaiting_approval', target: 'running', label: '审批通过\n→ 恢复执行' },
-            { source: 'running', target: 'done', label: '执行完成' },
-            { source: 'agent_running', target: 'done', label: '收敛\ndone:true' },
-            { source: 'done', target: 'archived', label: '只读归档' },
-            { source: 'agent_running', target: 'failed', label: '预算/超时\n停止', lineStyle: { color: '#ef4444', type: 'dashed' } }
-          ]
-        }
-      ]
+const syncArchHeight = () => {
+  const frame = archFrameRef.value
+  if (!frame) return
+  try {
+    const doc = frame.contentDocument
+    if (!doc || !doc.body) return
+    const h = doc.body.scrollHeight
+    const current = parseFloat(frame.style.height) || 0
+    if (h > 120 && Math.abs(h - current) > 4) {
+      frame.style.height = `${h}px`
     }
-  }
-
-const handleResize = () => {
-  charts.forEach((c) => c.resize())
-  if (graphChart && graphChartRef.value) {
-    graphChart.setOption(buildGraphOption())
+  } catch (_) {
+    /* 跨域不可读时忽略，保持 CSS 初始比例高度 */
   }
 }
 
-onMounted(async () => {
-  await nextTick()
-  initCharts()
-  window.addEventListener('resize', handleResize)
+onMounted(() => {
+  window.addEventListener('resize', syncArchHeight)
+  // 图内操作（面板展开 / present / 主题与风格切换）会改变文档高度，轻量轮询兜底
+  heightTimer = setInterval(syncArchHeight, 800)
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', handleResize)
-  charts.forEach((c) => c.dispose())
-  charts = []
+  window.removeEventListener('resize', syncArchHeight)
+  if (heightTimer) clearInterval(heightTimer)
 })
 </script>
 
@@ -314,36 +104,12 @@ onBeforeUnmount(() => {
         而是演示 <strong>AI 如何被可靠、可控、可审计地接进企业业务</strong>。
       </p>
 
-      <div class="hero-chips">
-        <span class="chip">🛡️ 可靠 Reliable</span>
-        <span class="chip">🔐 可控 Controlled</span>
-        <span class="chip">📋 可审计 Auditable</span>
-      </div>
-
       <div class="hero-actions">
         <a class="btn-primary" :href="PROJECT_URL" target="_blank" rel="noopener noreferrer">
           🚀 查看在线 Demo
         </a>
-        <a class="btn-ghost" href="#capabilities">8 大工程能力 ↓</a>
-      </div>
-
-      <div class="hero-stats">
-        <div class="stat">
-          <div class="num">8</div>
-          <div class="label">大工程能力落地</div>
-        </div>
-        <div class="stat">
-          <div class="num">3 重</div>
-          <div class="label">预算护栏 · 步数/Token/时间</div>
-        </div>
-        <div class="stat">
-          <div class="num">+18.8%</div>
-          <div class="label">rerank 后 recall@1 提升</div>
-        </div>
-        <div class="stat">
-          <div class="num">100%</div>
-          <div class="label">离线 reader 兜底可演示</div>
-        </div>
+        <a class="btn-ghost" href="#architecture">系统架构图</a>
+        <a class="btn-ghost" href="#capabilities">八大工程能力</a>
       </div>
     </section>
 
@@ -364,35 +130,28 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <!-- ============ 数据图表 ============ -->
-    <section class="section">
-      <h2>数据与流程可视化</h2>
-      <p class="section-sub">用数据说话，用流程兜底</p>
-      <div class="chart-grid">
-        <div class="chart-card">
-          <h3>RAG 检索评测 · rerank 精排前后对比</h3>
-          <p class="chart-desc">16 条真实标注查询 · 双路召回 + RRF 融合 + rerank 精排</p>
-          <div ref="rerankChartRef" class="chart-box"></div>
-        </div>
-        <div class="chart-card">
-          <h3>8 大工程能力 · 全部落地</h3>
-          <p class="chart-desc">从流程定义到预算控制，每条都有可运行的代码支撑</p>
-          <div ref="donutChartRef" class="chart-box"></div>
-        </div>
-      </div>
-      <div class="chart-card chart-wide">
-        <h3>工单状态机 · 确定性流程约束</h3>
-        <p class="chart-desc">LLM 只负责判断，执行权交给状态机与审批 —— 禁止跳步，状态可追溯</p>
-        <div class="graph-scroll">
-          <div ref="graphChartRef" class="graph-canvas"></div>
-        </div>
+    <!-- ============ 系统架构图（完整交互模式） ============ -->
+    <section class="section" id="architecture">
+      <h2>系统架构图</h2>
+      <p class="section-sub">
+        完整交互模式 —— 请使用工具栏（主题 / 风格 / 演示 / 导出）、PATH·MAP·LENS 控件、悬停与点击组件了解系统架构关系与详情
+      </p>
+      <div class="arch-card">
+        <iframe
+          ref="archFrameRef"
+          class="arch-frame"
+          src="/agent-harness-architecture.html?theme=light"
+          title="企业级混合 Agent 工作流 · 系统架构图"
+          loading="lazy"
+          @load="syncArchHeight"
+        ></iframe>
       </div>
     </section>
 
-    <!-- ============ 8 大工程能力 ============ -->
+    <!-- ============ 八大工程能力 ============ -->
     <section class="section" id="capabilities">
-      <h2>8 大工程能力</h2>
-      <p class="section-sub">每一条都有对应的可运行代码</p>
+      <h2>八大工程能力</h2>
+      <p class="section-sub">可靠、可控、可审计的具体落地实现</p>
       <div class="cap-grid">
         <div v-for="cap in capabilities" :key="cap.num" class="cap-card">
           <span class="cap-num">{{ cap.num }}</span>
@@ -400,21 +159,6 @@ onBeforeUnmount(() => {
           <p>{{ cap.desc }}</p>
           <div class="cap-tags">
             <span v-for="t in cap.tags" :key="t" class="cap-tag">{{ t }}</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============ 技术栈 ============ -->
-    <section class="section">
-      <h2>技术栈</h2>
-      <p class="section-sub">贴近真实企业栈，每一层都有生产对应物</p>
-      <div class="tech-grid">
-        <div v-for="t in techStack" :key="t.name" class="tech-card">
-          <span class="tech-icon">{{ t.icon }}</span>
-          <div>
-            <h3>{{ t.name }}</h3>
-            <p>{{ t.why }}</p>
           </div>
         </div>
       </div>
@@ -499,37 +243,11 @@ onBeforeUnmount(() => {
   color: rgba(255, 255, 255, 0.82);
   font-size: 1.02rem;
   line-height: 1.8;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .hero-sub strong {
   color: #A7EBF2;
-}
-
-.hero-chips {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 30px;
-}
-
-.chip {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  backdrop-filter: blur(8px);
-  border-radius: 999px;
-  padding: 8px 18px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.chip:hover {
-  background: rgba(167, 235, 242, 0.18);
-  transform: translateY(-2px);
 }
 
 .hero-actions {
@@ -540,7 +258,6 @@ onBeforeUnmount(() => {
   align-items: center;
   flex-wrap: wrap;
   gap: 14px;
-  margin-bottom: 10px;
 }
 
 .btn-primary {
@@ -582,7 +299,7 @@ onBeforeUnmount(() => {
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   margin-top: 36px;
   padding-top: 28px;
@@ -688,47 +405,23 @@ onBeforeUnmount(() => {
   font-size: 0.8rem;
 }
 
-/* ---------- 图表 ---------- */
-.chart-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.chart-card {
+/* ---------- 系统架构图 ---------- */
+.arch-card {
   background: #fff;
   border: 1px solid var(--card-border);
   border-radius: 20px;
-  padding: 24px;
+  padding: 16px;
   box-shadow: var(--card-shadow);
+  overflow: hidden;
 }
 
-.chart-card h3 {
-  font-size: 1.02rem;
-  margin-bottom: 4px;
-}
-
-.chart-desc {
-  font-size: 0.8rem;
-  color: #7a8b9c;
-  margin-bottom: 12px;
-}
-
-.chart-box {
+.arch-frame {
+  display: block;
   width: 100%;
-  height: 300px;
-}
-
-.graph-scroll {
-  overflow-x: auto;
-  padding-bottom: 4px;
-}
-
-.graph-canvas {
-  width: 100%;
-  min-width: 960px;
-  height: 340px;
+  aspect-ratio: 1300 / 760; /* 初始兜底高度，加载后由 JS 按内容自适应 */
+  border: 0;
+  border-radius: 12px;
+  background: #f8fafc;
 }
 
 /* ---------- 8 大能力 ---------- */
@@ -801,51 +494,9 @@ onBeforeUnmount(() => {
   white-space: nowrap;
 }
 
-/* ---------- 技术栈 ---------- */
-.tech-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-.tech-card {
-  background: #fff;
-  border: 1px solid var(--card-border);
-  border-radius: 16px;
-  padding: 18px 20px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  box-shadow: var(--card-shadow);
-  min-width: 0;
-  transition: all 0.3s ease;
-}
-
-.tech-card:hover {
-  transform: translateY(-3px);
-  border-color: #54ACBF;
-}
-
-.tech-icon {
-  font-size: 1.6rem;
-  flex-shrink: 0;
-}
-
-.tech-card h3 {
-  font-size: 0.92rem;
-  margin-bottom: 2px;
-}
-
-.tech-card p {
-  font-size: 0.75rem;
-  color: #7a8b9c;
-  margin: 0;
-}
-
 /* ---------- 响应式 ---------- */
 @media (max-width: 900px) {
-  .pillar-grid,
-  .chart-grid {
+  .pillar-grid {
     grid-template-columns: 1fr;
   }
 
@@ -853,16 +504,8 @@ onBeforeUnmount(() => {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .tech-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
   .hero {
     padding: 40px 24px 32px;
-  }
-
-  .hero-stats {
-    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -871,8 +514,7 @@ onBeforeUnmount(() => {
     gap: 40px;
   }
 
-  .cap-grid,
-  .tech-grid {
+  .cap-grid {
     grid-template-columns: 1fr;
   }
 }
