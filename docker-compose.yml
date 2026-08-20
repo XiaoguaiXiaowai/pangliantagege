@@ -24,6 +24,8 @@ services:
     image: mysql:8.0
     container_name: pltgg-db
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:3306:3306"   # ← 新增此行，仅宿主机可访问
     # 服务器内存仅 1.6G（+4G swap），限制容器内存防止 OOM
     mem_limit: 768m
     environment:
