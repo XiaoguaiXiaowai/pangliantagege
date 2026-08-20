@@ -142,7 +142,8 @@ onBeforeUnmount(() => {
           class="arch-frame"
           src="/agent-harness-architecture.html?theme=light"
           title="企业级混合 Agent 工作流 · 系统架构图"
-          loading="lazy"
+          loading="eager"
+          referrerpolicy="no-referrer"
           @load="syncArchHeight"
         ></iframe>
       </div>
