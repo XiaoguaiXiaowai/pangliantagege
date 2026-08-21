@@ -559,7 +559,7 @@ onMounted(() => {
           </ul>
         </nav>
         <div class="download-pdf">
-          <a href="/media/resume/李佳工作简历 - 完全版.pdf" class="btn-pdf" target="_blank" download>
+          <a href="/media/resume/简历_李佳_AI-Agent_v2.0.pdf" class="btn-pdf" target="_blank" download>
             <span>↓</span> 下载PDF版简历
           </a>
         </div>
