@@ -88,6 +88,15 @@
       "description": "项目描述"
     },
     "downloadPdf": "下载PDF版简历",
+    "pdfGroups": {
+      "aiAgent": "AI-Agent 简历",
+      "dataEngineer": "Data Engineer 简历"
+    },
+    "pdfLangs": {
+      "zh": "中文版",
+      "en": "English",
+      "ja": "日本語"
+    },
     "toPresent": "至今",
     "ageYears": "{age}岁",
     "viewProject": "查看项目 →",

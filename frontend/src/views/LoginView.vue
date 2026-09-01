@@ -100,7 +100,7 @@ const onSubmit = async () => {
 .login-card {
   width: 100%;
   max-width: 420px;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 16px;
   border: 1px solid var(--card-border);
   box-shadow: var(--card-shadow);
@@ -130,12 +130,14 @@ input {
   border: 1px solid var(--card-border);
   border-radius: 10px;
   outline: none;
+  background: var(--card-bg-soft);
+  color: var(--text-primary);
 }
 button {
   width: 100%;
   padding: 12px;
-  background: linear-gradient(135deg, var(--luna-dark), var(--luna-medium));
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-color);
   border-radius: 12px;
   border: none;
   font-weight: 600;

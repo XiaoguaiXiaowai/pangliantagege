@@ -5,6 +5,7 @@ import App from './App.vue'
 import router from './router'
 import i18n, { STORAGE_KEY, SUPPORTED_LOCALES } from './i18n'
 import { useLocaleStore } from './stores/locale'
+import { useThemeStore } from './stores/theme'
 import './style.css'
 
 const app = createApp(App)
@@ -17,6 +18,10 @@ app.use(router)
 const localeStore = useLocaleStore()
 i18n.global.locale.value = localeStore.locale
 document.documentElement.setAttribute('lang', localeStore.locale)
+
+// 应用主题（跟随系统 + 手动覆盖），mount 前执行避免闪烁
+const themeStore = useThemeStore()
+themeStore.init()
 
 // 所有 axios 请求自动携带当前语言参数（用于后端内容本地化）
 axios.interceptors.request.use((config) => {

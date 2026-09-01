@@ -10,6 +10,92 @@ axios.defaults.withCredentials = true
 const { t } = useI18n()
 const localeStore = useLocaleStore()
 
+// ===== 简历 PDF 下载清单（可下载的 5 个文件）=====
+// 命名约定：简历_李佳_{角色}_{语言}.pdf
+// 请在部署前把下面 url 改成服务器 backend/media/resume/ 目录下的真实文件名。
+const RESUME_PDF_FILES = [
+  {
+    groupKey: 'resume.pdfGroups.aiAgent', // AI-Agent 简历
+    files: [
+      { labelKey: 'resume.pdfLangs.zh', url: '/media/resume/简历_李佳_AI-Agent_ZH.pdf' }, // 中文版（沿用现有文件）
+      { labelKey: 'resume.pdfLangs.en', url: '/media/resume/简历_李佳_AI-Agent_EN.pdf' },
+      { labelKey: 'resume.pdfLangs.ja', url: '/media/resume/简历_李佳_AI-Agent_JA.pdf' },
+    ]
+  },
+  {
+    groupKey: 'resume.pdfGroups.dataEngineer', // Data Engineer 简历
+    files: [
+      { labelKey: 'resume.pdfLangs.zh', url: '/media/resume/简历_李佳_DataEngineer_ZH.pdf' },
+      { labelKey: 'resume.pdfLangs.en', url: '/media/resume/简历_李佳_DataEngineer_EN.pdf' },
+    ]
+  }
+]
+
+const pdfMenuOpen = ref(false)
+const pdfTriggerRef = ref(null)
+const pdfMenuStyle = ref({})
+
+// 计算下拉菜单的 fixed 定位：
+// 侧边栏是 sticky 吸顶的，absolute 向下展开会被挤出视口且无法滚动查看，
+// 因此按按钮实时位置计算，下方空间不足时自动向上翻转。
+const computePdfMenuStyle = () => {
+  const trigger = pdfTriggerRef.value
+  if (!trigger) return {}
+  const rect = trigger.getBoundingClientRect()
+  const GAP = 8
+  const MENU_EST_HEIGHT = 320 // 估算菜单高度，决定向下还是向上展开
+  const viewportH = window.innerHeight
+  const spaceBelow = viewportH - rect.bottom
+
+  const style = {
+    left: `${rect.left}px`,
+    minWidth: `${Math.max(rect.width, 220)}px`
+  }
+  if (spaceBelow >= MENU_EST_HEIGHT) {
+    style.top = `${rect.bottom + GAP}px`
+    style.maxHeight = `${spaceBelow - GAP}px`
+  } else {
+    style.bottom = `${viewportH - rect.top + GAP}px`
+    style.maxHeight = `${Math.max(rect.top - GAP, 160)}px`
+  }
+  return style
+}
+
+const openPdfMenu = () => {
+  pdfMenuStyle.value = computePdfMenuStyle()
+  pdfMenuOpen.value = true
+}
+
+const togglePdfMenu = () => {
+  if (pdfMenuOpen.value) {
+    pdfMenuOpen.value = false
+  } else {
+    openPdfMenu()
+  }
+}
+
+const closePdfMenu = () => {
+  pdfMenuOpen.value = false
+}
+
+// 菜单打开期间滚动/窗口尺寸变化时，跟随按钮实时重定位
+const onPdfMenuViewportChange = () => {
+  if (pdfMenuOpen.value) {
+    pdfMenuStyle.value = computePdfMenuStyle()
+  }
+}
+
+const onPdfMenuKeydown = (e) => {
+  if (pdfMenuOpen.value && e.key === 'Escape') {
+    pdfMenuOpen.value = false
+    pdfTriggerRef.value?.focus()
+  }
+}
+
+const onDocumentClick = () => {
+  pdfMenuOpen.value = false
+}
+
 const resumeData = ref(null)
 const loading = ref(true)
 const error = ref(null)
@@ -141,15 +227,6 @@ const setSummaryIndex = (index) => {
 // Project Carousel
 const projectCarouselState = ref({})
 let projectIntervals = {}
-let projectScrollIntervals = {}
-let projectScrollTimeouts = {}
-const projectDescRefs = ref({})
-
-const setProjectDescRef = (el, projectId) => {
-  if (el) {
-    projectDescRefs.value[projectId] = el
-  }
-}
 
 const roleWrapperRefs = ref([])
 const projectRoleOverflows = ref({})
@@ -201,79 +278,28 @@ const initProjectCarousels = () => {
 
 const startProjectRotation = (projectId) => {
   if (projectIntervals[projectId]) clearInterval(projectIntervals[projectId])
-  if (projectScrollIntervals[projectId]) clearInterval(projectScrollIntervals[projectId])
-  if (projectScrollTimeouts[projectId]) clearTimeout(projectScrollTimeouts[projectId])
 
   const state = projectCarouselState.value[projectId]
   if (!state || state.slides.length <= 1) return
 
-  // Wrapper element
-  const wrapper = projectDescRefs.value[projectId]
-  
-  if (wrapper) {
-    // Reset scroll position when starting a new rotation cycle for this slide
-    wrapper.scrollTop = 0
-  }
-
-  // Define the base time to show the first screen
-  const INITIAL_WAIT_MS = 3000
-  const SCROLL_SPEED_MS = 50 // 50ms per tick
-  const SCROLL_STEP_PX = 1   // 1px per tick
-  const END_WAIT_MS = 2000   // Wait at the bottom before switching
-
+  // 描述区为非固定高度（随文字自动撑开），内容完整展示，无需内部滚动，
+  // 仅按固定间隔自动轮换 slide。
   const processSlide = () => {
-    const wrapperEl = projectDescRefs.value[projectId]
-    if (!wrapperEl) {
-      // If ref is not ready, just fallback to simple interval
-      projectIntervals[projectId] = setTimeout(() => {
-        state.currentIndex = (state.currentIndex + 1) % state.slides.length
-        startProjectRotation(projectId) // recursively call for next slide
-      }, 5000)
-      return
-    }
-
-    // A tiny bit of extra tolerance to prevent precision errors
-    const needsScroll = wrapperEl.scrollHeight > (wrapperEl.clientHeight + 2)
-
-    if (!needsScroll) {
-      // Normal behavior: wait 5s then switch
-      projectIntervals[projectId] = setTimeout(() => {
-        state.currentIndex = (state.currentIndex + 1) % state.slides.length
-        startProjectRotation(projectId)
-      }, 5000)
-    } else {
-      // Needs scrolling behavior
-      projectScrollTimeouts[projectId] = setTimeout(() => {
-        // Start scrolling
-        projectScrollIntervals[projectId] = setInterval(() => {
-          // If hovered during scroll, it will be handled by pauseProjectRotation
-          if (wrapperEl.scrollTop + wrapperEl.clientHeight >= wrapperEl.scrollHeight - 1) {
-            // Reached bottom
-            clearInterval(projectScrollIntervals[projectId])
-            projectScrollTimeouts[projectId] = setTimeout(() => {
-              state.currentIndex = (state.currentIndex + 1) % state.slides.length
-              startProjectRotation(projectId)
-            }, END_WAIT_MS)
-          } else {
-            wrapperEl.scrollTop += SCROLL_STEP_PX
-          }
-        }, SCROLL_SPEED_MS)
-      }, INITIAL_WAIT_MS)
-    }
+    projectIntervals[projectId] = setTimeout(() => {
+      state.currentIndex = (state.currentIndex + 1) % state.slides.length
+      startProjectRotation(projectId) // recursively call for next slide
+    }, 5000)
   }
 
   // Need nextTick because Vue might be transitioning the DOM element
   nextTick(() => {
-    // wait a tiny bit for transition to finish so scrollHeight is accurate
-    // Increased timeout from 300ms to 600ms to ensure the new slide content is fully rendered and layout is updated
-    setTimeout(processSlide, 600) 
+    // wait a tiny bit for transition to finish so layout is accurate
+    setTimeout(processSlide, 600)
   })
 }
 
 const pauseProjectRotation = (projectId) => {
   if (projectIntervals[projectId]) clearInterval(projectIntervals[projectId])
-  if (projectScrollIntervals[projectId]) clearInterval(projectScrollIntervals[projectId])
-  if (projectScrollTimeouts[projectId]) clearTimeout(projectScrollTimeouts[projectId])
 }
 
 const handleProjectCarouselMouseEnter = (projectId) => {
@@ -313,11 +339,19 @@ const checkTitleOverflow = () => {
 onMounted(() => {
   window.addEventListener('resize', checkTitleOverflow)
   window.addEventListener('resize', checkRoleOverflows)
+  window.addEventListener('resize', onPdfMenuViewportChange)
+  window.addEventListener('scroll', onPdfMenuViewportChange, true)
+  document.addEventListener('click', onDocumentClick)
+  document.addEventListener('keydown', onPdfMenuKeydown)
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', checkTitleOverflow)
   window.removeEventListener('resize', checkRoleOverflows)
+  window.removeEventListener('resize', onPdfMenuViewportChange)
+  window.removeEventListener('scroll', onPdfMenuViewportChange, true)
+  document.removeEventListener('click', onDocumentClick)
+  document.removeEventListener('keydown', onPdfMenuKeydown)
   if (titleResizeObserver) {
     titleResizeObserver.disconnect()
   }
@@ -427,6 +461,11 @@ const getImageUrl = (url) => {
   }
   
   return url
+}
+
+// PDF 简历下载地址：与图片资源同一套宿主/端口解析逻辑
+const getPdfUrl = (url) => {
+  return getImageUrl(url)
 }
 
 const scrollToSection = (id) => {
@@ -577,9 +616,48 @@ onMounted(() => {
           </ul>
         </nav>
         <div class="download-pdf">
-          <a href="/media/resume/简历_李佳_AI-Agent_v2.0.pdf" class="btn-pdf" target="_blank" download>
+          <button
+            ref="pdfTriggerRef"
+            class="btn-pdf"
+            type="button"
+            :aria-label="t('resume.downloadPdf')"
+            :aria-expanded="pdfMenuOpen"
+            aria-haspopup="menu"
+            @click.stop="togglePdfMenu"
+          >
             <span>↓</span> {{ t('resume.downloadPdf') }}
-          </a>
+            <span class="pdf-caret" :class="{ 'is-open': pdfMenuOpen }" aria-hidden="true">▾</span>
+          </button>
+
+          <transition name="pdf-pop">
+            <ul
+              v-if="pdfMenuOpen"
+              class="pdf-menu"
+              :style="pdfMenuStyle"
+              role="menu"
+              @click.stop
+            >
+              <template v-for="group in RESUME_PDF_FILES" :key="group.groupKey">
+                <li class="pdf-group-label" role="presentation">{{ t(group.groupKey) }}</li>
+                <li
+                  v-for="file in group.files"
+                  :key="file.url"
+                  role="menuitem"
+                >
+                  <a
+                    :href="getPdfUrl(file.url)"
+                    class="pdf-option"
+                    download
+                    target="_blank"
+                    @click="closePdfMenu"
+                  >
+                    <span class="pdf-file-icon" aria-hidden="true">📄</span>
+                    {{ t(file.labelKey) }}
+                  </a>
+                </li>
+              </template>
+            </ul>
+          </transition>
         </div>
       </aside>
 
@@ -766,7 +844,6 @@ onMounted(() => {
                 
                 <div 
                   class="summary-content-wrapper project-desc-wrapper"
-                  :ref="(el) => setProjectDescRef(el, project.id)"
                 >
                   <transition name="fade-slide" mode="out-in">
                     <p :key="projectCarouselState[project.id].currentIndex" class="summary" style="white-space: pre-wrap;">{{ projectCarouselState[project.id].slides[projectCarouselState[project.id].currentIndex].content }}</p>
@@ -857,22 +934,23 @@ onMounted(() => {
 }
 
 .sidebar nav li:hover {
-  background-color: rgba(167, 235, 242, 0.3); /* Luna Lightest tint */
+  background-color: var(--nav-hover-bg);
   color: var(--luna-darkest);
 }
 
 .sidebar nav li.active {
-  background-color: #fff;
+  background-color: var(--card-bg);
   color: var(--luna-darkest);
-  box-shadow: 0 4px 15px rgba(1, 28, 64, 0.08);
+  box-shadow: var(--card-shadow);
   font-weight: 700;
-  border: 1px solid var(--luna-lightest);
+  border: 1px solid var(--card-border);
 }
 
 .download-pdf {
   margin-top: 30px;
   padding-top: 20px;
   border-top: 1px solid rgba(167, 235, 242, 0.5);
+  position: relative;
 }
 
 .btn-pdf {
@@ -880,21 +958,106 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   gap: 8px;
+  width: 100%;
   padding: 14px;
-  background: linear-gradient(135deg, var(--luna-dark), var(--luna-medium));
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-color);
+  border: none;
   border-radius: 18px;
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 20px rgba(38, 101, 140, 0.25);
+  box-shadow: 0 8px 20px var(--btn-primary-shadow);
 }
 
 .btn-pdf:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 25px rgba(38, 101, 140, 0.35);
+  box-shadow: 0 12px 25px var(--btn-primary-shadow);
   filter: brightness(1.1);
+}
+
+.pdf-caret {
+  font-size: 0.7rem;
+  color: var(--btn-primary-color);
+  opacity: 0.85;
+  transition: transform 0.25s ease;
+}
+
+.pdf-caret.is-open {
+  transform: rotate(180deg);
+}
+
+.pdf-menu {
+  position: fixed; /* 用 fixed + JS 计算定位：sticky 侧边栏下避免被挤出视口 */
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  min-width: 220px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  box-shadow: var(--card-shadow);
+  z-index: 200;
+}
+
+.pdf-menu li {
+  padding: 0;
+}
+
+.pdf-group-label {
+  padding: 9px 14px 5px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--luna-light);
+}
+
+.pdf-group-label:not(:first-child) {
+  margin-top: 4px;
+  border-top: 1px dashed rgba(167, 235, 242, 0.5);
+  padding-top: 10px;
+}
+
+.pdf-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pdf-option:hover {
+  background: var(--nav-hover-bg);
+  color: var(--luna-darkest);
+}
+
+.pdf-file-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.pdf-pop-enter-active,
+.pdf-pop-leave-active {
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  transform-origin: top left;
+}
+
+.pdf-pop-enter-from,
+.pdf-pop-leave-to {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
 }
 
 /* Main Content */
@@ -918,8 +1081,8 @@ onMounted(() => {
 
 /* Hero Card (Basic Info) */
 .hero-card {
-  background: #fff;
-  background-image: radial-gradient(circle at top right, rgba(167, 235, 242, 0.3), transparent 40%);
+  background: var(--card-bg);
+  background-image: radial-gradient(circle at top right, var(--card-glow), transparent 40%);
 }
 
 h3 {
@@ -955,7 +1118,7 @@ h3::after {
   border-radius: 40px; /* Soft Squircle */
   object-fit: cover;
   box-shadow: 0 15px 35px rgba(1, 28, 64, 0.15);
-  border: 4px solid #fff;
+  border: 4px solid var(--card-bg);
 }
 
 .info-text {
@@ -976,7 +1139,7 @@ h3::after {
 .title-wrapper {
   max-width: 100%;
   margin: 0 0 20px 0;
-  background: rgba(167, 235, 242, 0.3);
+  background: var(--surface-tint);
   border-radius: 12px;
   overflow: hidden;
   display: inline-flex;
@@ -1029,8 +1192,8 @@ h3::after {
 
 .summary-carousel {
   margin-top: 15px;
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(167, 235, 242, 0.4);
+  background: var(--card-bg-soft);
+  border: 1px solid var(--card-border);
   border-radius: 16px;
   padding: 20px;
   position: relative;
@@ -1038,7 +1201,7 @@ h3::after {
 }
 
 .summary-carousel:hover {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--surface-hover);
   border-color: var(--luna-light);
   box-shadow: 0 4px 15px rgba(167, 235, 242, 0.2);
 }
@@ -1161,8 +1324,8 @@ h3::after {
 
 .skill-pill {
   padding: 10px 24px;
-  background: #fff;
-  border: 1px solid rgba(0,0,0,0.05);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 50px;
   box-shadow: 0 4px 12px rgba(1, 28, 64, 0.05);
   display: flex;
@@ -1192,7 +1355,7 @@ h3::after {
 
 /* Projects Grid */
 .projects-grid {
-  column-count: 2;
+  column-count: 1;
   column-gap: 30px;
 }
 
@@ -1201,7 +1364,7 @@ h3::after {
   margin-bottom: 30px;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--card-bg);
 }
 
 .project-header {
@@ -1223,13 +1386,13 @@ h3::after {
 }
 
 .role-badge-wrapper {
-  background: linear-gradient(135deg, var(--luna-light), var(--luna-medium));
-  color: #fff;
+  background: var(--grad-accent-bg);
+  color: var(--grad-accent-color);
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 600;
-  box-shadow: 0 4px 10px rgba(38, 101, 140, 0.2);
+  box-shadow: 0 4px 10px var(--btn-primary-shadow);
   display: inline-flex;
   align-items: center;
   overflow: hidden;
@@ -1272,39 +1435,17 @@ h3::after {
   margin-top: 10px;
   margin-bottom: 20px;
   padding: 15px;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--card-bg-soft);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
 }
 
 .project-desc-wrapper {
-  /* 8 lines * 1.6 line-height * 0.9rem font-size ≈ 11.52rem */
-  height: 11.52rem; 
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 5px;
+  /* 非固定高度：随文字内容自动撑开（文字多则高、文字少则矮） */
+  height: auto;
+  overflow: visible;
   display: block; /* Override default flex */
-  scroll-behavior: smooth;
-}
-
-/* Custom Scrollbar for project description */
-.project-desc-wrapper::-webkit-scrollbar {
-  width: 4px;
-}
-
-.project-desc-wrapper::-webkit-scrollbar-track {
-  background: rgba(167, 235, 242, 0.2);
-  border-radius: 4px;
-}
-
-.project-desc-wrapper::-webkit-scrollbar-thumb {
-  background: rgba(38, 101, 140, 0.3);
-  border-radius: 4px;
-}
-
-.project-desc-wrapper::-webkit-scrollbar-thumb:hover {
-  background: rgba(38, 101, 140, 0.6);
 }
 
 .project-desc-carousel .summary {
@@ -1322,7 +1463,7 @@ h3::after {
 .tech-tag {
   font-size: 0.8rem;
   padding: 4px 10px;
-  background-color: rgba(167, 235, 242, 0.2); /* Luna Lightest tint */
+  background-color: var(--icon-tint);
   color: var(--luna-dark);
   border-radius: 6px;
   font-weight: 500;
@@ -1391,7 +1532,7 @@ h3::after {
   width: 10px;
   height: 10px;
   background: var(--luna-light);
-  border: 3px solid #fff;
+  border: 3px solid var(--card-bg);
   border-radius: 50%;
   z-index: 1;
   box-shadow: 0 0 0 3px rgba(167, 235, 242, 0.5); /* Luna Lightest shadow */
@@ -1429,11 +1570,11 @@ h3::after {
 }
 
 .honor-certificate-card {
-  background: linear-gradient(145deg, #fff, #f8fbfd);
+  background: var(--card-grad);
   padding: 8px;
   border-radius: 16px;
   box-shadow: 0 4px 15px rgba(1, 28, 64, 0.05);
-  border: 1px solid rgba(167, 235, 242, 0.4);
+  border: 1px solid var(--card-border);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -1453,7 +1594,7 @@ h3::after {
 }
 
 .cert-inner {
-  border: 1px dashed rgba(38, 101, 140, 0.2);
+  border: 1px dashed var(--card-border);
   border-radius: 10px;
   padding: 24px 20px;
   display: flex;
@@ -1462,12 +1603,12 @@ h3::after {
   justify-content: center;
   height: 100%;
   gap: 12px;
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--card-bg-soft);
 }
 
 .cert-icon {
   color: var(--luna-medium);
-  background: rgba(167, 235, 242, 0.2);
+  background: var(--icon-tint);
   padding: 12px;
   border-radius: 50%;
   display: flex;
@@ -1509,8 +1650,8 @@ h3::after {
   
   .sidebar nav li {
     white-space: nowrap;
-    background: #fff;
-    border: 1px solid rgba(0,0,0,0.05);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
   }
   
   .profile-header {
@@ -1563,11 +1704,11 @@ h3::after {
 }
 
 .tech-major-card {
-  background: #ffffff;
-  border: 1px solid rgba(167, 235, 242, 0.4);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(1, 28, 64, 0.04);
+  box-shadow: var(--card-shadow);
   transition: all 0.3s ease;
   break-inside: avoid; /* 防止卡片被跨列截断 */
   margin-bottom: 24px; /* 卡片之间的垂直间距 */
@@ -1577,14 +1718,14 @@ h3::after {
 
 .tech-major-card:hover {
   box-shadow: 0 8px 24px rgba(1, 28, 64, 0.08);
-  border-color: rgba(167, 235, 242, 0.8);
+  border-color: var(--luna-light);
   transform: translateY(-2px);
 }
 
 .major-header {
-  background: linear-gradient(135deg, rgba(167, 235, 242, 0.2) 0%, rgba(84, 172, 191, 0.05) 100%); /* 使用Luna主题蓝绿色调 */
+  background: var(--major-header-bg);
   padding: 16px 24px;
-  border-bottom: 1px solid rgba(167, 235, 242, 0.3);
+  border-bottom: 1px solid var(--card-border);
 }
 
 .major-header h4 {
@@ -1609,8 +1750,8 @@ h3::after {
 .skill-pill {
   display: inline-flex;
   align-items: center;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 16px; /* 稍微减小圆角 */
   padding: 6px 12px; /* 减小内边距 */
   transition: all 0.3s ease;
@@ -1631,7 +1772,7 @@ h3::after {
 }
 
 .skill-name {
-  color: #333;
+  color: var(--text-primary);
   font-size: 0.9rem;
   font-weight: 500;
   margin-right: 8px;

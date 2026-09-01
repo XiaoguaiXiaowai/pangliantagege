@@ -25,7 +25,7 @@ const goHome = () => router.push('/')
   min-height: 50vh;
 }
 .card {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 16px;
   border: 1px solid var(--card-border);
   box-shadow: var(--card-shadow);
@@ -49,8 +49,8 @@ p {
 }
 .btn {
   padding: 10px 20px;
-  background: linear-gradient(135deg, var(--luna-dark), var(--luna-medium));
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-color);
   border: none;
   border-radius: 10px;
   font-weight: 600;

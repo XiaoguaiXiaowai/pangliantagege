@@ -372,13 +372,14 @@ onUnmounted(() => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #fff;
+  /* 统一徽章样式：渐变底 + 发光描边 + 顶部高光，深浅色自动适配 */
+  background: var(--icon-badge-bg);
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 6px 22px rgba(167, 235, 242, 0.4);
-  border: 1.5px solid var(--luna-light);
+  box-shadow: 0 8px 24px var(--nav-active-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  border: 1.5px solid var(--badge-border);
 }
 
 .icon-cloud { width: 67.5px; height: 67.5px; font-size: 1.8rem; }
@@ -410,17 +411,46 @@ onUnmounted(() => {
 }
 
 /* Central Card */
+/* Central Card — 渐变描边毛玻璃 */
 .intro-card {
   position: relative;
   z-index: 1;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: 20px;
+  width: min(460px, 100%);
   padding: 45px;
-  width: 460px;
-  box-shadow: 0 20px 40px rgba(1, 28, 64, 0.08);
-  border: 1px solid rgba(167, 235, 242, 0.5);
+  border-radius: 24px;
+  /* 双层背景：内层卡片底色 + 外层渐变描边（border-box 裁剪） */
+  background-image:
+    linear-gradient(var(--card-bg-soft), var(--card-bg-soft)),
+    var(--card-border-grad);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  border: 1px solid transparent;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--card-shadow);
+}
+
+/* 背后光晕，增强毛玻璃纵深感 */
+.intro-card::after {
+  content: '';
+  position: absolute;
+  inset: -48px;
+  z-index: -1;
+  border-radius: 56px;
+  background: radial-gradient(closest-side, var(--card-glow), transparent 72%);
+  pointer-events: none;
+}
+
+/* 顶部高光线 */
+.intro-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 18%;
+  right: 18%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.85), transparent);
+  pointer-events: none;
 }
 
 .card-header {
@@ -506,14 +536,14 @@ onUnmounted(() => {
 }
 
 .nav-card {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 20px;
   padding: 30px;
   display: flex;
   align-items: center;
   gap: 20px;
   cursor: pointer;
-  border: 1px solid rgba(167, 235, 242, 0.4);
+  border: 1px solid var(--card-border);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -548,7 +578,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(167, 235, 242, 0.2);
+  background: var(--icon-tint);
   border-radius: 16px;
   flex-shrink: 0;
 }
@@ -570,11 +600,12 @@ onUnmounted(() => {
 .wip-badge {
   font-size: 0.7rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #f0f4f8, #e2e8f0);
+  font-family: var(--font-display);
+  background: var(--badge-bg);
   color: var(--luna-medium);
   padding: 2px 8px;
   border-radius: 12px;
-  border: 1px solid rgba(167, 235, 242, 0.5);
+  border: 1px solid var(--badge-border);
   box-shadow: 0 2px 4px rgba(1, 28, 64, 0.05);
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -606,8 +637,8 @@ onUnmounted(() => {
 
 .nav-card.disabled-card {
   cursor: not-allowed;
-  background: rgba(248, 250, 252, 0.6);
-  border-color: rgba(226, 232, 240, 0.8);
+  background: var(--card-bg-soft);
+  border-color: var(--card-border);
   opacity: 0.85;
 }
 
@@ -621,17 +652,18 @@ onUnmounted(() => {
 }
 
 .nav-card.disabled-card .card-icon {
-  background: rgba(226, 232, 240, 0.5);
+  background: var(--icon-tint-muted);
   filter: grayscale(100%);
   opacity: 0.7;
 }
 
 .nav-card.disabled-card .card-content h3 {
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .nav-card.disabled-card .card-content p {
-  color: #94a3b8;
+  color: var(--text-secondary);
+  opacity: 0.8;
 }
 
 @media (max-width: 768px) {

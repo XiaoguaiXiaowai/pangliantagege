@@ -34,8 +34,8 @@ const handleMouseMove = (e) => {
 .magic-card {
   position: relative;
   border-radius: 12px;
-  background-color: #fff;
-  border: 1px solid #e5e7eb;
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
   overflow: hidden;
   transition: transform 0.2s;
 }

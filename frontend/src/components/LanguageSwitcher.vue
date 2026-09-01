@@ -88,8 +88,8 @@ onBeforeUnmount(() => {
   height: 40px;
   padding: 0 14px;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(167, 235, 242, 0.6);
+  background: var(--card-bg-soft);
+  border: 1px solid var(--card-border);
   color: var(--text-secondary);
   font-weight: 600;
   font-size: 0.9rem;
@@ -97,8 +97,8 @@ onBeforeUnmount(() => {
 }
 
 .lang-trigger:hover {
-  color: var(--luna-darkest);
-  background-color: rgba(167, 235, 242, 0.25);
+  color: var(--text-primary);
+  background-color: var(--nav-hover-bg);
 }
 
 .lang-globe {
@@ -128,10 +128,10 @@ onBeforeUnmount(() => {
   padding: 6px;
   list-style: none;
   min-width: 140px;
-  background: #fff;
-  border: 1px solid rgba(167, 235, 242, 0.6);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 14px;
-  box-shadow: 0 12px 32px rgba(1, 28, 64, 0.14);
+  box-shadow: var(--card-shadow);
   z-index: 200;
 }
 
@@ -150,13 +150,13 @@ onBeforeUnmount(() => {
 }
 
 .lang-menu li:hover {
-  background: rgba(167, 235, 242, 0.2);
-  color: var(--luna-darkest);
+  background: var(--nav-hover-bg);
+  color: var(--text-primary);
 }
 
 .lang-menu li.is-active {
-  color: var(--luna-darkest);
-  background: rgba(167, 235, 242, 0.35);
+  color: var(--text-primary);
+  background: var(--nav-hover-bg);
 }
 
 .lang-check {

@@ -308,7 +308,7 @@ onMounted(() => {
   padding: 60px;
   font-size: 1.2rem;
   color: var(--text-secondary);
-  background: #fff;
+  background: var(--card-bg);
   border-radius: var(--card-radius);
   border: 1px solid var(--card-border);
 }
@@ -320,11 +320,11 @@ onMounted(() => {
 }
 
 .work-card {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(1, 28, 64, 0.08);
-  border: 1px solid rgba(167, 235, 242, 0.3);
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--card-border);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   display: flex;
   flex-direction: column;
@@ -367,13 +367,13 @@ onMounted(() => {
   position: absolute;
   top: 15px;
   right: 15px;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--card-bg-soft);
   backdrop-filter: blur(4px);
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--luna-darkest);
+  color: var(--text-primary);
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
@@ -430,8 +430,8 @@ onMounted(() => {
   gap: 8px;
   width: 100%;
   padding: 12px;
-  background: linear-gradient(135deg, var(--luna-dark), var(--luna-medium));
-  color: #fff;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-color);
   text-decoration: none;
   border-radius: 12px;
   font-weight: 600;

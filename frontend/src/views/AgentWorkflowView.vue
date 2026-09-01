@@ -286,7 +286,7 @@ onBeforeUnmount(() => {
 
 .section-sub {
   text-align: center;
-  color: #5a6b7c;
+  color: var(--text-secondary);
   font-size: 0.92rem;
   margin-bottom: 30px;
 }
@@ -299,7 +299,7 @@ onBeforeUnmount(() => {
 }
 
 .pillar-card {
-  background: #fff;
+  background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 20px;
   padding: 28px 24px;
@@ -332,7 +332,7 @@ onBeforeUnmount(() => {
 .pillar-en {
   font-size: 0.72rem;
   font-weight: 600;
-  color: #7a8b9c;
+  color: var(--text-secondary);
   letter-spacing: 0.06em;
   margin-left: 4px;
 }
@@ -348,7 +348,7 @@ onBeforeUnmount(() => {
 
 .pillar-card li {
   font-size: 0.86rem;
-  color: #44566a;
+  color: var(--text-primary);
   line-height: 1.55;
   padding-left: 20px;
   position: relative;
@@ -358,14 +358,14 @@ onBeforeUnmount(() => {
   content: '✓';
   position: absolute;
   left: 0;
-  color: #54ACBF;
+  color: var(--luna-light);
   font-weight: 800;
   font-size: 0.8rem;
 }
 
 /* ---------- 系统架构图 ---------- */
 .arch-card {
-  background: #fff;
+  background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 20px;
   padding: 16px;
@@ -379,7 +379,7 @@ onBeforeUnmount(() => {
   aspect-ratio: 1300 / 760; /* 初始兜底高度，加载后由 JS 按内容自适应 */
   border: 0;
   border-radius: 12px;
-  background: #f8fafc;
+  background: var(--card-bg-soft);
 }
 
 /* ---------- 8 大能力 ---------- */
@@ -390,7 +390,7 @@ onBeforeUnmount(() => {
 }
 
 .cap-card {
-  background: #fff;
+  background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: 16px;
   padding: 20px;
@@ -403,7 +403,7 @@ onBeforeUnmount(() => {
 
 .cap-card:hover {
   transform: translateY(-4px);
-  border-color: #54ACBF;
+  border-color: var(--luna-light);
   box-shadow: 0 12px 30px rgba(38, 101, 140, 0.16);
 }
 
@@ -429,7 +429,7 @@ onBeforeUnmount(() => {
 
 .cap-card p {
   font-size: 0.8rem;
-  color: #5a6b7c;
+  color: var(--text-secondary);
   line-height: 1.6;
   flex: 1;
   margin-bottom: 12px;
@@ -442,9 +442,9 @@ onBeforeUnmount(() => {
 }
 
 .cap-tag {
-  background: #eef8fb;
-  border: 1px solid rgba(167, 235, 242, 0.8);
-  color: #26658C;
+  background: var(--icon-tint);
+  border: 1px solid var(--badge-border);
+  color: var(--luna-medium);
   font-size: 0.72rem;
   font-weight: 600;
   padding: 3px 9px;

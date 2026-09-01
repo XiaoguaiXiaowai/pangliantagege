@@ -88,6 +88,15 @@
       "description": "概要"
     },
     "downloadPdf": "PDF版職務経歴書をダウンロード",
+    "pdfGroups": {
+      "aiAgent": "AI-Agent 職務経歴書",
+      "dataEngineer": "Data Engineer 職務経歴書"
+    },
+    "pdfLangs": {
+      "zh": "中国語版",
+      "en": "English",
+      "ja": "日本語"
+    },
     "toPresent": "現在",
     "ageYears": "{age}歳",
     "viewProject": "プロジェクトを見る →",

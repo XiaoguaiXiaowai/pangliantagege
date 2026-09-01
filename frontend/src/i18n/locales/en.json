@@ -88,6 +88,15 @@
       "description": "Description"
     },
     "downloadPdf": "Download PDF Resume",
+    "pdfGroups": {
+      "aiAgent": "AI-Agent Resume",
+      "dataEngineer": "Data Engineer Resume"
+    },
+    "pdfLangs": {
+      "zh": "Chinese",
+      "en": "English",
+      "ja": "Japanese"
+    },
     "toPresent": "Present",
     "ageYears": "{age} years old",
     "viewProject": "View Project →",
