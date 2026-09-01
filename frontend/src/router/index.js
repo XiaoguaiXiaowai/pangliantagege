@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import { applyDocumentTitle } from '../utils/documentTitle'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -8,25 +9,25 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
-      meta: { title: '首页' }
+      meta: { titleKey: 'home' }
     },
     {
       path: '/resume',
       name: 'resume',
       component: () => import('../views/ResumeView.vue'),
-      meta: { title: '工作简历' }
+      meta: { titleKey: 'resume' }
     },
     {
       path: '/message-board',
       name: 'message-board',
       component: () => import('../views/MessageBoardView.vue'),
-      meta: { title: '留言板' }
+      meta: { titleKey: 'messageBoard' }
     },
     {
       path: '/agent-workflow',
       name: 'agent-workflow',
       component: () => import('../views/AgentWorkflowView.vue'),
-      meta: { title: '企业级Agent' }
+      meta: { titleKey: 'agentWorkflow' }
     },
     {
       path: '/ai-assistant',
@@ -36,42 +37,37 @@ const router = createRouter({
       path: '/tools',
       name: 'tools',
       component: () => import('../views/ToolsView.vue'),
-      meta: { title: '小工具' }
+      meta: { titleKey: 'tools' }
     },
     {
       path: '/music',
       name: 'music-space',
       component: () => import('../views/MusicSpaceView.vue'),
-      meta: { title: '音乐作品' }
+      meta: { titleKey: 'musicSpace' }
     },
     {
       path: '/login',
       name: 'login',
       component: () => import('../views/LoginView.vue'),
-      meta: { title: '登录' }
+      meta: { titleKey: 'login' }
     },
     {
       path: '/talents',
       name: 'talents',
       component: () => import('../views/TalentsView.vue'),
-      meta: { title: '才艺' }
+      meta: { titleKey: 'talents' }
     },
     {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('../views/NotFoundView.vue'),
-      meta: { title: '页面不存在' }
+      meta: { titleKey: 'notFound' }
     }
   ]
 })
 
 router.beforeEach((to, from, next) => {
-  const siteTitle = '李佳的个人网站'
-  if (to.meta.title) {
-    document.title = `${siteTitle} - ${to.meta.title}`
-  } else {
-    document.title = siteTitle
-  }
+  applyDocumentTitle(to)
   next()
 })
 

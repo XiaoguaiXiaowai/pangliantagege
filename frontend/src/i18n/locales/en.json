@@ -1,0 +1,247 @@
+{
+  "common": {
+    "brandName": "胖脸她哥哥",
+    "brandSub": " - Li Jia's Personal Website",
+    "siteTitle": "Li Jia's Personal Website",
+    "footerCopyright": "© 2026 胖脸她哥哥 - Li Jia's Personal Website. All rights reserved."
+  },
+  "nav": {
+    "home": "Home",
+    "resume": "Resume",
+    "agent": "Enterprise Agent",
+    "music": "Music",
+    "board": "Message Board",
+    "tools": "Tools",
+    "talents": "More"
+  },
+  "route": {
+    "home": "Home",
+    "resume": "Resume",
+    "messageBoard": "Message Board",
+    "agentWorkflow": "Enterprise Agent",
+    "tools": "Small Tools",
+    "musicSpace": "Music Works",
+    "login": "Login",
+    "talents": "Talent",
+    "notFound": "Page Not Found"
+  },
+  "home": {
+    "myNameIs": "My name is:",
+    "imA": "I'm a:",
+    "features": {
+      "resume": {
+        "title": "Resume",
+        "description": "Explore my career history, project experience and tech stack in detail."
+      },
+      "agent": {
+        "title": "Enterprise Agent",
+        "description": "An enterprise-grade hybrid Agent workflow — integrating AI into business reliably, controllably and auditable."
+      },
+      "music": {
+        "title": "Music Works",
+        "description": "A collection of my original music, performance photos and videos."
+      },
+      "board": {
+        "title": "Message Board",
+        "description": "<Under development> Leave a footprint, chat with me or share your thoughts."
+      },
+      "tools": {
+        "title": "Tools",
+        "description": "<Under development> Some practical tools I built to boost daily productivity."
+      },
+      "talents": {
+        "title": "More",
+        "description": "Taking a break? Watch the two orbs floating in the background."
+      }
+    },
+    "roles": {
+      "seniorSRE": "Senior Cloud Architect & Ops/SRE Engineer",
+      "jpTechLead": "Tech Lead & Project Manager",
+      "aiFullstack": "AI-Enhanced Full-Stack Developer",
+      "toolMaker": "Small Tool Enthusiast",
+      "aiExplorer": "Full-Stack Autonomous AI Engineer",
+      "musician": "Self-Entertaining Indie Musician"
+    }
+  },
+  "resume": {
+    "loading": "Loading...",
+    "sections": {
+      "basicInfo": "Basic Info",
+      "keywords": "My Keywords",
+      "techStack": "Tech Stack",
+      "certificates": "Certificates",
+      "experience": "Work Experience",
+      "projects": "Projects",
+      "education": "Education"
+    },
+    "summaryTitles": {
+      "experience": "Work Experience",
+      "skills": "Professional Skills",
+      "management": "Team Management",
+      "intro": "Profile"
+    },
+    "projectSlideTitles": {
+      "bg": "Background",
+      "duty": "Responsibilities",
+      "solution": "Solution",
+      "result": "Outcome",
+      "description": "Description"
+    },
+    "downloadPdf": "Download PDF Resume",
+    "toPresent": "Present",
+    "ageYears": "{age} years old",
+    "viewProject": "View Project →",
+    "emptyBasicInfo": "No basic info available",
+    "emptyKeywords": "No keywords available",
+    "emptyTechStack": "No tech stack available",
+    "emptyCertificates": "No certificates yet",
+    "emptyExperience": "No work experience yet",
+    "emptyProjects": "No projects yet",
+    "emptyEducation": "No education background yet",
+    "loadError": "Failed to load resume data. Please try again later."
+  },
+  "music": {
+    "loading": "Loading...",
+    "empty": "No music works yet — stay tuned!",
+    "audioSection": "Original Music",
+    "audioDesc": "No skills, just feelings",
+    "videoSection": "Live Performance Videos",
+    "videoDesc": "Missing the good old days playing music with my brothers...",
+    "photoSection": "Live Performance Photos",
+    "photoDesc": "Some precious memories from the stage",
+    "audioUnsupported": "Your browser does not support the audio element.",
+    "videoUnsupported": "Your browser does not support the video element.",
+    "loadError": "Failed to load music works. Please try again later."
+  },
+  "login": {
+    "title": "Login",
+    "desc": "Enter your account and password to access protected content",
+    "username": "Account",
+    "password": "Password",
+    "submitting": "Logging in...",
+    "submit": "Login",
+    "error": "Login failed. Please check your account or password."
+  },
+  "notfound": {
+    "title": "Page Not Found",
+    "desc": "The address you visited does not exist or has been moved. Please check the link or return to the home page.",
+    "backHome": "Back to Home"
+  },
+  "agent": {
+    "heroBadge": "🤖 Project · Enterprise Agent Engineering Practice",
+    "heroTitle": "Enterprise Hybrid Agent Workflow",
+    "heroSub1": "An intelligent enterprise IT ticket processing system — not about how smart AI is,",
+    "heroSub2": "but how <strong>AI is integrated into enterprise workflows reliably, controllably and auditable</strong>.",
+    "viewDemo": "🚀 View Live Demo",
+    "architecture": "System Architecture",
+    "capabilitiesNav": "8 Engineering Capabilities",
+    "archFrameTitle": "Enterprise Hybrid Agent Workflow · System Architecture",
+    "whyEnterprise": "Why \"Enterprise-Grade\"?",
+    "whyEnterpriseSub": "Turning unpredictable Agents into controllable workflows",
+    "architectureSub": "Full interactive mode — use the toolbar (Theme / Style / Present / Export), PATH·MAP·LENS controls, hover and click components to explore the system architecture and details",
+    "eightCapabilities": "8 Engineering Capabilities",
+    "eightCapabilitiesSub": "Concrete implementation of Reliable, Controlled and Auditable",
+    "pillars": [
+      {
+        "key": "reliable",
+        "icon": "🛡️",
+        "color": "#26658C",
+        "title": "Reliable",
+        "subtitle": "",
+        "points": [
+          "Deterministic state machine constrains the action sequence — no skipping steps",
+          "Idempotent retries + failure compensation — no duplicate authorization on re-execution",
+          "Triple budget on steps / tokens / time — terminates immediately when the cap is hit",
+          "Only delivered after convergence check done:true passes"
+        ]
+      },
+      {
+        "key": "controlled",
+        "icon": "🔐",
+        "color": "#0e7490",
+        "title": "Controlled",
+        "subtitle": "",
+        "points": [
+          "IAM least privilege + physical multi-tenant isolation",
+          "Tool allowlist registry — unregistered tools are rejected outright",
+          "Strongly-typed parameter validation + sensitive data masking",
+          "High-risk actions are handed back for human HITL approval"
+        ]
+      },
+      {
+        "key": "auditable",
+        "icon": "📋",
+        "color": "#7c3aed",
+        "title": "Auditable",
+        "subtitle": "",
+        "points": [
+          "Full-chain Trace replay — every single step accounted for",
+          "Model / prompt versions recorded on every run",
+          "State transitions and tool calls persisted one by one",
+          "Success rate / latency / cost / human takeover rate visualized"
+        ]
+      }
+    ],
+    "capabilities": [
+      {
+        "num": "①",
+        "title": "Process Definition",
+        "desc": "Structure vague requirements, clarify what goes to Agents vs. Workflow, and draw the risk boundary",
+        "tags": ["Structured Input", "Risk Boundary"]
+      },
+      {
+        "num": "②",
+        "title": "Business Entry",
+        "desc": "Identity verification, tenant isolation, IAM least privilege, input risk grading",
+        "tags": ["AuthN/AuthZ", "Tenant Isolation", "Least Privilege"]
+      },
+      {
+        "num": "③",
+        "title": "Core LOOP",
+        "desc": "Context select/compress/truncate, model routing, four-layer constraints, five-tier memory, exception handling",
+        "tags": ["Context Assembly", "Model Routing"]
+      },
+      {
+        "num": "④",
+        "title": "Business Exit",
+        "desc": "HITL approval, convergence check done:true, delivery archiving",
+        "tags": ["HITL Approval", "Convergence Check", "Archiving"]
+      },
+      {
+        "num": "⑤",
+        "title": "Tool Layer MPC-Skill",
+        "desc": "Allowlist, parameter validation, masking, HITL, idempotent compensation, auditing",
+        "tags": ["Allowlist", "Masking", "Idempotency"]
+      },
+      {
+        "num": "⑥",
+        "title": "Trace",
+        "desc": "Model/prompt versions, context provenance, tool calls, state transitions, latency records",
+        "tags": ["Version History", "Full-Chain Replay"]
+      },
+      {
+        "num": "⑦",
+        "title": "Monitoring & Evaluation",
+        "desc": "Success rate, correct-failure rate, latency, cost, human takeover rate",
+        "tags": ["Success Rate", "Latency", "Cost"]
+      },
+      {
+        "num": "⑧",
+        "title": "Budget",
+        "desc": "Triple budget on steps / tokens / time — terminates at the cap to prevent runaway",
+        "tags": ["Steps", "Token", "Time"]
+      }
+    ]
+  },
+  "board": {
+    "title": "Message Board",
+    "desc": "Welcome to leave a message!"
+  },
+  "tools": {
+    "title": "Small Tools",
+    "desc": "Sharing some practical small tools here."
+  },
+  "talents": {
+    "title": "👀"
+  }
+}

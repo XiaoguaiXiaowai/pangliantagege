@@ -1,0 +1,247 @@
+{
+  "common": {
+    "brandName": "胖脸她哥哥",
+    "brandSub": " - 李佳的个人网站",
+    "siteTitle": "李佳的个人网站",
+    "footerCopyright": "© 2026 胖脸她哥哥 - 李佳的个人网站. All rights reserved."
+  },
+  "nav": {
+    "home": "首页",
+    "resume": "工作简历",
+    "agent": "企业级Agent",
+    "music": "音乐作品",
+    "board": "留言板",
+    "tools": "小工具",
+    "talents": "其他"
+  },
+  "route": {
+    "home": "首页",
+    "resume": "工作简历",
+    "messageBoard": "留言板",
+    "agentWorkflow": "企业级Agent",
+    "tools": "小工具",
+    "musicSpace": "音乐作品",
+    "login": "登录",
+    "talents": "才艺",
+    "notFound": "页面不存在"
+  },
+  "home": {
+    "myNameIs": "My name is:",
+    "imA": "I'm a:",
+    "features": {
+      "resume": {
+        "title": "工作简历",
+        "description": "查看我的详细工作经历、项目经验以及技能栈。"
+      },
+      "agent": {
+        "title": "企业级Agent",
+        "description": "企业级混合Agent工作流作品——让AI可靠、可控、可审计地接进企业业务。"
+      },
+      "music": {
+        "title": "音乐作品",
+        "description": "记录我的音乐作品和一些演出照片、视频。"
+      },
+      "board": {
+        "title": "留言板",
+        "description": "<开发中>欢迎在这里留下您的足迹，与我交流或分享您的想法。"
+      },
+      "tools": {
+        "title": "小工具",
+        "description": "<开发中>我开发的一些实用小工具，旨在提高日常工作效率。"
+      },
+      "talents": {
+        "title": "其他",
+        "description": "忙里偷闲，可以看着背景的两个小球发发呆。"
+      }
+    },
+    "roles": {
+      "seniorSRE": "资深云架构运维工程师 (偏SRE)",
+      "jpTechLead": "技术负责人、项目管理者",
+      "aiFullstack": "AI增强型全栈开发者",
+      "toolMaker": "小工具开发爱好者",
+      "aiExplorer": "全栈自主AI工程师",
+      "musician": "自娱自乐的独立音乐人"
+    }
+  },
+  "resume": {
+    "loading": "加载中...",
+    "sections": {
+      "basicInfo": "基本信息",
+      "keywords": "我的标签",
+      "techStack": "技能概况",
+      "certificates": "获得证书",
+      "experience": "工作经历",
+      "projects": "项目经历",
+      "education": "教育背景"
+    },
+    "summaryTitles": {
+      "experience": "工作经验",
+      "skills": "专业能力",
+      "management": "团队管理",
+      "intro": "个人简介"
+    },
+    "projectSlideTitles": {
+      "bg": "项目背景",
+      "duty": "项目职责",
+      "solution": "解决方案",
+      "result": "项目成果",
+      "description": "项目描述"
+    },
+    "downloadPdf": "下载PDF版简历",
+    "toPresent": "至今",
+    "ageYears": "{age}岁",
+    "viewProject": "查看项目 →",
+    "emptyBasicInfo": "暂无基本信息",
+    "emptyKeywords": "暂无关键词信息",
+    "emptyTechStack": "暂无技能栈信息",
+    "emptyCertificates": "暂无认证经历信息",
+    "emptyExperience": "暂无工作经历",
+    "emptyProjects": "暂无项目经历",
+    "emptyEducation": "暂无教育背景",
+    "loadError": "无法加载简历数据，请稍后再试。"
+  },
+  "music": {
+    "loading": "加载中...",
+    "empty": "暂无音乐作品，敬请期待！",
+    "audioSection": "部分原创音乐",
+    "audioDesc": "妹有技巧，全是感情",
+    "videoSection": "部分演出视频",
+    "videoDesc": "怀念跟兄弟们一起玩儿音乐的日子啊……",
+    "photoSection": "部分演出照片",
+    "photoDesc": "一些珍贵的舞台回忆",
+    "audioUnsupported": "您的浏览器不支持 audio 元素。",
+    "videoUnsupported": "您的浏览器不支持 video 元素。",
+    "loadError": "无法加载音乐作品，请稍后再试。"
+  },
+  "login": {
+    "title": "登录",
+    "desc": "请输入账号密码以访问网站的受保护内容",
+    "username": "账号",
+    "password": "密码",
+    "submitting": "登录中...",
+    "submit": "登录",
+    "error": "登录失败，请检查账号或密码"
+  },
+  "notfound": {
+    "title": "页面不存在",
+    "desc": "您访问的地址不存在或已被移动。请检查链接或返回首页。",
+    "backHome": "返回首页"
+  },
+  "agent": {
+    "heroBadge": "🤖 作品 · 企业级 Agent 工程实践",
+    "heroTitle": "企业级混合 Agent 工作流",
+    "heroSub1": "一个企业 IT 工单智能处理系统 —— 不是演示 AI 多聪明，",
+    "heroSub2": "而是演示 <strong>AI 如何被可靠、可控、可审计地接进企业业务</strong>。",
+    "viewDemo": "🚀 查看在线 Demo",
+    "architecture": "系统架构图",
+    "capabilitiesNav": "八大工程能力",
+    "archFrameTitle": "企业级混合 Agent 工作流 · 系统架构图",
+    "whyEnterprise": "为什么是\"企业级\"？",
+    "whyEnterpriseSub": "把不可控的 Agent，变成可控的流程",
+    "architectureSub": "完整交互模式 —— 请使用工具栏（主题 / 风格 / 演示 / 导出）、PATH·MAP·LENS 控件、悬停与点击组件了解系统架构关系与详情",
+    "eightCapabilities": "八大工程能力",
+    "eightCapabilitiesSub": "可靠、可控、可审计的具体落地实现",
+    "pillars": [
+      {
+        "key": "reliable",
+        "icon": "🛡️",
+        "color": "#26658C",
+        "title": "可靠",
+        "subtitle": "Reliable",
+        "points": [
+          "确定性状态机约束动作序列，禁止跳步",
+          "幂等重试 + 失败补偿，重复执行不重复授权",
+          "步数 / Token / 时间三重预算，触顶即终止",
+          "收敛校验 done:true 通过才交付"
+        ]
+      },
+      {
+        "key": "controlled",
+        "icon": "🔐",
+        "color": "#0e7490",
+        "title": "可控",
+        "subtitle": "Controlled",
+        "points": [
+          "IAM 最小权限 + 多租户物理隔离",
+          "工具白名单注册表，未登记工具直接拒绝",
+          "参数强类型校验 + 敏感信息脱敏",
+          "高风险动作交还人工 HITL 审批"
+        ]
+      },
+      {
+        "key": "auditable",
+        "icon": "📋",
+        "color": "#7c3aed",
+        "title": "可审计",
+        "subtitle": "Auditable",
+        "points": [
+          "Trace 全链路回放，一步不差",
+          "模型 / 提示词版本逐次留痕",
+          "状态迁移、工具调用逐条落库",
+          "成功率 / 延迟 / 成本 / 人工接管率可视化"
+        ]
+      }
+    ],
+    "capabilities": [
+      {
+        "num": "①",
+        "title": "流程定义",
+        "desc": "把模糊需求结构化，明确哪些交给 Agent、哪些交给 Workflow，划清风险边界",
+        "tags": ["结构化输入", "风险边界"]
+      },
+      {
+        "num": "②",
+        "title": "业务入口",
+        "desc": "身份校验、租户隔离、IAM 最小权限、输入风险分级",
+        "tags": ["鉴权", "租户隔离", "最小权限"]
+      },
+      {
+        "num": "③",
+        "title": "核心 LOOP",
+        "desc": "上下文\"选/压/截\"、模型路由、四层约束、记忆五分层、异常处理",
+        "tags": ["上下文装配", "模型路由"]
+      },
+      {
+        "num": "④",
+        "title": "业务出口",
+        "desc": "HITL 审批、收敛校验 done:true、交付归档",
+        "tags": ["HITL 审批", "收敛校验", "归档"]
+      },
+      {
+        "num": "⑤",
+        "title": "工具层 MPC-Skill",
+        "desc": "白名单、参数校验、脱敏、HITL、幂等补偿、审计",
+        "tags": ["白名单", "脱敏", "幂等"]
+      },
+      {
+        "num": "⑥",
+        "title": "Trace",
+        "desc": "模型/提示词版本、上下文来源、工具调用、状态迁移、延迟留痕",
+        "tags": ["版本留痕", "全链路回放"]
+      },
+      {
+        "num": "⑦",
+        "title": "监控评估",
+        "desc": "成功率、正确失败率、延迟、成本、人工接管率",
+        "tags": ["成功率", "延迟", "成本"]
+      },
+      {
+        "num": "⑧",
+        "title": "预算",
+        "desc": "步数 / Token / 时间三重预算，触顶即终止防跑飞",
+        "tags": ["步数", "Token", "时间"]
+      }
+    ]
+  },
+  "board": {
+    "title": "留言板",
+    "desc": "欢迎留言！"
+  },
+  "tools": {
+    "title": "小工具",
+    "desc": "这里分享一些实用小工具。"
+  },
+  "talents": {
+    "title": "👀"
+  }
+}

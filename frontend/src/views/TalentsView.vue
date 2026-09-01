@@ -1,6 +1,6 @@
 <template>
   <div class="talents-view">
-    <h1>👀</h1>
+    <h1>{{ $t('talents.title') }}</h1>
     <p></p>
   </div>
 </template>

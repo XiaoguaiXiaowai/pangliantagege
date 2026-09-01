@@ -1,7 +1,7 @@
 <template>
   <div class="tools-view">
-    <h1>小工具</h1>
-    <p>这里分享一些实用小工具。</p>
+    <h1>{{ $t('tools.title') }}</h1>
+    <p>{{ $t('tools.desc') }}</p>
   </div>
 </template>
 

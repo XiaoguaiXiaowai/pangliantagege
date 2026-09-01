@@ -1,7 +1,10 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import axios from 'axios'
+
+const { t, tm } = useI18n()
 
 const router = useRouter()
 const avatarUrl = ref('')
@@ -11,51 +14,34 @@ const navigateTo = (path) => {
 }
 
 const features = [
-  {
-    title: '工作简历',
-    description: '查看我的详细工作经历、项目经验以及技能栈。',
-    path: '/resume',
-    icon: '💼',
-    wip: false
-  },
-  {
-    title: '企业级Agent',
-    description: '企业级混合Agent工作流作品——让AI可靠、可控、可审计地接进企业业务。',
-    path: '/agent-workflow',
-    icon: '🤖',
-    wip: false
-  },
-  {
-    title: '音乐作品',
-    description: '记录我的音乐作品和一些演出照片、视频。',
-    path: '/music',
-    icon: '🎵',
-    wip: false
-  },
-  {
-    title: '留言板',
-    description: '<开发中>欢迎在这里留下您的足迹，与我交流或分享您的想法。',
-    path: '/message-board',
-    icon: '💬',
-    wip: true
-  },
-  {
-    title: '小工具',
-    description: '<开发中>我开发的一些实用小工具，旨在提高日常工作效率。',
-    path: '/tools',
-    icon: '🛠️',
-    wip: true
-  },
-  {
-    title: '其他',
-    description: '忙里偷闲，可以看着背景的两个小球发发呆。',
-    path: '/talents',
-    icon: '🎱',
-    wip: false
-  }
+  { key: 'resume', path: '/resume', icon: '💼', wip: false },
+  { key: 'agent', path: '/agent-workflow', icon: '🤖', wip: false },
+  { key: 'music', path: '/music', icon: '🎵', wip: false },
+  { key: 'board', path: '/message-board', icon: '💬', wip: true },
+  { key: 'tools', path: '/tools', icon: '🛠️', wip: true },
+  { key: 'talents', path: '/talents', icon: '🎱', wip: false }
 ]
 
-const names = ['李 佳', '胖脸她哥哥', 'Jimmy Li']
+// 当前语言下的首页卡片数据（title/description 随语言实时切换）
+const localizedFeatures = computed(() => {
+  const messages = tm('home.features')
+  return features.map((f) => ({
+    ...f,
+    title: messages?.[f.key]?.title || f.key,
+    description: messages?.[f.key]?.description || ''
+  }))
+})
+
+const roleKeys = [
+  'aiExplorer',
+  'aiFullstack',
+  'seniorSRE',
+  'jpTechLead',
+  'toolMaker',
+  'musician'
+]
+
+const names = ['李 佳', 'リ カ', 'Jimmy Li']
 const currentNameIndex = ref(0)
 let nameInterval = null
 
@@ -110,11 +96,10 @@ const fetchAvatar = async () => {
 
     const response = await axios.get(finalUrl)
     if (response.data && response.data.basic_info && response.data.basic_info.avatar) {
-      let url = response.data.basic_info.avatar
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        if (!isProd || isDevPort) {
-          url = `http://${hostname}:8000${url}`
-        }
+      // 去掉协议+主机，统一为相对路径（生产经网关解析为 https 域名，本地直连解析为当前源）
+      let url = String(response.data.basic_info.avatar).replace(/^https?:\/\/[^/]+/i, '')
+      if (!isProd || isDevPort) {
+        url = `http://${hostname}:8000${url}`
       }
       avatarUrl.value = url
     }
@@ -222,7 +207,7 @@ onUnmounted(() => {
           }"
         >
           <div class="card-header">
-            <span class="label-text">My name is:</span>
+            <span class="label-text">{{ t('home.myNameIs') }}</span>
             <div class="name-text-wrapper">
               <transition name="fade-slide" mode="out-in">
                 <h1 :key="names[currentNameIndex]" class="name-text">{{ names[currentNameIndex] }}</h1>
@@ -231,14 +216,9 @@ onUnmounted(() => {
           </div>
           <div class="divider"></div>
           <div class="card-body">
-            <span class="label-text">I'm a:</span>
+            <span class="label-text">{{ t('home.imA') }}</span>
             <ul class="role-list">
-              <li>资深云架构运维工程师 (偏SRE)</li>
-              <li>对日项目技术负责人、项目管理者</li>
-              <li>AI增强型全栈开发者</li>
-              <li>小工具开发爱好者</li>
-              <li>AI相关技术探索者</li>
-              <li>自娱自乐的独立音乐人</li>
+              <li v-for="key in roleKeys" :key="key">{{ t(`home.roles.${key}`) }}</li>
             </ul>
           </div>
         </div>
@@ -247,8 +227,8 @@ onUnmounted(() => {
 
     <section class="navigation-grid">
       <div 
-        v-for="feature in features" 
-        :key="feature.title" 
+        v-for="feature in localizedFeatures" 
+        :key="feature.key" 
         class="nav-card"
         :class="{ 'disabled-card': feature.wip }"
         @click="!feature.wip && navigateTo(feature.path)"

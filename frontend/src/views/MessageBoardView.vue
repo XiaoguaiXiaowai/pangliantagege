@@ -1,7 +1,7 @@
 <template>
   <div class="message-board-view">
-    <h1>留言板</h1>
-    <p>欢迎留言！</p>
+    <h1>{{ $t('board.title') }}</h1>
+    <p>{{ $t('board.desc') }}</p>
   </div>
 </template>
 

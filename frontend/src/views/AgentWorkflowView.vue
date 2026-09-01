@@ -1,62 +1,19 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t, tm } = useI18n()
 
 // ============================================================
 // 作品在线地址
 // ============================================================
 const PROJECT_URL = 'https://playground.pangliantagege.top'
 
-// ---------------- 三大支柱 ----------------
-const pillars = [
-  {
-    icon: '🛡️',
-    title: '可靠',
-    en: 'Reliable',
-    color: '#26658C',
-    points: [
-      '确定性状态机约束动作序列，禁止跳步',
-      '幂等重试 + 失败补偿，重复执行不重复授权',
-      '步数 / Token / 时间三重预算，触顶即终止',
-      '收敛校验 done:true 通过才交付'
-    ]
-  },
-  {
-    icon: '🔐',
-    title: '可控',
-    en: 'Controlled',
-    color: '#0e7490',
-    points: [
-      'IAM 最小权限 + 多租户物理隔离',
-      '工具白名单注册表，未登记工具直接拒绝',
-      '参数强类型校验 + 敏感信息脱敏',
-      '高风险动作交还人工 HITL 审批'
-    ]
-  },
-  {
-    icon: '📋',
-    title: '可审计',
-    en: 'Auditable',
-    color: '#7c3aed',
-    points: [
-      'Trace 全链路回放，一步不差',
-      '模型 / 提示词版本逐次留痕',
-      '状态迁移、工具调用逐条落库',
-      '成功率 / 延迟 / 成本 / 人工接管率可视化'
-    ]
-  }
-]
+// ---------------- 三大支柱（文案随语言切换） ----------------
+const pillars = computed(() => tm('agent.pillars'))
 
-// ---------------- 8 大工程能力 ----------------
-const capabilities = [
-  { num: '①', title: '流程定义', desc: '把模糊需求结构化，明确哪些交给 Agent、哪些交给 Workflow，划清风险边界', tags: ['结构化输入', '风险边界'] },
-  { num: '②', title: '业务入口', desc: '身份校验、租户隔离、IAM 最小权限、输入风险分级', tags: ['鉴权', '租户隔离', '最小权限'] },
-  { num: '③', title: '核心 LOOP', desc: '上下文"选/压/截"、模型路由、四层约束、记忆五分层、异常处理', tags: ['上下文装配', '模型路由'] },
-  { num: '④', title: '业务出口', desc: 'HITL 审批、收敛校验 done:true、交付归档', tags: ['HITL 审批', '收敛校验', '归档'] },
-  { num: '⑤', title: '工具层 MPC-Skill', desc: '白名单、参数校验、脱敏、HITL、幂等补偿、审计', tags: ['白名单', '脱敏', '幂等'] },
-  { num: '⑥', title: 'Trace', desc: '模型/提示词版本、上下文来源、工具调用、状态迁移、延迟留痕', tags: ['版本留痕', '全链路回放'] },
-  { num: '⑦', title: '监控评估', desc: '成功率、正确失败率、延迟、成本、人工接管率', tags: ['成功率', '延迟', '成本'] },
-  { num: '⑧', title: '预算', desc: '步数 / Token / 时间三重预算，触顶即终止防跑飞', tags: ['步数', 'Token', '时间'] }
-]
+// ---------------- 8 大工程能力（文案随语言切换） ----------------
+const capabilities = computed(() => tm('agent.capabilities'))
 
 // ---------------- 架构图 iframe 高度自适应 ----------------
 // 完整模式（非 embed）嵌入 archify 架构图：Light/Classic/Present/Export、PATH·MAP·LENS、
@@ -97,32 +54,32 @@ onBeforeUnmount(() => {
   <div class="agent-workflow-view">
     <!-- ============ Hero ============ -->
     <section class="hero">
-      <span class="hero-badge">🤖 作品 · 企业级 Agent 工程实践</span>
-      <h1 class="hero-title">企业级混合 Agent 工作流</h1>
+      <span class="hero-badge">{{ t('agent.heroBadge') }}</span>
+      <h1 class="hero-title">{{ t('agent.heroTitle') }}</h1>
       <p class="hero-sub">
-        一个企业 IT 工单智能处理系统 —— 不是演示 AI 多聪明，<br />
-        而是演示 <strong>AI 如何被可靠、可控、可审计地接进企业业务</strong>。
+        {{ t('agent.heroSub1') }}<br />
+        <span v-html="t('agent.heroSub2')"></span>
       </p>
 
       <div class="hero-actions">
         <a class="btn-primary" :href="PROJECT_URL" target="_blank" rel="noopener noreferrer">
-          🚀 查看在线 Demo
+          {{ t('agent.viewDemo') }}
         </a>
-        <a class="btn-ghost" href="#architecture">系统架构图</a>
-        <a class="btn-ghost" href="#capabilities">八大工程能力</a>
+        <a class="btn-ghost" href="#architecture">{{ t('agent.architecture') }}</a>
+        <a class="btn-ghost" href="#capabilities">{{ t('agent.capabilitiesNav') }}</a>
       </div>
     </section>
 
     <!-- ============ 三大支柱 ============ -->
     <section class="section">
-      <h2>为什么是"企业级"？</h2>
-      <p class="section-sub">把不可控的 Agent，变成可控的流程</p>
+      <h2>{{ t('agent.whyEnterprise') }}</h2>
+      <p class="section-sub">{{ t('agent.whyEnterpriseSub') }}</p>
       <div class="pillar-grid">
-        <div v-for="p in pillars" :key="p.title" class="pillar-card">
+        <div v-for="p in pillars" :key="p.key" class="pillar-card">
           <div class="pillar-icon" :style="{ background: `linear-gradient(135deg, ${p.color}, #011C40)` }">
             {{ p.icon }}
           </div>
-          <h3>{{ p.title }} <span class="pillar-en">{{ p.en }}</span></h3>
+          <h3>{{ p.title }} <span v-if="p.subtitle && p.subtitle !== p.title" class="pillar-en">{{ p.subtitle }}</span></h3>
           <ul>
             <li v-for="(pt, i) in p.points" :key="i">{{ pt }}</li>
           </ul>
@@ -132,16 +89,16 @@ onBeforeUnmount(() => {
 
     <!-- ============ 系统架构图（完整交互模式） ============ -->
     <section class="section" id="architecture">
-      <h2>系统架构图</h2>
+      <h2>{{ t('agent.architecture') }}</h2>
       <p class="section-sub">
-        完整交互模式 —— 请使用工具栏（主题 / 风格 / 演示 / 导出）、PATH·MAP·LENS 控件、悬停与点击组件了解系统架构关系与详情
+        {{ t('agent.architectureSub') }}
       </p>
       <div class="arch-card">
         <iframe
           ref="archFrameRef"
           class="arch-frame"
           src="/agent-harness-architecture.html?theme=light"
-          title="企业级混合 Agent 工作流 · 系统架构图"
+          :title="t('agent.archFrameTitle')"
           loading="eager"
           referrerpolicy="no-referrer"
           @load="syncArchHeight"
@@ -151,8 +108,8 @@ onBeforeUnmount(() => {
 
     <!-- ============ 八大工程能力 ============ -->
     <section class="section" id="capabilities">
-      <h2>八大工程能力</h2>
-      <p class="section-sub">可靠、可控、可审计的具体落地实现</p>
+      <h2>{{ t('agent.eightCapabilities') }}</h2>
+      <p class="section-sub">{{ t('agent.eightCapabilitiesSub') }}</p>
       <div class="cap-grid">
         <div v-for="cap in capabilities" :key="cap.num" class="cap-card">
           <span class="cap-num">{{ cap.num }}</span>

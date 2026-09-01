@@ -1,14 +1,22 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import axios from 'axios'
+import { useLocaleStore } from '../stores/locale'
 axios.defaults.withCredentials = true
+
+const { t } = useI18n()
+const localeStore = useLocaleStore()
 
 const musicWorks = ref([])
 const loading = ref(true)
 const error = ref(null)
 
+let fetchSeq = 0
+
 const fetchMusicWorks = async () => {
   try {
+    const seq = ++fetchSeq
     const isProd = import.meta.env.PROD
     const isDevPort = window.location.port === '5173'
     const hostname = window.location.hostname
@@ -23,34 +31,39 @@ const fetchMusicWorks = async () => {
     }
 
     const response = await axios.get(finalUrl)
+    if (seq !== fetchSeq) return // 丢弃过期响应（快速切换语言时）
     
     // Process URLs to be absolute if needed
     musicWorks.value = response.data.map(work => {
-      let cover = work.cover_image
-      let audio = work.audio_file
-      let video = work.video_file
-      
-      if (cover && !cover.startsWith('http')) {
-        cover = (!isProd || isDevPort) ? `http://${hostname}:8000${cover}` : cover
-      }
-      
-      if (audio && !audio.startsWith('http')) {
-        audio = (!isProd || isDevPort) ? `http://${hostname}:8000${audio}` : audio
-      }
+      // 去掉协议+主机，统一为相对路径（生产经网关解析为 https 域名，本地直连解析为当前源）
+      const norm = (u) => (u ? String(u).replace(/^https?:\/\/[^/]+/i, '') : u)
+      let cover = norm(work.cover_image)
+      let audio = norm(work.audio_file)
+      let video = norm(work.video_file)
 
-      if (video && !video.startsWith('http')) {
-        video = (!isProd || isDevPort) ? `http://${hostname}:8000${video}` : video
-      }
-      
+      cover = cover ? ((!isProd || isDevPort) ? `http://${hostname}:8000${cover}` : cover) : cover
+      audio = audio ? ((!isProd || isDevPort) ? `http://${hostname}:8000${audio}` : audio) : audio
+      video = video ? ((!isProd || isDevPort) ? `http://${hostname}:8000${video}` : video) : video
+
       return { ...work, cover_image: cover, audio_file: audio, video_file: video }
     })
   } catch (err) {
-    error.value = '无法加载音乐作品，请稍后再试。'
+    error.value = t('music.loadError')
     console.error('API Error:', err)
   } finally {
     loading.value = false
   }
 }
+
+// 语言切换时按新语言重新拉取音乐作品
+watch(
+  () => localeStore.locale,
+  () => {
+    loading.value = true
+    error.value = null
+    fetchMusicWorks()
+  }
+)
 
 const audioWorks = computed(() => {
   return musicWorks.value.filter(work => work.work_type === 'audio')
@@ -107,18 +120,18 @@ onMounted(() => {
 
 <template>
   <div class="music-space-container">
-    <div v-if="loading" class="loading">加载中...</div>
+    <div v-if="loading" class="loading">{{ t('music.loading') }}</div>
     <div v-else-if="error" class="error">{{ error }}</div>
     <div v-else-if="musicWorks.length === 0" class="empty-state">
-      暂无音乐作品，敬请期待！
+      {{ t('music.empty') }}
     </div>
     
     <div v-else class="content-wrapper">
       <!-- 原创音乐 Section -->
       <section v-if="audioWorks.length > 0" class="work-section">
         <div class="section-header">
-          <h2>部分原创音乐</h2>
-          <p class="section-desc">妹有技巧，全是感情</p>
+          <h2>{{ t('music.audioSection') }}</h2>
+          <p class="section-desc">{{ t('music.audioDesc') }}</p>
         </div>
         
         <div class="works-grid">
@@ -137,7 +150,7 @@ onMounted(() => {
               <div class="media-player">
                 <audio v-if="work.audio_file" controls class="audio-player">
                   <source :src="work.audio_file" type="audio/mpeg">
-                  您的浏览器不支持 audio 元素。
+                  {{ t('music.audioUnsupported') }}
                 </audio>
               </div>
             </div>
@@ -148,8 +161,8 @@ onMounted(() => {
       <!-- 演出视频 Section -->
       <section v-if="videoWorks.length > 0" class="work-section">
         <div class="section-header">
-          <h2>部分演出视频</h2>
-          <p class="section-desc">怀念跟兄弟们一起玩儿音乐的日子啊……</p>
+          <h2>{{ t('music.videoSection') }}</h2>
+          <p class="section-desc">{{ t('music.videoDesc') }}</p>
         </div>
         
         <div class="works-grid">
@@ -180,8 +193,8 @@ onMounted(() => {
       <!-- 演出照片 Section -->
       <section v-if="photoWorks.length > 0" class="work-section">
         <div class="section-header">
-          <h2>部分演出照片</h2>
-          <p class="section-desc">一些珍贵的舞台回忆</p>
+          <h2>{{ t('music.photoSection') }}</h2>
+          <p class="section-desc">{{ t('music.photoDesc') }}</p>
         </div>
         
         <div class="works-grid">
@@ -226,7 +239,7 @@ onMounted(() => {
               class="modal-video-player"
             >
               <source :src="currentVideoWork.video_file" type="video/mp4">
-              您的浏览器不支持 video 元素。
+              {{ t('music.videoUnsupported') }}
             </video>
           </div>
         </div>

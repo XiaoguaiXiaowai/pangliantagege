@@ -22,12 +22,14 @@ class ResumeViewSet(viewsets.ViewSet):
         educations = Education.objects.all()
         certificates = Certificate.objects.all()
 
+        # context 传入 request，使序列化器可按 ?lang= 返回对应语言的内容
+        ctx = {'request': request}
         return Response({
-            'basic_info': BasicInfoSerializer(basic_info).data if basic_info else None,
-            'skills': SkillSerializer(skills, many=True).data,
-            'tech_stack': TechStackSerializer(tech_stack, many=True).data,
-            'experiences': ExperienceSerializer(experiences, many=True).data,
-            'projects': ProjectSerializer(projects, many=True).data,
-            'educations': EducationSerializer(educations, many=True).data,
-            'certificates': CertificateSerializer(certificates, many=True).data,
+            'basic_info': BasicInfoSerializer(basic_info, context=ctx).data if basic_info else None,
+            'skills': SkillSerializer(skills, many=True, context=ctx).data,
+            'tech_stack': TechStackSerializer(tech_stack, many=True, context=ctx).data,
+            'experiences': ExperienceSerializer(experiences, many=True, context=ctx).data,
+            'projects': ProjectSerializer(projects, many=True, context=ctx).data,
+            'educations': EducationSerializer(educations, many=True, context=ctx).data,
+            'certificates': CertificateSerializer(certificates, many=True, context=ctx).data,
         })

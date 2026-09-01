@@ -1,6 +1,21 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { watch } from 'vue'
+import { RouterLink, RouterView, useRoute } from 'vue-router'
 import DynamicBackground from './components/DynamicBackground.vue'
+import LanguageSwitcher from './components/LanguageSwitcher.vue'
+import { useLocaleStore } from './stores/locale'
+import { applyDocumentTitle } from './utils/documentTitle'
+
+const route = useRoute()
+const localeStore = useLocaleStore()
+
+// 语言切换后立即用新语言重算浏览器标题（路由级切换由 router.beforeEach 负责）
+watch(
+  () => localeStore.locale,
+  () => {
+    applyDocumentTitle(route)
+  }
+)
 </script>
 
 <template>
@@ -10,26 +25,29 @@ import DynamicBackground from './components/DynamicBackground.vue'
       <header>
         <div class="wrapper">
           <div class="site-branding">
-            <span class="logo-main">胖脸她哥哥</span>
-            <span class="logo-sub"> - 李佳的个人网站</span>
+            <span class="logo-main">{{ $t('common.brandName') }}</span>
+            <span class="logo-sub">{{ $t('common.brandSub') }}</span>
           </div>
-          <nav>
-            <RouterLink to="/">首页</RouterLink>
-            <RouterLink to="/resume">工作简历</RouterLink>
-            <RouterLink to="/agent-workflow">企业级Agent</RouterLink>
-            <RouterLink to="/music">音乐作品</RouterLink>
-            <div class="nav-item-wrapper disabled-nav">
-              <span class="nav-text">留言板</span>
-              <span class="wip-badge">WIP</span>
-            </div>
-            
-            <div class="nav-item-wrapper disabled-nav">
-              <span class="nav-text">小工具</span>
-              <span class="wip-badge">WIP</span>
-            </div>
-            
-            <RouterLink to="/talents">其他</RouterLink>
-          </nav>
+          <div class="header-right">
+            <nav>
+              <RouterLink to="/">{{ $t('nav.home') }}</RouterLink>
+              <RouterLink to="/resume">{{ $t('nav.resume') }}</RouterLink>
+              <RouterLink to="/agent-workflow">{{ $t('nav.agent') }}</RouterLink>
+              <RouterLink to="/music">{{ $t('nav.music') }}</RouterLink>
+              <div class="nav-item-wrapper disabled-nav">
+                <span class="nav-text">{{ $t('nav.board') }}</span>
+                <span class="wip-badge">WIP</span>
+              </div>
+
+              <div class="nav-item-wrapper disabled-nav">
+                <span class="nav-text">{{ $t('nav.tools') }}</span>
+                <span class="wip-badge">WIP</span>
+              </div>
+
+              <RouterLink to="/talents">{{ $t('nav.talents') }}</RouterLink>
+            </nav>
+            <LanguageSwitcher />
+          </div>
         </div>
       </header>
 
@@ -38,7 +56,7 @@ import DynamicBackground from './components/DynamicBackground.vue'
       </main>
 
       <footer>
-        <p>&copy; 2026 胖脸她哥哥 - 李佳的个人网站. All rights reserved.</p>
+        <p>{{ $t('common.footerCopyright') }}</p>
       </footer>
     </div>
   </div>
@@ -79,16 +97,26 @@ header {
   gap: 40px;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
 .site-branding {
   display: flex;
-  align-items: baseline;
-  letter-spacing: -0.01em;
+  align-items: center;
+  /* 固定品牌区高度：避免日文/英文下 CJK 字形行盒溢出导致页头变高 */
+  height: 51px;
   flex-shrink: 0;
 }
 
 .logo-main {
   font-size: 2.0rem;
   font-weight: 800;
+  line-height: 1.2;
   background: linear-gradient(135deg, var(--luna-darkest), var(--luna-medium));
   -webkit-background-clip: text;
   background-clip: text;
@@ -98,14 +126,24 @@ header {
 .logo-sub {
   font-size: 1rem;
   font-weight: 500;
+  line-height: 1.2;
   color: var(--text-secondary);
   margin-left: 8px;
+  white-space: nowrap;
 }
 
 nav {
   display: flex;
   gap: 10px;
   align-items: center;
+  min-width: 0;
+  /* 导航区允许横向滚动，保证页头始终单行、高度不因语言变化 */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+nav::-webkit-scrollbar {
+  display: none;
 }
 
 nav a, .nav-item-wrapper {
@@ -113,10 +151,17 @@ nav a, .nav-item-wrapper {
   text-decoration: none;
   font-weight: 600;
   font-size: 0.95rem;
-  padding: 8px 18px;
+  /* 固定高度 + 居中：导航项高度不随语言字形度量变化，页头高度恒一致 */
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
   border-radius: 20px;
   transition: all 0.3s ease;
   position: relative;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 nav a:hover {
@@ -170,5 +215,16 @@ footer {
   color: var(--text-secondary);
   font-size: 0.85rem;
   border-top: 1px solid rgba(167, 235, 242, 0.3);
+}
+
+@media (max-width: 900px) {
+  .wrapper {
+    gap: 20px;
+    padding: 1rem 20px;
+  }
+
+  .logo-sub {
+    display: none;
+  }
 }
 </style>

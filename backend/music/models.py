@@ -8,7 +8,11 @@ class MusicWork(models.Model):
     )
     
     title = models.CharField(max_length=200, verbose_name="作品名称")
+    title_en = models.CharField(max_length=200, blank=True, null=True, verbose_name="作品名称(English)")
+    title_ja = models.CharField(max_length=200, blank=True, null=True, verbose_name="作品名称(日本語)")
     description = models.TextField(blank=True, null=True, verbose_name="作品简介")
+    description_en = models.TextField(blank=True, null=True, verbose_name="作品简介(English)")
+    description_ja = models.TextField(blank=True, null=True, verbose_name="作品简介(日本語)")
     work_type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='audio', verbose_name="类型")
     cover_image = models.ImageField(upload_to='music/covers/', blank=True, null=True, verbose_name="封面图片")
     audio_file = models.FileField(upload_to='music/audio/', blank=True, null=True, verbose_name="音频文件")

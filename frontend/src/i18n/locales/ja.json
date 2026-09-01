@@ -1,0 +1,247 @@
+{
+  "common": {
+    "brandName": "胖脸她哥哥",
+    "brandSub": " - 李佳の個人サイト",
+    "siteTitle": "李佳の個人サイト",
+    "footerCopyright": "© 2026 胖脸她哥哥 - 李佳の個人サイト. All rights reserved."
+  },
+  "nav": {
+    "home": "ホーム",
+    "resume": "職務経歴書",
+    "agent": "エンタープライズAIエージェント",
+    "music": "音楽作品",
+    "board": "掲示板",
+    "tools": "ツール",
+    "talents": "その他"
+  },
+  "route": {
+    "home": "ホーム",
+    "resume": "職務経歴書",
+    "messageBoard": "掲示板",
+    "agentWorkflow": "エンタープライズAIエージェント",
+    "tools": "ツール",
+    "musicSpace": "音楽作品",
+    "login": "ログイン",
+    "talents": "マイタレント",
+    "notFound": "ページが見つかりません"
+  },
+  "home": {
+    "myNameIs": "私の名前は:",
+    "imA": "私は:",
+    "features": {
+      "resume": {
+        "title": "職務経歴書",
+        "description": "職歴・プロジェクト経験・技術スタックを詳しくご覧いただけます。"
+      },
+      "agent": {
+        "title": "エンタープライズAIエージェント",
+        "description": "エンタープライズ向けハイブリッドAgentワークフロー作品——AIを信頼性・制御性・監査可能性をもって企業業務に組み込みます。"
+      },
+      "music": {
+        "title": "音楽作品",
+        "description": "自作の音楽作品やライブ写真・動画を記録しています。"
+      },
+      "board": {
+        "title": "掲示板",
+        "description": "<開発中>ぜひ足跡を残して、交流やご意見を共有してください。"
+      },
+      "tools": {
+        "title": "ツール",
+        "description": "<開発中>日常の作業効率化を目的に開発した便利な小ツールです。"
+      },
+      "talents": {
+        "title": "その他",
+        "description": "一息つきたい時は、背景の二つの球体を眺めてぼんやりどうぞ。"
+      }
+    },
+    "roles": {
+      "seniorSRE": "クラウドアーキテクト・運用SREエンジニア",
+      "jpTechLead": "技術責任者・プロジェクトマネージャー",
+      "aiFullstack": "AI拡張型フルスタック開発者",
+      "toolMaker": "小ツール開発好き",
+      "aiExplorer": "フルスタック・オートノマスAIエンジニア",
+      "musician": "自己満足のインディーズミュージシャン"
+    }
+  },
+  "resume": {
+    "loading": "読み込み中...",
+    "sections": {
+      "basicInfo": "基本情報",
+      "keywords": "私のキーワード",
+      "techStack": "スキル概要",
+      "certificates": "取得資格",
+      "experience": "職務経歴",
+      "projects": "プロジェクト経歴",
+      "education": "学歴"
+    },
+    "summaryTitles": {
+      "experience": "職務経験",
+      "skills": "専門スキル",
+      "management": "チームマネジメント",
+      "intro": "プロフィール"
+    },
+    "projectSlideTitles": {
+      "bg": "プロジェクト背景",
+      "duty": "担当業務",
+      "solution": "解決策",
+      "result": "成果",
+      "description": "概要"
+    },
+    "downloadPdf": "PDF版職務経歴書をダウンロード",
+    "toPresent": "現在",
+    "ageYears": "{age}歳",
+    "viewProject": "プロジェクトを見る →",
+    "emptyBasicInfo": "基本情報はありません",
+    "emptyKeywords": "キーワード情報はありません",
+    "emptyTechStack": "スキル情報はありません",
+    "emptyCertificates": "資格情報はありません",
+    "emptyExperience": "職務経歴はありません",
+    "emptyProjects": "プロジェクト経歴はありません",
+    "emptyEducation": "学歴情報はありません",
+    "loadError": "職務経歴データの読み込みに失敗しました。しばらくしてからお試しください。"
+  },
+  "music": {
+    "loading": "読み込み中...",
+    "empty": "まだ音楽作品はありません。お楽しみに！",
+    "audioSection": "オリジナル音楽",
+    "audioDesc": "テクニックなし、すべて感情",
+    "videoSection": "ライブ映像",
+    "videoDesc": "仲間たちと音楽を楽しんだあの日々が懐かしい……",
+    "photoSection": "ライブ写真",
+    "photoDesc": "ステージの貴重な思い出",
+    "audioUnsupported": "お使いのブラウザは audio 要素に対応していません。",
+    "videoUnsupported": "お使いのブラウザは video 要素に対応していません。",
+    "loadError": "音楽作品の読み込みに失敗しました。しばらくしてからお試しください。"
+  },
+  "login": {
+    "title": "ログイン",
+    "desc": "保護されたコンテンツにアクセスするにはアカウントとパスワードを入力してください",
+    "username": "アカウント",
+    "password": "パスワード",
+    "submitting": "ログイン中...",
+    "submit": "ログイン",
+    "error": "ログインに失敗しました。アカウントまたはパスワードを確認してください。"
+  },
+  "notfound": {
+    "title": "ページが見つかりません",
+    "desc": "アクセスしたアドレスは存在しないか、移動された可能性があります。リンクを確認するか、ホームに戻ってください。",
+    "backHome": "ホームに戻る"
+  },
+  "agent": {
+    "heroBadge": "🤖 作品 · エンタープライズAgentエンジニアリング実践",
+    "heroTitle": "エンタープライズ向けハイブリッドAgentワークフロー",
+    "heroSub1": "企業ITチケットを知的に処理するシステム——AIがどれだけ賢いかを示すのではなく、",
+    "heroSub2": "AIが<strong>信頼性・制御性・監査可能性をもって企業業務に組み込まれるか</strong>を示します。",
+    "viewDemo": "🚀 ライブデモを見る",
+    "architecture": "システムアーキテクチャ",
+    "capabilitiesNav": "8つのエンジニアリング能力",
+    "archFrameTitle": "エンタープライズ向けハイブリッドAgentワークフロー · システムアーキテクチャ",
+    "whyEnterprise": "なぜ「エンタープライズ向け」なのか？",
+    "whyEnterpriseSub": "制御不能なAgentを、制御可能なワークフローに変える",
+    "architectureSub": "フルインタラクティブモード——ツールバー（テーマ/スタイル/プレゼン/エクスポート）、PATH・MAP・LENS コントロール、ホバーやクリックでシステム構成と詳細をご確認ください",
+    "eightCapabilities": "8つのエンジニアリング能力",
+    "eightCapabilitiesSub": "信頼性・制御性・監査可能性を具体化した実装",
+    "pillars": [
+      {
+        "key": "reliable",
+        "icon": "🛡️",
+        "color": "#26658C",
+        "title": "信頼性",
+        "subtitle": "Reliable",
+        "points": [
+          "決定性ステートマシンがアクション列を制約、ステップ飛ばしを禁止",
+          "冪等リトライ＋失敗補償、再実行しても重複認可なし",
+          "ステップ/Token/時間の三重予算、上限到達で即終了",
+          "収束チェック done:true 通過時のみ納品"
+        ]
+      },
+      {
+        "key": "controlled",
+        "icon": "🔐",
+        "color": "#0e7490",
+        "title": "制御性",
+        "subtitle": "Controlled",
+        "points": [
+          "IAM最小権限＋マルチテナント物理分離",
+          "ツールホワイトリスト登録制、未登録ツールは直接拒否",
+          "パラメータ強型検証＋機密情報のマスキング",
+          "高リスク動作は人間のHITL承認に委譲"
+        ]
+      },
+      {
+        "key": "auditable",
+        "icon": "📋",
+        "color": "#7c3aed",
+        "title": "監査可能性",
+        "subtitle": "Auditable",
+        "points": [
+          "Trace全チェーンリプレイ、一歩も欠かさず記録",
+          "モデル/プロンプト版数を毎回記録",
+          "状態遷移・ツール呼び出しを1件ずつDBに保存",
+          "成功率/レイテンシ/コスト/人手介入率を可視化"
+        ]
+      }
+    ],
+    "capabilities": [
+      {
+        "num": "①",
+        "title": "プロセス定義",
+        "desc": "曖昧な要件を構造化し、AgentとWorkflowの担当を明確化してリスク境界を引く",
+        "tags": ["構造化入力", "リスク境界"]
+      },
+      {
+        "num": "②",
+        "title": "業務入口",
+        "desc": "本人確認、テナント分離、IAM最小権限、入力リスクのグレーディング",
+        "tags": ["認証・認可", "テナント分離", "最小権限"]
+      },
+      {
+        "num": "③",
+        "title": "コアLOOP",
+        "desc": "コンテキストの選別/圧縮/切り捨て、モデルルーティング、四層の制約、五層メモリ、例外処理",
+        "tags": ["コンテキスト組み立て", "モデルルーティング"]
+      },
+      {
+        "num": "④",
+        "title": "業務出口",
+        "desc": "HITL承認、収束チェック done:true、納品アーカイブ",
+        "tags": ["HITL承認", "収束チェック", "アーカイブ"]
+      },
+      {
+        "num": "⑤",
+        "title": "ツール層 MPC-Skill",
+        "desc": "ホワイトリスト、パラメータ検証、マスキング、HITL、冪等補償、監査",
+        "tags": ["ホワイトリスト", "マスキング", "冪等"]
+      },
+      {
+        "num": "⑥",
+        "title": "Trace",
+        "desc": "モデル/プロンプト版数、コンテキスト由来、ツール呼び出し、状態遷移、レイテンシ記録",
+        "tags": ["版数記録", "全チェーンリプレイ"]
+      },
+      {
+        "num": "⑦",
+        "title": "監視と評価",
+        "desc": "成功率、正確失敗率、レイテンシ、コスト、人手介入率",
+        "tags": ["成功率", "レイテンシ", "コスト"]
+      },
+      {
+        "num": "⑧",
+        "title": "予算",
+        "desc": "ステップ/Token/時間の三重予算、上限到達で即終了し暴走を防止",
+        "tags": ["ステップ", "Token", "時間"]
+      }
+    ]
+  },
+  "board": {
+    "title": "掲示板",
+    "desc": "ぜひメッセージをお寄せください！"
+  },
+  "tools": {
+    "title": "小さなツール",
+    "desc": "実用的な小ツールをここでシェアしています。"
+  },
+  "talents": {
+    "title": "👀"
+  }
+}

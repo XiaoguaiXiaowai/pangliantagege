@@ -1,5 +1,7 @@
 <script setup>
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 const router = useRouter()
 const goHome = () => router.push('/')
 </script>
@@ -8,9 +10,9 @@ const goHome = () => router.push('/')
   <div class="notfound-container">
     <div class="card">
       <div class="emoji">🧭</div>
-      <h1>页面不存在</h1>
-      <p>您访问的地址不存在或已被移动。请检查链接或返回首页。</p>
-      <button class="btn" @click="goHome">返回首页</button>
+      <h1>{{ t('notfound.title') }}</h1>
+      <p>{{ t('notfound.desc') }}</p>
+      <button class="btn" @click="goHome">{{ t('notfound.backHome') }}</button>
     </div>
   </div>
   </template>

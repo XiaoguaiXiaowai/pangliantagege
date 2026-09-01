@@ -1,7 +1,10 @@
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
+
+const { t } = useI18n()
 
 const router = useRouter()
 const username = ref('')
@@ -59,7 +62,7 @@ const onSubmit = async () => {
     })
     router.push('/')
   } catch (e) {
-    error.value = '登录失败，请检查账号或密码'
+    error.value = t('login.error')
   } finally {
     loading.value = false
   }
@@ -69,18 +72,18 @@ const onSubmit = async () => {
 <template>
   <div class="login-container">
     <div class="login-card">
-      <h1>登录</h1>
-      <p class="desc">请输入账号密码以访问网站的受保护内容</p>
+      <h1>{{ t('login.title') }}</h1>
+      <p class="desc">{{ t('login.desc') }}</p>
       <form @submit.prevent="onSubmit">
         <div class="field">
-          <label>账号</label>
+          <label>{{ t('login.username') }}</label>
           <input v-model="username" type="text" required />
         </div>
         <div class="field">
-          <label>密码</label>
+          <label>{{ t('login.password') }}</label>
           <input v-model="password" type="password" required />
         </div>
-        <button type="submit" :disabled="loading">{{ loading ? '登录中...' : '登录' }}</button>
+        <button type="submit" :disabled="loading">{{ loading ? t('login.submitting') : t('login.submit') }}</button>
       </form>
       <p v-if="error" class="error">{{ error }}</p>
     </div>

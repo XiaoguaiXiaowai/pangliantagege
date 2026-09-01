@@ -1,9 +1,14 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import axios from 'axios'
 import MagicCard from '../components/MagicCard.vue'
 import Marquee from '../components/Marquee.vue'
+import { useLocaleStore } from '../stores/locale'
 axios.defaults.withCredentials = true
+
+const { t } = useI18n()
+const localeStore = useLocaleStore()
 
 const resumeData = ref(null)
 const loading = ref(true)
@@ -12,13 +17,13 @@ const error = ref(null)
 const activeSection = ref('')
 
 const sections = [
-  { id: 'basic-info', title: '基本信息' },
-  { id: 'keywords', title: '我的标签' },
-  { id: 'tech-stack', title: '技能概况' },
-  { id: 'certificates', title: '获得证书' },
-  { id: 'experience', title: '工作经历' },
-  { id: 'projects', title: '项目经历' },
-  { id: 'education', title: '教育背景' },
+  { id: 'basic-info', titleKey: 'resume.sections.basicInfo' },
+  { id: 'keywords', titleKey: 'resume.sections.keywords' },
+  { id: 'tech-stack', titleKey: 'resume.sections.techStack' },
+  { id: 'certificates', titleKey: 'resume.sections.certificates' },
+  { id: 'experience', titleKey: 'resume.sections.experience' },
+  { id: 'projects', titleKey: 'resume.sections.projects' },
+  { id: 'education', titleKey: 'resume.sections.education' },
 ]
 
 // Refs for interaction
@@ -44,12 +49,12 @@ const summarySlides = computed(() => {
   if (!resumeData.value?.basic_info) return []
   const info = resumeData.value.basic_info
   const slides = []
-  if (info.summary_experience) slides.push({ title: '工作经验', content: info.summary_experience, icon: '' })
-  if (info.summary_skills) slides.push({ title: '专业能力', content: info.summary_skills, icon: '' })
-  if (info.summary_management) slides.push({ title: '团队管理', content: info.summary_management, icon: '' })
+  if (info.summary_experience) slides.push({ title: t('resume.summaryTitles.experience'), content: info.summary_experience, icon: '' })
+  if (info.summary_skills) slides.push({ title: t('resume.summaryTitles.skills'), content: info.summary_skills, icon: '' })
+  if (info.summary_management) slides.push({ title: t('resume.summaryTitles.management'), content: info.summary_management, icon: '' })
   
   if (slides.length === 0 && info.summary) {
-    slides.push({ title: '个人简介', content: info.summary, icon: '📝' })
+    slides.push({ title: t('resume.summaryTitles.intro'), content: info.summary, icon: '📝' })
   }
   return slides
 })
@@ -168,13 +173,13 @@ const checkRoleOverflows = () => {
 
 const getProjectSlides = (project) => {
   const slides = []
-  if (project.bg_description) slides.push({ title: '项目背景', content: project.bg_description, icon: '🎯' })
-  if (project.duty_description) slides.push({ title: '项目职责', content: project.duty_description, icon: '🛡️' })
-  if (project.solution_description) slides.push({ title: '解决方案', content: project.solution_description, icon: '💡' })
-  if (project.result_description) slides.push({ title: '项目成果', content: project.result_description, icon: '🏆' })
+  if (project.bg_description) slides.push({ title: t('resume.projectSlideTitles.bg'), content: project.bg_description, icon: '🎯' })
+  if (project.duty_description) slides.push({ title: t('resume.projectSlideTitles.duty'), content: project.duty_description, icon: '🛡️' })
+  if (project.solution_description) slides.push({ title: t('resume.projectSlideTitles.solution'), content: project.solution_description, icon: '💡' })
+  if (project.result_description) slides.push({ title: t('resume.projectSlideTitles.result'), content: project.result_description, icon: '🏆' })
   
   if (slides.length === 0 && project.description) {
-    slides.push({ title: '项目描述', content: project.description, icon: '📝' })
+    slides.push({ title: t('resume.projectSlideTitles.description'), content: project.description, icon: '📝' })
   }
   return slides
 }
@@ -323,8 +328,11 @@ onUnmounted(() => {
   Object.keys(projectIntervals).forEach(id => pauseProjectRotation(id))
 })
 
+let fetchSeq = 0
+
 const fetchResumeData = async () => {
   try {
+    const seq = ++fetchSeq
     // Determine the base URL dynamically based on current window location
     // If in production, we proxy /api/ to the backend via Nginx.
     // In dev, we might be running vite on 5173 and backend on 8000.
@@ -351,6 +359,7 @@ const fetchResumeData = async () => {
     }
 
     const response = await axios.get(finalUrl)
+    if (seq !== fetchSeq) return // 丢弃过期响应（快速切换语言时）
     resumeData.value = response.data
     startSummaryRotation()
     initProjectCarousels()
@@ -375,7 +384,7 @@ const fetchResumeData = async () => {
         }
       }, 100)
   } catch (err) {
-    error.value = '无法加载简历数据，请稍后再试。'
+    error.value = t('resume.loadError')
     if (err?.response?.status === 401) {
       window.location.href = '/login'
     } else {
@@ -386,12 +395,21 @@ const fetchResumeData = async () => {
   }
 }
 
+// 语言切换时按新语言重新拉取简历数据
+watch(
+  () => localeStore.locale,
+  () => {
+    loading.value = true
+    error.value = null
+    fetchResumeData()
+  }
+)
+
 const getImageUrl = (url) => {
   if (!url) return ''
-  // If the URL is already absolute, return it
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url
-  }
+  // 统一为相对路径：去掉协议+主机，由浏览器按当前源解析
+  // （生产经网关为 https 域名，本地 http 直连则解析为当前页面源，媒体可正常加载）
+  url = url.replace(/^https?:\/\/[^/]+/i, '')
   
   const isProd = import.meta.env.PROD
   const isDevPort = window.location.port === '5173'
@@ -540,7 +558,7 @@ onMounted(() => {
 
 <template>
   <div class="resume-container">
-    <div v-if="loading" class="loading">加载中...</div>
+    <div v-if="loading" class="loading">{{ t('resume.loading') }}</div>
     <div v-else-if="error" class="error">{{ error }}</div>
     
     <div v-else class="content-wrapper" ref="contentWrapperRef">
@@ -554,13 +572,13 @@ onMounted(() => {
               :class="{ active: activeSection === section.id }"
               @click="scrollToSection(section.id)"
             >
-              {{ section.title }}
+              {{ t(section.titleKey) }}
             </li>
           </ul>
         </nav>
         <div class="download-pdf">
           <a href="/media/resume/简历_李佳_AI-Agent_v2.0.pdf" class="btn-pdf" target="_blank" download>
-            <span>↓</span> 下载PDF版简历
+            <span>↓</span> {{ t('resume.downloadPdf') }}
           </a>
         </div>
       </aside>
@@ -585,7 +603,7 @@ onMounted(() => {
               <p class="contact-info">
                 <span v-if="resumeData.basic_info.gender">{{ resumeData.basic_info.gender }}</span>
                 <span v-if="resumeData.basic_info.gender" class="dot">·</span>
-                <span v-if="resumeData.basic_info.age">{{ resumeData.basic_info.age }}岁</span>
+                <span v-if="resumeData.basic_info.age">{{ t('resume.ageYears', { age: resumeData.basic_info.age }) }}</span>
                 <span v-if="resumeData.basic_info.age" class="dot">·</span>
                 <span>{{ resumeData.basic_info.location }}</span>
                 <span class="dot">·</span>
@@ -628,12 +646,12 @@ onMounted(() => {
 
             </div>
           </div>
-          <div v-else class="empty-state">暂无基本信息</div>
+          <div v-else class="empty-state">{{ t('resume.emptyBasicInfo') }}</div>
         </section>
 
         <!-- Keywords (Marquee) - Previously Skills -->
         <section id="keywords" class="section-card">
-          <h3>我的标签</h3>
+          <h3>{{ t('resume.sections.keywords') }}</h3>
           <div class="skills-marquee-container" v-if="resumeData && resumeData.skills && resumeData.skills.length">
             <Marquee pauseOnHover duration="40s" class="mb-4">
               <div v-for="skill in firstRowSkills" :key="skill.id" class="skill-pill">
@@ -646,12 +664,12 @@ onMounted(() => {
               </div>
             </Marquee>
           </div>
-          <div v-else class="empty-state">暂无关键词信息</div>
+          <div v-else class="empty-state">{{ t('resume.emptyKeywords') }}</div>
         </section>
 
         <!-- Tech Stack -->
         <section id="tech-stack" class="section-card">
-          <h3>技能概况</h3>
+          <h3>{{ t('resume.sections.techStack') }}</h3>
           <div class="tech-major-grid" v-if="groupedTechSkills && groupedTechSkills.length">
             <div v-for="(majorGroup, mIndex) in groupedTechSkills" :key="majorGroup.name" class="tech-major-card">
               <div class="major-header">
@@ -672,12 +690,12 @@ onMounted(() => {
               </div>
             </div>
           </div>
-          <div v-else class="empty-state">暂无技能栈信息</div>
+          <div v-else class="empty-state">{{ t('resume.emptyTechStack') }}</div>
         </section>
 
         <!-- Certificates -->
         <section id="certificates" class="section-card">
-          <h3>获得证书</h3>
+          <h3>{{ t('resume.sections.certificates') }}</h3>
           <div class="honor-certificate-list" v-if="resumeData && resumeData.certificates && resumeData.certificates.length">
             <div v-for="cert in resumeData.certificates" :key="cert.id" class="honor-certificate-card">
               <div class="cert-inner">
@@ -688,28 +706,28 @@ onMounted(() => {
               </div>
             </div>
           </div>
-          <div v-else class="empty-state">暂无认证经历信息</div>
+          <div v-else class="empty-state">{{ t('resume.emptyCertificates') }}</div>
         </section>
 
         <!-- Experience -->
         <section id="experience" class="section-card">
-          <h3>工作经历</h3>
+          <h3>{{ t('resume.sections.experience') }}</h3>
           <div class="timeline" v-if="resumeData && resumeData.experiences && resumeData.experiences.length">
             <div v-for="exp in resumeData.experiences" :key="exp.id" class="timeline-item">
               <div class="timeline-header">
                 <span class="company">{{ exp.company }}</span>
-                <span class="date">{{ exp.start_date }} - {{ exp.end_date || '至今' }}</span>
+                <span class="date">{{ exp.start_date }} - {{ exp.end_date || t('resume.toPresent') }}</span>
               </div>
               <div class="position">{{ exp.position }}</div>
               <p class="description" style="white-space: pre-wrap;">{{ exp.description }}</p>
             </div>
           </div>
-           <div v-else class="empty-state">暂无工作经历</div>
+           <div v-else class="empty-state">{{ t('resume.emptyExperience') }}</div>
         </section>
 
         <!-- Projects (MagicCard) -->
         <section id="projects" class="section-card">
-          <h3>项目经历</h3>
+          <h3>{{ t('resume.sections.projects') }}</h3>
           <div class="projects-grid" v-if="resumeData && resumeData.projects && resumeData.projects.length">
             <MagicCard 
               v-for="project in resumeData.projects" 
@@ -729,7 +747,7 @@ onMounted(() => {
                   <span v-else class="role-badge-text">{{ project.role }}</span>
                 </div>
               </div>
-              <p class="project-date" v-if="project.start_date">{{ project.start_date }} - {{ project.end_date || '至今' }}</p>
+              <p class="project-date" v-if="project.start_date">{{ project.start_date }} - {{ project.end_date || t('resume.toPresent') }}</p>
               
               <div 
                 class="summary-carousel project-desc-carousel" 
@@ -771,25 +789,25 @@ onMounted(() => {
                   {{ tech.trim() }}
                 </span>
               </div>
-              <a v-if="project.link" :href="project.link" target="_blank" class="project-link">查看项目 →</a>
+              <a v-if="project.link" :href="project.link" target="_blank" class="project-link">{{ t('resume.viewProject') }}</a>
             </MagicCard>
           </div>
-          <div v-else class="empty-state">暂无项目经历</div>
+          <div v-else class="empty-state">{{ t('resume.emptyProjects') }}</div>
         </section>
 
         <!-- Education -->
         <section id="education" class="section-card">
-          <h3>教育背景</h3>
+          <h3>{{ t('resume.sections.education') }}</h3>
           <div class="education-list" v-if="resumeData && resumeData.educations && resumeData.educations.length">
             <div v-for="edu in resumeData.educations" :key="edu.id" class="edu-item">
               <div class="edu-header">
                 <span class="school">{{ edu.school }}</span>
-                <span class="date">{{ edu.start_date }} - {{ edu.end_date || '至今' }}</span>
+                <span class="date">{{ edu.start_date }} - {{ edu.end_date || t('resume.toPresent') }}</span>
               </div>
               <div class="degree">{{ edu.degree }} - {{ edu.major }}</div>
             </div>
           </div>
-          <div v-else class="empty-state">暂无教育背景</div>
+          <div v-else class="empty-state">{{ t('resume.emptyEducation') }}</div>
         </section>
       </div>
     </div>
