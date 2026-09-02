@@ -15,7 +15,9 @@ venv/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-migrations
+
+# 注意：migrations/ 目录不能忽略——迁移文件必须入库，
+# 否则 git clone/pull 部署（生产 /opt/git/pltgg）拿不到迁移，新列无法创建
 
 # Frontend
 frontend/node_modules/
