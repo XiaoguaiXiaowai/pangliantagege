@@ -218,7 +218,7 @@
       },
       {
         "num": "⑤",
-        "title": "Tool Layer MPC-Skill",
+        "title": "Tool Layer MCP-Skill",
         "desc": "Allowlist, parameter validation, masking, HITL, idempotent compensation, auditing",
         "tags": ["Allowlist", "Masking", "Idempotency"]
       },

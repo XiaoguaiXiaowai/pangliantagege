@@ -39,3 +39,4 @@ scripts/rag_ip_update_*.log
 
 # Docker 部署
 docker.env
+pangliantagege_local_2026-09-02.sql
