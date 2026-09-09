@@ -1,8 +1,10 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useLocaleStore } from '../stores/locale'
 
 const { t, tm } = useI18n()
+const localeStore = useLocaleStore()
 
 // ============================================================
 // 作品在线地址
@@ -14,6 +16,11 @@ const pillars = computed(() => tm('agent.pillars'))
 
 // ---------------- 8 大工程能力（文案随语言切换） ----------------
 const capabilities = computed(() => tm('agent.capabilities'))
+
+// ---------------- 架构图 iframe 随语言切换 ----------------
+// 架构图是独立 HTML（archify 生成，自包含多语言字典），通过 ?lang= 参数
+// 在加载时选择语言；用 :key 强制重建 iframe，保证语言切换后整图按新语言重载。
+const archSrc = computed(() => `/agent-harness-architecture.html?theme=light&lang=${localeStore.locale}`)
 
 // ---------------- 架构图 iframe 高度自适应 ----------------
 // 完整模式（非 embed）嵌入 archify 架构图：Light/Classic/Present/Export、PATH·MAP·LENS、
@@ -97,7 +104,8 @@ onBeforeUnmount(() => {
         <iframe
           ref="archFrameRef"
           class="arch-frame"
-          src="/agent-harness-architecture.html?theme=light"
+          :src="archSrc"
+          :key="localeStore.locale"
           :title="t('agent.archFrameTitle')"
           loading="eager"
           referrerpolicy="no-referrer"

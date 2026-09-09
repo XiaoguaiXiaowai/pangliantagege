@@ -30,7 +30,22 @@
         document.documentElement.setAttribute('data-theme', theme);
       } catch (_) {}
     })();
+    // i18n: when a non-default language is requested via ?lang=, keep the
+    // diagram hidden until the end-of-body script has applied the translations,
+    // so users never see a flash of the default (Chinese) labels.
+    (function () {
+      try {
+        var lang = new URLSearchParams(window.location.search).get('lang');
+        if (lang === 'en' || lang === 'ja') {
+          document.documentElement.setAttribute('data-lang-pending', 'true');
+        }
+      } catch (_) {}
+    })();
   </script>
+  <style>
+    /* i18n: hide the diagram container until language labels are applied below */
+    html[data-lang-pending] .container { visibility: hidden; }
+  </style>
   <!-- Async font load: a blackholed network must not block first paint.
        The body font stack falls back to system monospace until it lands. -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -5356,6 +5371,226 @@
     </div>
 
   </div>
+
+
+  <!-- ============ i18n: 站点语言 -> 架构图内容翻译（保持自包含） ============ -->
+<script id="archify-i18n-data" type="application/json">
+{
+  "en": {
+    "① 客户端 · Next.js SPA": "① Client · Next.js SPA",
+    "② 入口层 · FastAPI + Nginx": "② Entry Layer · FastAPI + Nginx",
+    "③ Agent Harness 内核 · 编排与智能": "③ Agent Harness Core · Orchestration & Intelligence",
+    "④ 工具与数据面 · 本地零成本": "④ Tools & Data Plane · Local Zero-Cost",
+    "⑤ 模型层 · 三级降级": "⑤ Model Layer · 3-Tier Fallback",
+    "治理横切 · 状态机 / 预算 / 守卫 / Trace": "Governance Cross-Cut · State Machine / Budget / Guard / Trace",
+    "员工 / 审批人": "Employee / Approver",
+    "建单 · 追问 · 审批 · 看板": "Create · Follow-up · Approve · Board",
+    "Next.js 前端": "Next.js Frontend",
+    "工单台 · 审批台 · Trace 回放 · 指标看板": "Ticket Desk · Approve · Trace Replay · Metrics",
+    "FastAPI 入口层": "FastAPI Entry Layer",
+    "鉴权 · RBAC · 工单 API · WS 实时推送": "AuthN · RBAC · Ticket API · WS Real-time Push",
+    "后台任务队列": "Background Task Queue",
+    "taskqueue · 入队即返回 · 每工单互斥锁": "taskqueue · Return-on-enqueue · Per-ticket Mutex",
+    "编排器": "Orchestrator",
+    "入口流水线 · LOOP 调度 · HITL 恢复": "Entry Pipeline · LOOP Scheduling · HITL Resume",
+    "智能层": "Intelligence Layer",
+    "OpenAI Agents SDK · Triage → 5 子 Agent handoff": "OpenAI Agents SDK · Triage → 5 sub-Agent handoff",
+    "模型层": "Model Layer",
+    "OpenRouter ⇄ Ollama ⇄ 离线 reader": "OpenRouter ⇄ Ollama ⇄ Offline reader",
+    "治理横切": "Governance Cross-Cut",
+    "状态机 · 三重预算 · 守卫 · Trace/指标落库": "State Machine · Budgets · Guard · Trace/Metrics",
+    "SQLite 主存储": "SQLite Primary Storage",
+    "工单 · 事件 · 审批 · 记忆": "Tickets · Events · Approvals · Memory",
+    "工具层": "Tool Layer",
+    "注册即白名单 · RBAC · 脱敏 · 幂等": "Allowlist · RBAC · Masking · Idempotent",
+    "知识库 RAG": "Knowledge Base RAG",
+    "LanceDB 向量 + FTS5 双路召回 + rerank": "LanceDB vectors + FTS5 dual recall + rerank",
+    "MCP 外部工具": "MCP External Tools",
+    "建单 · 追问 · 审批 · 确认": "Create · Follow-up · Approve · Confirm",
+    "WS 事件推送": "WS Event Push",
+    "POST /run · 入队即返回 queued": "POST /run · Return-on-enqueue queued",
+    "worker 执行 run_ticket": "worker runs run_ticket",
+    "run_sdk / resume_run · HITL 恢复": "run_sdk / resume_run · HITL Resume",
+    "Chat Completions · 意图/风险路由": "Chat Completions · Intent/Risk Routing",
+    "工具调用 · 白名单/脱敏/幂等": "Tool calls · Allowlist/Masking/Idempotency",
+    "状态/事件/审批/RunState": "State/Events/Approvals/RunState",
+    "tool_calls · grants 审计": "tool_calls · grants audit",
+    "search_kb · 双路召回 + rerank": "search_kb · dual recall + rerank",
+    "traces · metrics 落库": "traces · metrics persisted",
+    "治理约束": "Governance",
+    "企业级混合 Agent 工作流 · 系统架构": "Enterprise Hybrid Agent Workflow · System Architecture",
+    "主链路": "Main Path",
+    "数据与治理": "Data & Governance",
+    "• 建单秒回 → POST /run 入队即返回 queued → worker 执行入口流水线（相关性校验 / 内容重写 / 意图风险分级）": "• Create-ticket instant response → POST /run enqueue-returns queued → worker runs entry pipeline (relevance check / content rewrite / intent-risk classification)",
+    "• SDK 计划-工具循环：Triage → 子 Agent handoff，工具调用逐项过白名单与治理核查；高风险触发 HITL 中断，审批通过后 RunState 跨进程恢复": "• SDK plan-tool loop: Triage → sub-Agent handoff; every tool call passes allowlist & governance checks; high risk triggers HITL interruption, RunState resumes across processes after approval",
+    "• 回合收敛进入 pending_confirm，客户确认后才 done —— 终态由人确认，不由模型自封；全程经 WebSocket 事件流推送": "• Turn convergence enters pending_confirm; done only after customer confirmation — the final state is confirmed by a human, not self-declared by the model; everything is pushed over the WebSocket event stream",
+    "• SQLite(WAL) 主存储：工单 / 事件 / 审批 / 记忆 / Trace / 指标；RAG 双路召回 + RRF + rerank（recall@1 0.938 → 1.000）": "• SQLite(WAL) primary storage: tickets / events / approvals / memory / trace / metrics; RAG dual recall + RRF + rerank (recall@1 0.938 → 1.000)",
+    "• MCP 工具面：配置即白名单（mcp_servers.json），未声明 = 拒绝，调用不绕过治理；连接外置，治理不外包": "• MCP tool surface: config = allowlist (mcp_servers.json), undeclared = rejected, calls never bypass governance; connectivity is outsourced, governance is not",
+    "• 状态机防跳步（乐观锁）· 三重预算（步数/Token/时间）· 幂等守卫 · Trace 全链路可回放": "• State machine prevents step-skipping (optimistic lock) · triple budget (steps/Token/time) · idempotency guard · fully replayable Trace"
+  },
+  "ja": {
+    "① 客户端 · Next.js SPA": "① クライアント · Next.js SPA",
+    "② 入口层 · FastAPI + Nginx": "② エントリ層 · FastAPI + Nginx",
+    "③ Agent Harness 内核 · 编排与智能": "③ Agent Harness カーネル · オーケストレーションとインテリジェンス",
+    "④ 工具与数据面 · 本地零成本": "④ ツール・データ面 · ローカルで低コスト",
+    "⑤ 模型层 · 三级降级": "⑤ モデル層 · 3段フォールバック",
+    "治理横切 · 状态机 / 预算 / 守卫 / Trace": "横断的ガバナンス · ステートマシン / 予算 / ガード / Trace",
+    "员工 / 审批人": "社員 / 承認者",
+    "建单 · 追问 · 审批 · 看板": "作成 · 追記 · 承認 · ボード",
+    "Next.js 前端": "Next.js フロントエンド",
+    "工单台 · 审批台 · Trace 回放 · 指标看板": "チケット台 · 承認 · Traceリプレイ · メトリクス",
+    "FastAPI 入口层": "FastAPI エントリ層",
+    "鉴权 · RBAC · 工单 API · WS 实时推送": "認証 · RBAC · チケットAPI · WSリアルタイム配信",
+    "后台任务队列": "バックグラウンドタスクキュー",
+    "taskqueue · 入队即返回 · 每工单互斥锁": "taskqueue · エンキュー即返却 · チケット毎ミューテックス",
+    "编排器": "オーケストレータ",
+    "入口流水线 · LOOP 调度 · HITL 恢复": "エントリパイプライン · LOOPスケジューリング · HITL再開",
+    "智能层": "インテリジェンス層",
+    "OpenAI Agents SDK · Triage → 5 子 Agent handoff": "OpenAI Agents SDK · Triage → 5サブAgentハンドオフ",
+    "模型层": "モデル層",
+    "OpenRouter ⇄ Ollama ⇄ 离线 reader": "OpenRouter ⇄ Ollama ⇄ オフラインreader",
+    "治理横切": "横断的ガバナンス",
+    "状态机 · 三重预算 · 守卫 · Trace/指标落库": "ステートマシン · 予算 · ガード · Trace/メトリクス",
+    "SQLite 主存储": "SQLite プライマリストレージ",
+    "工单 · 事件 · 审批 · 记忆": "チケット · イベント · 承認 · メモリ",
+    "工具层": "ツール層",
+    "注册即白名单 · RBAC · 脱敏 · 幂等": "登録=Wリスト · RBAC · マスキング · 冪等",
+    "知识库 RAG": "ナレッジベースRAG",
+    "LanceDB 向量 + FTS5 双路召回 + rerank": "LanceDBベクトル + FTS5デュアルリコール + rerank",
+    "MCP 外部工具": "MCP外部ツール",
+    "建单 · 追问 · 审批 · 确认": "作成 · 追記 · 承認 · 確認",
+    "WS 事件推送": "WSイベント配信",
+    "POST /run · 入队即返回 queued": "POST /run · エンキュー即返却 queued",
+    "worker 执行 run_ticket": "worker が run_ticket を実行",
+    "run_sdk / resume_run · HITL 恢复": "run_sdk / resume_run · HITL再開",
+    "Chat Completions · 意图/风险路由": "Chat Completions · 意図/リスクルーティング",
+    "工具调用 · 白名单/脱敏/幂等": "ツール呼び出し · ホワイトリスト/マスキング/冪等",
+    "状态/事件/审批/RunState": "状態/イベント/承認/RunState",
+    "tool_calls · grants 审计": "tool_calls · grants監査",
+    "search_kb · 双路召回 + rerank": "search_kb · デュアルリコール + rerank",
+    "traces · metrics 落库": "traces · metrics永続化",
+    "治理约束": "ガバナンス",
+    "企业级混合 Agent 工作流 · 系统架构": "エンタープライズ向けハイブリッドAgentワークフロー · システムアーキテクチャ",
+    "主链路": "メインフロー",
+    "数据与治理": "データとガバナンス",
+    "• 建单秒回 → POST /run 入队即返回 queued → worker 执行入口流水线（相关性校验 / 内容重写 / 意图风险分级）": "• チケット作成は即応答 → POST /runでエンキュー即返却 queued → workerがエントリパイプライン（関連性検証 / 内容書き換え / 意図・リスク分類）を実行",
+    "• SDK 计划-工具循环：Triage → 子 Agent handoff，工具调用逐项过白名单与治理核查；高风险触发 HITL 中断，审批通过后 RunState 跨进程恢复": "• SDKのプラン-ツールループ：Triage → サブAgentへハンドオフ、ツール呼び出しは毎回ホワイトリストとガバナンス検査を通過。高リスクはHITL中断、承認後RunStateがプロセスを超えて再開",
+    "• 回合收敛进入 pending_confirm，客户确认后才 done —— 终态由人确认，不由模型自封；全程经 WebSocket 事件流推送": "• 収束で pending_confirm に入り、顧客確認後にのみ done —— 終状態は人が確認し、モデルが独断しない。全過程はWebSocketイベントストリームで配信",
+    "• SQLite(WAL) 主存储：工单 / 事件 / 审批 / 记忆 / Trace / 指标；RAG 双路召回 + RRF + rerank（recall@1 0.938 → 1.000）": "• SQLite(WAL)プライマリストレージ：チケット / イベント / 承認 / メモリ / Trace / メトリクス。RAGはデュアルリコール + RRF + rerank（recall@1 0.938 → 1.000）",
+    "• MCP 工具面：配置即白名单（mcp_servers.json），未声明 = 拒绝，调用不绕过治理；连接外置，治理不外包": "• MCPツール面：設定=ホワイトリスト（mcp_servers.json）、未宣言=拒否、呼び出しはガバナンスを迂回しない。接続は外付け、ガバナンスは外注しない",
+    "• 状态机防跳步（乐观锁）· 三重预算（步数/Token/时间）· 幂等守卫 · Trace 全链路可回放": "• ステートマシンがステップ飛ばしを防止（楽観的ロック）· 三重予算（ステップ/Token/時間）· 冪等ガード · Trace全チェーンをリプレイ可能"
+  }
+}
+</script>
+
+  <script>
+    // Apply the requested language (?lang=en|ja) to every Chinese node before
+    // the archify engine initialises, so finder/passport/probe caches match.
+    // zh-CN (default) needs no rewrite.
+    (function () {
+      try {
+        var lang = new URLSearchParams(window.location.search).get('lang');
+        if (lang !== 'en' && lang !== 'ja') {
+          document.documentElement.removeAttribute('data-lang-pending');
+          return;
+        }
+        var dict = JSON.parse(document.getElementById('archify-i18n-data').textContent)[lang];
+        if (!dict) {
+          document.documentElement.removeAttribute('data-lang-pending');
+          return;
+        }
+        // Keys share prefixes (e.g. "治理横切" ⊂ "治理横切 · 状态机 / …"),
+        // so replace the longest source strings first.
+        var keys = Object.keys(dict).sort(function (a, b) { return b.length - a.length; });
+        var rewrite = function (value) {
+          if (!value || !/[\u4e00-\u9fff]/.test(value)) return value;
+          var out = value;
+          for (var i = 0; i < keys.length; i++) {
+            if (out.indexOf(keys[i]) !== -1) out = out.replace(keys[i], dict[keys[i]]);
+          }
+          return out;
+        };
+        // 1) SVG text, header, info cards (full-text nodes)
+        var nodes = document.querySelectorAll('text, h1, h3, li, #archify-diagram-title');
+        for (var i = 0; i < nodes.length; i++) {
+          var el = nodes[i];
+          var key = (el.textContent || '').trim();
+          var val = dict[key];
+          if (val && val !== key) el.textContent = val;
+        }
+        // 2) Attribute labels the archify engine also reads (node/edge labels,
+        //    aria-labels) — same dictionary, substring replacement.
+        var ATTRS = ['data-node-label', 'data-node-sublabel', 'data-node-context',
+                     'data-edge-label', 'aria-label', 'title'];
+        var allEls = document.querySelectorAll('g[data-node-label], [data-edge-label], [aria-label]');
+        for (var j = 0; j < allEls.length; j++) {
+          var e = allEls[j];
+          for (var a = 0; a < ATTRS.length; a++) {
+            var cur = e.getAttribute(ATTRS[a]);
+            var next = rewrite(cur);
+            if (next !== cur) e.setAttribute(ATTRS[a], next);
+          }
+        }
+        // 3) Native SVG <title> tooltips (node label · sublabel · context) and
+        //    the document head <title> — same dictionary, substring rewrite.
+        var titleEls = document.querySelectorAll('title');
+        for (var k = 0; k < titleEls.length; k++) {
+          var titleEl = titleEls[k];
+          var next = rewrite(titleEl.textContent);
+          if (next !== titleEl.textContent) titleEl.textContent = next;
+        }
+        document.documentElement.setAttribute('lang', lang);
+
+        // 4) Auto-fit: the translated labels are often wider than the Chinese
+        //    they replace and the SVG boxes are fixed, so shrink each label
+        //    down to stay inside its box instead of overflowing its pill.
+        function fitAll() {
+          try {
+            var svg = document.querySelector('svg[role="img"], svg');
+            if (!svg) return;
+            var MIN_FS = 4.2;
+            var texts = svg.querySelectorAll('text');
+            for (var f = 0; f < texts.length; f++) {
+              var t = texts[f];
+              if (!(t.textContent || '').trim()) continue;
+              var boxW = 0;
+              for (var p = t.parentElement; p && p !== svg; p = p.parentElement) {
+                var rects = p.querySelectorAll(':scope > rect');
+                for (var r = 0; r < rects.length; r++) {
+                  var w = parseFloat(rects[r].getAttribute('width') || '');
+                  if (w > 0) { boxW = w; break; }
+                }
+                if (boxW > 0) break;
+              }
+              if (boxW <= 0) continue;
+              var fs = parseFloat(t.getAttribute('font-size') || '10') || 10;
+              if (fs <= MIN_FS) continue;
+              var tw = 0;
+              try { tw = t.getBBox().width; } catch (e2) {}
+              if (!tw || tw <= boxW * 0.97) continue;
+              var next = Math.max(MIN_FS, Math.floor(fs * ((boxW * 0.94) / tw) * 10) / 10);
+              if (next < fs) t.setAttribute('font-size', String(next));
+            }
+          } catch (e3) { /* best effort */ }
+        }
+        fitAll();
+        // Keep the diagram hidden until fonts are in and the labels are fitted,
+        // so viewers never see oversized/overlapping text. Hard fallback below
+        // guarantees the diagram is never left hidden.
+        var revealed = false;
+        var reveal = function () {
+          if (revealed) return;
+          revealed = true;
+          document.documentElement.removeAttribute('data-lang-pending');
+        };
+        window.addEventListener('load', function () { fitAll(); reveal(); });
+        setTimeout(reveal, 4000);
+      } catch (_) {
+        /* on any failure, never hold the diagram hidden */
+        document.documentElement.removeAttribute('data-lang-pending');
+      }
+    })();
+  </script>
 
   <script>
     var Archify = {};
