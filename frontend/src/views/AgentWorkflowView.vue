@@ -7,9 +7,15 @@ const { t, tm } = useI18n()
 const localeStore = useLocaleStore()
 
 // ============================================================
-// 作品在线地址
+// “查看在线 Demo”：链接随页面语言切换
+// 站点 locale（zh-CN / en / ja）→ 在线 Demo 登录页路径（/zh /en /ja）
 // ============================================================
-const PROJECT_URL = 'https://playground.pangliantagege.top'
+const DEMO_BASE_URL = 'https://playground.pangliantagege.top'
+const DEMO_LANG_PATH = { 'zh-CN': 'zh', en: 'en', ja: 'ja' }
+const demoUrl = computed(() => {
+  const lang = DEMO_LANG_PATH[localeStore.locale] || 'zh'
+  return `${DEMO_BASE_URL}/${lang}/login`
+})
 
 // ---------------- 三大支柱（文案随语言切换） ----------------
 const pillars = computed(() => tm('agent.pillars'))
@@ -69,7 +75,7 @@ onBeforeUnmount(() => {
       </p>
 
       <div class="hero-actions">
-        <a class="btn-primary" :href="PROJECT_URL" target="_blank" rel="noopener noreferrer">
+        <a class="btn-primary" :href="demoUrl" target="_blank" rel="noopener noreferrer">
           {{ t('agent.viewDemo') }}
         </a>
         <a class="btn-ghost" href="#architecture">{{ t('agent.architecture') }}</a>
