@@ -10,7 +10,7 @@ const localeStore = useLocaleStore()
 // “查看在线 Demo”：链接随页面语言切换
 // 站点 locale（zh-CN / en / ja）→ 在线 Demo 登录页路径（/zh /en /ja）
 // ============================================================
-const DEMO_BASE_URL = 'https://playground.pangliantagege.top'
+const DEMO_BASE_URL = 'https://playground.lijia.ink'
 const DEMO_LANG_PATH = { 'zh-CN': 'zh', en: 'en', ja: 'ja' }
 const demoUrl = computed(() => {
   const lang = DEMO_LANG_PATH[localeStore.locale] || 'zh'
