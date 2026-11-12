@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人网站 UI 重设计 · 10 个方案</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0b0d10; color:#e8eaed; font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+  .page-head { max-width:1200px; margin:0 auto; padding:64px 32px 24px; }
+  .page-head h1 { font-size:34px; letter-spacing:1px; }
+  .page-head p { margin-top:12px; color:#9aa0a6; line-height:1.8; font-size:14px; }
+  .page-head .tip { display:inline-block; margin-top:14px; padding:8px 16px; border:1px solid #2a2f36; border-radius:8px; color:#7dd3fc; font-size:13px; background:#11151a; }
+  .grid { max-width:1200px; margin:0 auto; padding:24px 32px 96px; display:grid; grid-template-columns:1fr; gap:56px; }
+
+  .proposal { border:1px solid #22262c; border-radius:20px; overflow:hidden; background:#101318; }
+  .p-head { display:flex; align-items:baseline; gap:16px; padding:24px 28px 0; flex-wrap:wrap; }
+  .p-num { font-size:13px; color:#5f6b7a; font-family:ui-monospace,Menlo,monospace; letter-spacing:2px; }
+  .p-name { font-size:22px; font-weight:700; }
+  .p-tag { font-size:12px; color:#8b949e; border:1px solid #2a2f36; padding:3px 10px; border-radius:99px; }
+  .p-desc { padding:10px 28px 20px; color:#9aa0a6; font-size:13.5px; line-height:1.8; }
+
+  /* ===== mockup frame ===== */
+  .mock { margin:0 28px; border-radius:14px; overflow:hidden; height:340px; position:relative; border:1px solid rgba(255,255,255,.08); }
+  .mock * { pointer-events:none; }
+  .m-nav { display:flex; align-items:center; gap:18px; padding:14px 22px; font-size:11px; }
+  .m-logo { font-weight:700; font-size:12px; margin-right:auto; }
+  .m-nav span { opacity:.75; }
+  .m-hero { padding:36px 40px; }
+  .m-title { font-size:34px; font-weight:800; line-height:1.25; }
+  .m-sub { margin-top:12px; font-size:12.5px; opacity:.7; max-width:420px; line-height:1.7; }
+  .m-btns { margin-top:22px; display:flex; gap:12px; }
+  .m-btn { font-size:11px; padding:8px 18px; border-radius:6px; font-weight:600; }
+  .m-cards { position:absolute; right:32px; top:86px; width:220px; display:flex; flex-direction:column; gap:12px; }
+  .m-card { border-radius:10px; padding:14px 16px; font-size:11px; line-height:1.6; }
+
+  .p-meta { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1px; background:#22262c; border-top:1px solid #22262c; margin-top:24px; }
+  .p-meta > div { background:#101318; padding:16px 20px; font-size:12.5px; color:#9aa0a6; line-height:1.8; }
+  .p-meta b { display:block; color:#e8eaed; font-size:12px; margin-bottom:6px; letter-spacing:1px; }
+  .swatches { display:flex; gap:8px; margin-top:4px; }
+  .sw { width:26px; height:26px; border-radius:6px; border:1px solid rgba(255,255,255,.12); }
+
+  /* ================= 1. 赛博终端 ================= */
+  .t1 { background:#050807; color:#c9ffb3; font-family:ui-monospace,Menlo,monospace;
+        background-image:repeating-linear-gradient(0deg,rgba(120,255,150,.045) 0 1px,transparent 1px 3px); }
+  .t1 .m-nav { border-bottom:1px solid #1c2b1f; color:#8fd98a; }
+  .t1 .m-logo { color:#6dff8f; }
+  .t1 .m-logo::before { content:"> "; color:#3f7a4a; }
+  .t1 .m-title { color:#6dff8f; text-shadow:0 0 18px rgba(109,255,143,.35); }
+  .t1 .m-title::after { content:"▌"; animation:blink 1s steps(1) infinite; color:#6dff8f; }
+  @keyframes blink { 50% { opacity:0; } }
+  .t1 .m-btn { border:1px solid #3f7a4a; color:#6dff8f; background:transparent; font-family:inherit; }
+  .t1 .m-btn.primary { background:#6dff8f; color:#04140a; box-shadow:0 0 20px rgba(109,255,143,.4); }
+  .t1 .m-card { border:1px solid #22402a; background:rgba(10,20,12,.8); color:#9fe6a4; }
+  .t1 .m-card b { color:#6dff8f; display:block; margin-bottom:4px; }
+
+  /* ================= 2. 极光玻璃 ================= */
+  .t2 { background:#0a0e1a; color:#eaf2ff; overflow:hidden; }
+  .t2::before { content:""; position:absolute; width:520px; height:520px; left:-140px; top:-180px; border-radius:50%;
+        background:radial-gradient(circle,rgba(124,92,255,.5),transparent 65%); filter:blur(40px); }
+  .t2::after { content:""; position:absolute; width:460px; height:460px; right:-100px; bottom:-160px; border-radius:50%;
+        background:radial-gradient(circle,rgba(34,211,238,.45),transparent 65%); filter:blur(40px); }
+  .t2 > * { position:relative; z-index:1; }
+  .t2 .m-title { background:linear-gradient(90deg,#a5b4fc,#22d3ee,#e879f9); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .t2 .m-btn { background:rgba(255,255,255,.08); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,.18); color:#fff; border-radius:99px; }
+  .t2 .m-btn.primary { background:linear-gradient(90deg,#6366f1,#22d3ee); border:none; }
+  .t2 .m-card { background:rgba(255,255,255,.07); backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.16); border-radius:16px; color:#cdd9f5; }
+
+  /* ================= 3. 深空轨道 ================= */
+  .t3 { background:#03071a; color:#dbe7ff;
+        background-image:radial-gradient(1px 1px at 12% 30%,#fff,transparent),radial-gradient(1px 1px at 35% 70%,#9db8ff,transparent),
+        radial-gradient(1.5px 1.5px at 60% 20%,#fff,transparent),radial-gradient(1px 1px at 82% 55%,#c7d6ff,transparent),
+        radial-gradient(1px 1px at 48% 45%,#fff,transparent),radial-gradient(1.5px 1.5px at 90% 85%,#8fa9ff,transparent),
+        radial-gradient(1px 1px at 22% 88%,#fff,transparent),radial-gradient(1px 1px at 70% 90%,#dce6ff,transparent); }
+  .t3 .m-title { color:#fff; letter-spacing:2px; }
+  .t3 .m-title em { font-style:normal; color:#ffd479; }
+  .t3 .m-btn { border:1px solid #3a4a7a; color:#bcd0ff; background:rgba(58,74,122,.2); border-radius:99px; }
+  .t3 .m-btn.primary { background:#ffd479; color:#0a1030; border:none; box-shadow:0 0 24px rgba(255,212,121,.35); }
+  .t3 .m-card { border:1px solid rgba(140,160,220,.25); background:rgba(10,16,45,.72); border-radius:14px; color:#aabbee; }
+  .t3 .orbit { position:absolute; right:-90px; top:-90px; width:300px; height:300px; border:1px dashed rgba(150,170,230,.3); border-radius:50%; }
+  .t3 .orbit::after { content:""; position:absolute; width:10px; height:10px; background:#ffd479; border-radius:50%; top:20px; left:60px; box-shadow:0 0 12px #ffd479; }
+
+  /* ================= 4. 霓虹都市 ================= */
+  .t4 { background:#12001f; color:#ffe6ff; }
+  .t4::before { content:""; position:absolute; inset:auto 0 0 0; height:46%;
+        background:linear-gradient(transparent,rgba(255,0,200,.12)),
+        repeating-linear-gradient(90deg,rgba(0,240,255,.25) 0 1px,transparent 1px 46px),
+        repeating-linear-gradient(0deg,rgba(0,240,255,.25) 0 1px,transparent 1px 34px);
+        transform:perspective(320px) rotateX(58deg); transform-origin:bottom; }
+  .t4 > * { position:relative; z-index:1; }
+  .t4 .m-title { color:#fff; text-shadow:0 0 8px #ff2bd6,0 0 28px #ff2bd6; letter-spacing:1px; }
+  .t4 .m-title span { color:#00f0ff; text-shadow:0 0 8px #00f0ff,0 0 28px #00f0ff; }
+  .t4 .m-btn { border:1px solid #00f0ff; color:#00f0ff; background:rgba(0,240,255,.06); box-shadow:0 0 14px rgba(0,240,255,.25),inset 0 0 10px rgba(0,240,255,.12); }
+  .t4 .m-btn.primary { border-color:#ff2bd6; color:#fff; background:#ff2bd6; box-shadow:0 0 22px rgba(255,43,214,.55); }
+  .t4 .m-card { border:1px solid rgba(255,43,214,.45); background:rgba(30,0,50,.72); box-shadow:0 0 18px rgba(255,43,214,.18); color:#ffc9f4; }
+
+  /* ================= 5. 量子极简 ================= */
+  .t5 { background:#f7f6f2; color:#14151a; }
+  .t5 .m-nav { border-bottom:1px solid #e4e2da; color:#6b6f76; }
+  .t5 .m-logo { color:#14151a; }
+  .t5 .m-title { font-size:40px; letter-spacing:-1.5px; line-height:1.15; }
+  .t5 .m-title span { color:#2b5cff; }
+  .t5 .m-sub { color:#6b6f76; }
+  .t5 .m-btn { background:#14151a; color:#fff; border-radius:8px; }
+  .t5 .m-btn.ghost { background:transparent; color:#14151a; border:1px solid #d8d6cd; }
+  .t5 .m-card { background:#fff; border:1px solid #e8e6df; color:#55585e; box-shadow:0 10px 30px rgba(20,21,26,.05); }
+  .t5 .m-card b { color:#14151a; display:block; }
+  .t5 .crosshair { position:absolute; left:40px; bottom:26px; font-size:10px; color:#a8a59a; font-family:ui-monospace,monospace; }
+
+  /* ================= 6. 全息卡片 ================= */
+  .t6 { background:#0d1117; color:#e6edf3; }
+  .t6 .m-title span { background:linear-gradient(90deg,#ff8a5c,#ffd25c,#7cf29c,#5cc8ff,#b78aff,#ff8ad4);
+        -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .t6 .m-btn { border:1px solid #30363d; background:#161b22; color:#e6edf3; border-radius:10px; }
+  .t6 .m-btn.primary { background:linear-gradient(90deg,#5cc8ff,#b78aff); color:#0d1117; border:none; font-weight:700; }
+  .t6 .m-card { position:relative; background:#131a22; border-radius:14px; color:#9fb0c3; border:1px solid transparent;
+        background-clip:padding-box; }
+  .t6 .m-card::before { content:""; position:absolute; inset:-1px; border-radius:15px; z-index:-1;
+        background:linear-gradient(135deg,#5cc8ff,#b78aff,#ff8ad4,#ffd25c); }
+  .t6 .hud { position:absolute; left:40px; bottom:24px; display:flex; gap:22px; font-family:ui-monospace,monospace; font-size:10px; color:#5cc8ff; }
+  .t6 .hud b { display:block; color:#e6edf3; font-size:15px; }
+
+  /* ================= 7. 电路脉络 ================= */
+  .t7 { background:#0c1210; color:#d8efe0; }
+  .t7::before { content:""; position:absolute; inset:0; opacity:.5;
+        background-image:
+        linear-gradient(90deg,transparent 49%,rgba(52,211,153,.12) 49% 51%,transparent 51%),
+        linear-gradient(0deg,transparent 49%,rgba(52,211,153,.12) 49% 51%,transparent 51%);
+        background-size:56px 56px; }
+  .t7 > * { position:relative; }
+  .t7 .m-title { color:#ecfdf5; }
+  .t7 .m-title span { color:#34d399; }
+  .t7 .m-btn { border:1px solid #1f5c42; color:#6ee7b7; background:rgba(16,60,42,.35); border-radius:4px; font-family:ui-monospace,monospace; }
+  .t7 .m-btn.primary { background:#34d399; color:#04150d; border:none; }
+  .t7 .m-card { border:1px solid #1f5c42; background:rgba(8,24,17,.85); border-radius:6px; color:#93d8b4; font-family:ui-monospace,monospace; font-size:10.5px; }
+  .t7 .node { position:absolute; width:8px; height:8px; border-radius:50%; background:#34d399; box-shadow:0 0 10px #34d399; }
+  .t7 .n1 { left:46%; top:24%; } .t7 .n2 { left:63%; top:60%; } .t7 .n3 { left:30%; top:78%; }
+
+  /* ================= 8. 数据流体 ================= */
+  .t8 { background:linear-gradient(160deg,#061224,#0a2a4a 55%,#061224); color:#dff1ff; overflow:hidden; }
+  .t8 svg.waves { position:absolute; inset:auto 0 0 0; width:100%; height:70%; opacity:.55; }
+  .t8 > * { position:relative; z-index:1; }
+  .t8 .m-title { color:#fff; }
+  .t8 .m-title span { color:#38bdf8; }
+  .t8 .m-btn { background:rgba(56,189,248,.12); border:1px solid rgba(56,189,248,.5); color:#7dd3fc; border-radius:99px; }
+  .t8 .m-btn.primary { background:#38bdf8; color:#04263c; border:none; box-shadow:0 6px 24px rgba(56,189,248,.4); }
+  .t8 .m-card { background:rgba(6,24,44,.7); backdrop-filter:blur(10px); border:1px solid rgba(125,211,252,.25); border-radius:14px; color:#a9d7f5; }
+  .t8 .bar { height:5px; border-radius:99px; background:#123; margin-top:8px; overflow:hidden; }
+  .t8 .bar i { display:block; height:100%; background:linear-gradient(90deg,#38bdf8,#818cf8); border-radius:99px; }
+
+  /* ================= 9. 机甲工业 ================= */
+  .t9 { background:#17191c; color:#e8e6e1;
+        background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.015) 0 2px,transparent 2px 8px); }
+  .t9 .m-nav { border-bottom:2px solid #2a2d31; font-family:ui-monospace,monospace; color:#9a9da2; }
+  .t9 .m-logo { color:#ff7a1a; }
+  .t9 .m-title { text-transform:uppercase; letter-spacing:2px; }
+  .t9 .m-title span { color:#ff7a1a; }
+  .t9 .m-btn { background:#23262b; color:#e8e6e1; border:1px solid #3a3e44; border-radius:0;
+        clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px); font-family:ui-monospace,monospace; }
+  .t9 .m-btn.primary { background:#ff7a1a; color:#1a1206; border:none; font-weight:700; }
+  .t9 .m-card { background:#1e2126; border:1px solid #33373d; border-left:3px solid #ff7a1a; border-radius:0; color:#a6a9ae; font-family:ui-monospace,monospace; font-size:10.5px; }
+  .t9 .stripe { position:absolute; left:0; right:0; bottom:0; height:8px;
+        background:repeating-linear-gradient(45deg,#ff7a1a 0 14px,#17191c 14px 28px); opacity:.8; }
+
+  /* ================= 10. 像素复古未来 ================= */
+  .t10 { background:#101020; color:#e0e0ff;
+        background-image:radial-gradient(rgba(130,130,255,.12) 1px,transparent 1px); background-size:8px 8px; }
+  .t10 .m-nav { border-bottom:3px solid #2a2a4a; font-family:ui-monospace,monospace; }
+  .t10 .m-logo { color:#ffe066; text-shadow:2px 2px 0 #b84fd0; }
+  .t10 .m-title { font-family:ui-monospace,monospace; color:#ffe066; text-shadow:3px 3px 0 #b84fd0,6px 6px 0 rgba(0,240,255,.5); letter-spacing:2px; }
+  .t10 .m-sub { color:#9a9ad0; font-family:ui-monospace,monospace; }
+  .t10 .m-btn { font-family:ui-monospace,monospace; background:#2a2a4a; color:#fff; border:2px solid #e0e0ff; border-radius:0; box-shadow:4px 4px 0 #b84fd0; }
+  .t10 .m-btn.primary { background:#00f0ff; color:#101020; box-shadow:4px 4px 0 #ffe066; }
+  .t10 .m-card { background:#1a1a35; border:2px solid #4a4a8a; border-radius:0; box-shadow:5px 5px 0 rgba(0,0,0,.45); color:#a9a9e0; font-family:ui-monospace,monospace; font-size:10.5px; }
+  .t10 .m-card b { color:#ffe066; display:block; }
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <h1>个人网站 UI 重设计 · 10 个方案</h1>
+  <p>基于现有站点结构（Home / Resume 简历 / Talents 才艺 / MusicSpace 音乐空间 / AgentWorkflow / AI 助理 / Tools / 留言板）做的 10 个视觉方向。每个方案含：首页 Hero 迷你预览、配色、气质关键词与落地要点。</p>
+  <span class="tip">看完直接回复编号即可，例如「选 3」或「2 + 6 混搭：极光的背景 + 全息卡片」。</span>
+</div>
+
+<div class="grid">
+
+  <!-- 1 -->
+  <section class="proposal">
+    <div class="p-head"><span class="p-num">01</span><span class="p-name">赛博终端 Cyber Terminal</span><span class="p-tag">极客 / 黑客 / 硬核</span></div>
+    <p class="p-desc">整站就是一个“活着的终端”：磷光绿字符、扫描线、打字机光标。简历页变成 `cat resume.md`，AI 助理变成真正的 shell 会话。技术人设最直接，辨识度拉满。</p>
+    <div class="mock t1">
+      <div class="m-nav"><span class="m-logo">lijia@panglian:~$</span><span>./resume</span><span>./talents</span><span>./ai-chat</span><span>./tools</span></div>
+      <div class="m-hero">
+        <div class="m-title">李佳 — FULL-STACK<br>& AI ENGINEER</div>
+        <div class="m-sub">$ whoami → 对日 AI 全栈工程师 / 数据 / Agent 系统构建者。本站运行在一个私域 RAG 助理之上，输入 help 查看可用命令。</div>
+        <div class="m-btns"><span class="m-btn primary">[ 查看简历 ]</span><span class="m-btn">[ 启动 AI 助理 ]</span></div>
+      </div>
+      <div class="m-cards">
+        <div class="m-card"><b>$ status</b>uptime: 99.9% · RAG: connected ●<br>model: local-llm · latency: 42ms</div>
+        <div class="m-card"><b>$ ls projects/</b>rag-ai-01  dwh-platform  agent-flow</div>
+      </div>
+    </div>
+    <div class="p-meta">
+      <div><b>配色</b><div class="swatches"><span class="sw" style="background:#050807"></span><span class="sw" style="background:#6dff8f"></span><span class="sw" style="background:#3f7a4a"></span><span class="sw" style="background:#c9ffb3"></span></div></div>
+      <div><b>字体</b>JetBrains Mono / 等宽字体全站统一</div>
+      <div><b>动效</b>打字机输出、光标闪烁、扫描线、字符雨彩蛋</div>
+      <div><b>落地要点</b>CSS 扫描线 + JS 打字机组件；各页面映射成“命令”，改造量中等</div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="proposal">
+    <div class="p-head"><span class="p-num">02</span><span class="p-name">极光玻璃 Aurora Glass</span><span class="p-tag">柔和 / 高级 / 流体渐变</span></div>
+    <p class="p-desc">深邃底色上漂浮紫→青→品红的极光光晕，所有面板是磨砂玻璃。是现有 Luna 蓝的“高级进化版”——保留蓝色基因，但更有层次和呼吸感。</p>
+    <div class="mock t2">
+      <div class="m-nav"><span class="m-logo">◈ Li Jia</span><span>简历</span><span>作品</span><span>AI 助理</span><span>工具</span></div>
+      <div class="m-hero">
+        <div class="m-title">用代码与模型<br>构建下一代体验</div>
+        <div class="m-sub">对日 AI 全栈工程师 —— 从数据仓库到智能体工作流，我把复杂系统做成优雅的产品。</div>
+        <div class="m-btns"><span class="m-btn primary">进入站点</span><span class="m-btn">了解我</span></div>
+      </div>
+      <div class="m-cards">
+        <div class="m-card">🤖 私域 RAG 助理在线，问我任何关于李佳的问题</div>
+        <div class="m-card">🎸 最新音乐作品 · 3 首新 Demo 已上传</div>
+      </div>
+    </div>
+    <div class="p-meta">
+      <div><b>配色</b><div class="swatches"><span class="sw" style="background:#0a0e1a"></span><span class="sw" style="background:#6366f1"></span><span class="sw" style="background:#22d3ee"></span><span class="sw" style="background:#e879f9"></span></div></div>
+      <div><b>字体</b>现代无衬线 + 渐变标题字</div>
+      <div><b>动效</b>极光缓慢漂移、玻璃模糊、卡片悬浮微浮起</div>
+      <div><b>落地要点</b>与现有 DynamicBackground 兼容，替换为渐变光斑 canvas；改造量最小</div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="proposal">
+    <div class="p-head"><span class="p-num">03</span><span class="p-name">深空轨道 Deep Space</span><span class="p-tag">宇宙 / 探索 / 叙事感</span></div>
+    <p class="p-desc">把个人网站做成一片星域：每个板块是一颗星球，导航是轨道线。滚动 = 穿越星海，简历是“任务日志”，项目是“探索坐标”。故事性最强。</p>
+    <div class="mock t3">
+      <div class="orbit"></div>
+      <div class="m-nav"><span class="m-logo">✦ LIJIA.SPACE</span><span>任务日志</span><span>探索坐标</span><span>通讯频道</span></div>
+      <div class="m-hero">
+        <div class="m-title">欢迎来到<br><em>李佳的宇宙</em></div>
+        <div class="m-sub">一名对日 AI 全栈工程师的星图：每一颗星球都是一段经历、一个作品、一项技能。</div>
+        <div class="m-btns"><span class="m-btn primary">开始探索</span><span class="m-btn">通讯频道</span></div>
+      </div>
+      <div class="m-cards">
+        <div class="m-card">🪐 星球 · 简历 —— 轨道已同步，点击查看任务日志</div>
+        <div class="m-card">🛰 卫星 · AI 助理 —— 信号良好，随时通讯</div>
+      </div>
+    </div>
+    <div class="p-meta">
+      <div><b>配色</b><div class="swatches"><span class="sw" style="background:#03071a"></span><span class="sw" style="background:#dbe7ff"></span><span class="sw" style="background:#ffd479"></span><span class="sw" style="background:#3a4a7a"></span></div></div>
+      <div><b>字体</b>宽字距无衬线，标题加字间距营造仪式感</div>
+      <div><b>动效</b>视差星野、行星自转、滚动驱动轨道位移</div>
+      <div><b>落地要点</b>粒子背景 + 视差滚动；页面信息架构要配合“星球”隐喻微调</div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="proposal">
+    <div class="p-head"><span class="p-num">04</span><span class="p-name">霓虹都市 Neon Grid</span><span class="p-tag">赛博朋克 / Synthwave / 张扬</span></div>
+    <p class="p-desc">品红 + 青霓虹、透视网格地平线、辉光文字。视觉冲击最猛的一版，音乐空间（MusicSpace）用这个风格会特别炸，像走进 livehouse。</p>
+    <div class="mock t4">
+      <div class="m-nav"><span class="m-logo">LIJIA.EXE</span><span>RESUME</span><span>MUSIC</span><span>AI</span><span>TOOLS</span></div>
+      <div class="m-hero">
+        <div class="m-title">CODE THE<br><span>NIGHT CITY</span></div>
+        <div class="m-sub">FULL-STACK × AI ENGINEER — 在数据与霓虹之间，构建属于我的赛博世界。</div>
+        <div class="m-btns"><span class="m-btn primary">ENTER</span><span class="m-btn">JACK IN</span></div>
+      </div>
+      <div class="m-cards">
+        <div class="m-card">♪ NOW PLAYING — 最新 Demo「Neon Rain」</div>
+        <div class="m-card">AI UNIT: ONLINE · 霓虹信号接入中…</div>
+      </div>
+    </div>
+    <div class="p-meta">
+      <div><b>配色</b><div class="swatches"><span class="sw" style="background:#12001f"></span><span class="sw" style="background:#ff2bd6"></span><span class="sw" style="background:#00f0ff"></span><span class="sw" style="background:#ffe6ff"></span></div></div>
+      <div><b>字体</b>粗体大写 + 辉光描边，标题可用铬金属渐变</div>
+      <div><b>动效</b>霓虹闪烁、网格向远处流动、故障 glitch 转场</div>
+      <div><b>落地要点</b>辉光用 text-shadow/box-shadow 叠加；建议全站深色模式 only</div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="proposal">
+    <div class="p-head"><span class="p-num">05</span><span class="p-name">量子极简 Quantum Minimal</span><span class="p-tag">浅色 / 留白 / 字体排版驱动</span></div>
+    <p class="p-desc">Linear / Vercel 式的浅色高级感：纸白底、超大排版、单一电光蓝点睛。不靠特效靠排版功力，内容最聚焦，加载最快，对日文/英文排版也最友好（利于对日求职场景）。</p>
+    <div class="mock t5">
+      <div class="m-nav"><span class="m-logo">李佳®</span><span>简历</span><span>作品</span><span>AI</span><span>联络</span></div>
+      <div class="m-hero">
+        <div class="m-title">少即是多。<br><span>代码也是。</span></div>
+        <div class="m-sub">对日 AI 全栈工程师李佳 —— 数据、全栈与智能体系统。这里是我的全部作品与思考。</div>
+        <div class="m-btns"><span class="m-btn">查看简历 →</span><span class="m-btn ghost">联系我</span></div>
+      </div>
+      <div class="m-cards">
+        <div class="m-card"><b>01 / RAG 私域助理</b>本地大模型驱动的个人知识库问答系统</div>
+        <div class="m-card"><b>02 / DWH 数据平台</b>从采集到可视化的完整数据链路</div>
+      </div>
+      <div class="crosshair">35.6762° N, 139.6503° E — TOKYO READY</div>
+    </div>
+    <div class="p-meta">
+      <div><b>配色</b><div class="swatches"><span class="sw" style="background:#f7f6f2"></span><span class="sw" style="background:#14151a"></span><span class="sw" style="background:#2b5cff"></span><span class="sw" style="background:#d8d6cd"></span></div></div>
+      <div><b>字体</b>超大号 tight-tracking 标题，正文小字号高行距</div>
+      <div><b>动效</b>极简：滚动渐入、数字滚动、精准微交互</div>
+      <div><b>落地要点</b>工作量集中在排版系统重建；i18n（中/日/英）排版需分别调优</div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="proposal">
+    <div class="p-head"><span class="p-num">06</span><span class="p-name">全息卡片 Holo Deck</span><span class="p-tag">全息渐变 / 3D 悬浮 / 数据 HUD</span></div>
+    <p class="p-desc">每张卡片像一张全息投影卡：彩虹渐变描边、随鼠标 3D 倾斜、角落带数据读数。与现有 MagicCard 组件天然契合，是“科技感”最直观的一版。</p>
+    <div class="mock t6">
+      <div class="m-nav"><span class="m-logo">▣ LIJIA OS</span><span>简历</span><span>作品</span><span>AI 助理</span><span>工具</span></div>
+      <div class="m-hero">
+        <div class="m-title">李佳<br><span>HOLOGRAPHIC PROFILE</span></div>
+        <div class="m-sub">FULL-STACK × AI — 把每一段经历投影成可交互的全息卡片，hover 试试。</div>
+        <div class="m-btns"><span class="m-btn primary">展开卡组</span><span class="m-btn">AI 助理</span></div>
+      </div>
+      <div class="m-cards">
+        <div class="m-card">◈ SKILL CARD — Vue3 / Django / LLM RAG</div>
+        <div class="m-card">◈ PROJECT CARD — rag-ai-01 · ★ featured</div>
+      </div>
+      <div class="hud"><span><b>5+</b>YRS EXP</span><span><b>20+</b>PROJECTS</span><span><b>3</b>LANGUAGES</span></div>
+    </div>
+    <div class="p-meta">
+      <div><b>配色</b><div class="swatches"><span class="sw" style="background:#0d1117"></span><span class="sw" style="background:#5cc8ff"></span><span class="sw" style="background:#b78aff"></span><span class="sw" style="background:#ff8ad4"></span></div></div>
+      <div><b>字体</b>中性无衬线 + 等宽字体做 HUD 读数</div>
+      <div><b>动效</b>卡片 3D tilt、渐变边框流动、数据计数动画</div>
+      <div><b>落地要点</b>直接升级 MagicCard.vue，加 conic-gradient 流动边框 + tilt；改造量小</div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="proposal">
+    <div class="p-head"><span class="p-num">07</span><span class="p-name">电路脉络 Circuit Pulse</span><span class="p-tag">PCB / 硬件感 / 工程师浪漫</span></div>
+    <p class="p-desc">灵感来自电路板：墨绿石墨底色，走线连接各个板块，脉冲光点沿走线流动——寓意“全栈”：从前端触点一路打通到后端与模型。和你正在折腾的路由器/家庭网络环境也很搭。</p>
+    <div class="mock t7">
+      <span class="node n1"></span><span class="node n2"></span><span class="node n3"></span>
+      <div class="m-nav"><span class="m-logo">⟨/⟩ LIJIA.PCB</span><span>[简历]</span><span>[作品]</span><span>[AI]</span><span>[工具]</span></div>
+      <div class="m-hero">
+        <div class="m-title">EVERY LAYER,<br><span>CONNECTED.</span></div>
+        <div class="m-sub">FRONTEND → API → DB → LLM —— 我是李佳，一个把每层电路都点亮的对日 AI 全栈工程师。</div>
+        <div class="m-btns"><span class="m-btn primary">&gt; 通电_START</span><span class="m-btn">&gt; 查看电路图</span></div>
+      </div>
+      <div class="m-cards">
+        <div class="m-card">TRACE 01: resume.view → skills.map ... OK<br>TRACE 02: ai.chat → rag.local ... OK</div>
+        <div class="m-card">SIGNAL: ██████░░ 82% · NODE: online</div>
+      </div>
+    </div>
+    <div class="p-meta">
+      <div><b>配色</b><div class="swatches"><span class="sw" style="background:#0c1210"></span><span class="sw" style="background:#34d399"></span><span class="sw" style="background:#1f5c42"></span><span class="sw" style="background:#d8efe0"></span></div></div>
+      <div><b>字体</b>等宽字体为主，强化“原理图标注”感</div>
+      <div><b>动效</b>脉冲光点沿 SVG 路径流动、节点呼吸、通电开机动画</div>
+      <div><b>落地要点</b>SVG 走线背景 + offset-path 动画；滚动时点亮对应“层”</div>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="proposal">
+    <div class="p-head"><span class="p-num">08</span><span class="p-name">数据流体 Data Flow</span><span class="p-tag">深蓝 / 流动曲线 / 仪表盘</span></div>
+    <p class="p-desc">对你 DWH/数据背景的直接表达：深海蓝渐变 + 流动的数据波形，组件像一个个实时仪表盘。专业、冷静、可信，是最“商务科技感”的一版。</p>
+    <div class="mock t8">
+      <svg class="waves" viewBox="0 0 400 120" preserveAspectRatio="none">
+        <path d="M0,70 C60,40 120,95 200,70 C280,45 340,90 400,60 L400,120 L0,120 Z" fill="rgba(56,189,248,.18)"/>
+        <path d="M0,85 C70,60 140,105 220,80 C300,58 350,100 400,75 L400,120 L0,120 Z" fill="rgba(129,140,248,.22)"/>
+        <path d="M0,70 C60,40 120,95 200,70 C280,45 340,90 400,60" fill="none" stroke="#38bdf8" stroke-width="1.5"/>
+      </svg>
+      <div class="m-nav"><span class="m-logo">≋ LIJIA.DATA</span><span>简历</span><span>作品</span><span>AI</span><span>工具</span></div>
+      <div class="m-hero">
+        <div class="m-title">让数据流动，<br><span>让智能涌现</span></div>
+        <div class="m-sub">DWH × FullStack × AI Agent —— 三条河流在此交汇，我是李佳。</div>
+        <div class="m-btns"><span class="m-btn primary">查看数据画像</span><span class="m-btn">AI 助理</span></div>
+      </div>
+      <div class="m-cards">
+        <div class="m-card">技能水位 · FullStack<div class="bar"><i style="width:88%"></i></div></div>
+        <div class="m-card">技能水位 · AI/LLM<div class="bar"><i style="width:76%"></i></div></div>
+      </div>
+    </div>
+    <div class="p-meta">
+      <div><b>配色</b><div class="swatches"><span class="sw" style="background:#061224"></span><span class="sw" style="background:#0a2a4a"></span><span class="sw" style="background:#38bdf8"></span><span class="sw" style="background:#818cf8"></span></div></div>
+      <div><b>字体</b>现代无衬线，数字用 tabular-nums</div>
+      <div><b>动效</b>波形流动、仪表盘实时刷新、数字滚动</div>
+      <div><b>落地要点</b>SVG 波形 + 实时数据组件；技能/项目数据可视化是亮点</div>
+    </div>
+  </section>
+
+  <!-- 9 -->
+  <section class="proposal">
+    <div class="p-head"><span class="p-num">09</span><span class="p-name">机甲工业 Mecha Industrial</span><span class="p-tag">高达 HUD / 硬朗 / 力量感</span></div>
+    <p class="p-desc">钛灰装甲 + 警示橙、斜切面板、编号标签，像坐进机甲驾驶舱。男子力与工程感拉满，Tools 页面做成“装备库/武装列表”毫无违和。</p>
+    <div class="mock t9">
+      <div class="m-nav"><span class="m-logo">■ LJ-01 GUNDAM.SYS</span><span>MS-RESUME</span><span>ARMS-TOOLS</span><span>AI-CORE</span></div>
+      <div class="m-hero">
+        <div class="m-title">LI JIA — <span>UNIT 01</span><br>SYSTEM ALL GREEN</div>
+        <div class="m-sub">PILOT: 李佳 / ROLE: AI FULL-STACK ENGINEER / BASE: TOKYO-BOUND — 全系统正常运转，随时准备出击。</div>
+        <div class="m-btns"><span class="m-btn primary">▶ LAUNCH</span><span class="m-btn">机体参数</span></div>
+      </div>
+      <div class="m-cards">
+        <div class="m-card">UNIT STATUS — ARMOR: VUE3 · FRAME: DJANGO<br>CORE: LOCAL-LLM · OUTPUT: 98.2%</div>
+        <div class="m-card">WEAPONRY — RAG-AI-01 / DWH-PLATFORM / AGENT-FLOW</div>
+      </div>
+      <div class="stripe"></div>
+    </div>
+    <div class="p-meta">
+      <div><b>配色</b><div class="swatches"><span class="sw" style="background:#17191c"></span><span class="sw" style="background:#ff7a1a"></span><span class="sw" style="background:#3a3e44"></span><span class="sw" style="background:#e8e6e1"></span></div></div>
+      <div><b>字体</b>等宽 + 大写 + 宽字距，配编号标签（MS-06S 式）</div>
+      <div><b>动效</b>HUD 锁定框、面板滑入、警示条纹滚动</div>
+      <div><b>落地要点</b>clip-path 斜切面板 + 角标系统；信息层级用“参数表”呈现</div>
+    </div>
+  </section>
+
+  <!-- 10 -->
+  <section class="proposal">
+    <div class="p-head"><span class="p-num">10</span><span class="p-name">像素复古未来 Pixel Future</span><span class="p-tag">像素 / CRT / 个人特色最强</span></div>
+    <p class="p-desc">像素字体标题 + CRT 扫描线 + 现代布局混搭——复古游戏机的美学，未来感的内容。你本机装着 OpenEmu/RetroArch，这个风格就是“你本人”，别人抄都抄不走。</p>
+    <div class="mock t10">
+      <div class="m-nav"><span class="m-logo">★ LIJIA.GAME</span><span>PLAYER CARD</span><span>STAGE</span><span>NPC-AI</span><span>ITEMS</span></div>
+      <div class="m-hero">
+        <div class="m-title">PRESS START<br>TO KNOW ME</div>
+        <div class="m-sub">PLAYER: 李佳 · CLASS: AI 全栈工程师 · QUEST: 对日开发 — 1UP READY</div>
+        <div class="m-btns"><span class="m-btn primary">▶ START</span><span class="m-btn">SELECT</span></div>
+      </div>
+      <div class="m-cards">
+        <div class="m-card"><b>■ PLAYER CARD</b>LV.5 ENGINEER · EXP: ██████░░<br>SKILLS: VUE / PYTHON / LLM</div>
+        <div class="m-card"><b>■ NPC: AI 助理</b>「你好，有什么想问主角的吗？」</div>
+      </div>
+    </div>
+    <div class="p-meta">
+      <div><b>配色</b><div class="swatches"><span class="sw" style="background:#101020"></span><span class="sw" style="background:#ffe066"></span><span class="sw" style="background:#b84fd0"></span><span class="sw" style="background:#00f0ff"></span></div></div>
+      <div><b>字体</b>像素字体（标题）+ 等宽（正文），中文用“方舟像素”类字体</div>
+      <div><b>动效</b>8-bit 跳跃动画、CRT 开机效果、金币音效彩蛋（可关）</div>
+      <div><b>落地要点</b>像素字体 + box-shadow 硬阴影体系；简历=角色卡、项目=关卡地图</div>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>

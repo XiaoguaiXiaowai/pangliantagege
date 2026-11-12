@@ -12,9 +12,19 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # 先装依赖，充分利用构建缓存
+# 默认 PyPI 源：国内环境可通过 --build-arg PYPI_MIRROR=https://mirrors.aliyun.com/pypi/simple/ 切换
+ARG PYPI_MIRROR=https://mirrors.aliyun.com/pypi/simple/
+ARG PYPI_TRUSTED_HOST=mirrors.aliyun.com
 COPY requirements.txt .
-RUN pip install --upgrade pip wheel && \
-    pip install -r requirements.txt
+# 双保险：先 --index-url 用主镜像，--extra-index-url 用 PyPI 官方兜底，避免镜像同步不及时漏包
+RUN pip install --upgrade pip wheel \
+        --index-url "$PYPI_MIRROR" \
+        --trusted-host "$PYPI_TRUSTED_HOST" \
+        --extra-index-url https://pypi.org/simple/ && \
+    pip install -r requirements.txt \
+        --index-url "$PYPI_MIRROR" \
+        --trusted-host "$PYPI_TRUSTED_HOST" \
+        --extra-index-url https://pypi.org/simple/
 
 # 拷贝项目代码（.dockerignore 排除了 venv / db.sqlite3 / media 等）
 COPY . .

@@ -222,6 +222,13 @@ onUnmounted(() => {
             </ul>
           </div>
         </div>
+
+        <!-- HUD 状态读数条 -->
+        <div class="hud-strip">
+          <div class="hud-item"><span class="hud-label">ORBIT</span><span class="hud-value">STABLE<i class="hud-dot"></i></span></div>
+          <div class="hud-item"><span class="hud-label">AI-CORE</span><span class="hud-value">ONLINE<i class="hud-dot"></i></span></div>
+          <div class="hud-item"><span class="hud-label">DEST</span><span class="hud-value gold">TOKYO ▮</span></div>
+        </div>
       </div>
     </section>
 
@@ -293,7 +300,7 @@ onUnmounted(() => {
   position: absolute;
   top: 50%;
   left: 50%;
-  border: 1.5px dashed rgba(167, 235, 242, 0.6);
+  border: 1.5px dashed var(--orbit-line);
   border-radius: 50%;
   transform-style: preserve-3d;
 }
@@ -400,33 +407,32 @@ onUnmounted(() => {
 
 .dot-luna-small {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  width: 15px; height: 15px; background-color: var(--luna-dark);
-  border-radius: 50%; box-shadow: 0 0 12px var(--luna-dark);
+  width: 15px; height: 15px; background-color: var(--star-gold);
+  border-radius: 50%; box-shadow: 0 0 12px var(--star-gold);
 }
 
 .dot-luna-large {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-  width: 30px; height: 30px; background-color: var(--luna-light);
-  border-radius: 50%; box-shadow: 0 0 22px var(--luna-light);
+  width: 30px; height: 30px; background-color: var(--star-gold);
+  border-radius: 50%; box-shadow: 0 0 22px var(--star-gold);
 }
 
-/* Central Card */
-/* Central Card — 渐变描边毛玻璃 */
+/* Central Card — 全息渐变描边毛玻璃 */
 .intro-card {
   position: relative;
   z-index: 1;
   width: min(460px, 100%);
   padding: 45px;
   border-radius: 24px;
-  /* 双层背景：内层卡片底色 + 外层渐变描边（border-box 裁剪） */
+  /* 双层背景：内层卡片底色 + 外层全息渐变描边（hover 时流动） */
   background-image:
     linear-gradient(var(--card-bg-soft), var(--card-bg-soft)),
     var(--card-border-grad);
   background-origin: border-box;
   background-clip: padding-box, border-box;
   border: 1px solid transparent;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   box-shadow: var(--card-shadow);
 }
 
@@ -475,7 +481,7 @@ onUnmounted(() => {
   font-size: 3.5rem;
   font-weight: 800;
   margin: 0;
-  background: linear-gradient(135deg, var(--luna-darkest), var(--luna-medium));
+  background: var(--grad-name);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -501,9 +507,67 @@ onUnmounted(() => {
 
 .divider {
   height: 2px;
-  background: linear-gradient(to right, var(--luna-darkest), var(--luna-light), transparent);
+  background: linear-gradient(to right, var(--luna-medium), var(--star-gold), transparent);
   width: 100%;
   margin: 25px 0;
+}
+
+/* ===== HUD 状态读数条 ===== */
+.hud-strip {
+  position: absolute;
+  bottom: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 28px;
+  padding: 10px 22px;
+  border-radius: 99px;
+  background: var(--card-bg-soft);
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.hud-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+
+.hud-label {
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.hud-value {
+  color: var(--hud-text);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hud-value.gold {
+  color: var(--star-gold);
+}
+
+.hud-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--luna-medium);
+  box-shadow: 0 0 8px var(--luna-medium);
+  animation: hud-pulse 2s ease-in-out infinite;
+}
+
+@keyframes hud-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
 }
 
 .card-body {
@@ -551,8 +615,14 @@ onUnmounted(() => {
 
 .nav-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 15px 35px rgba(1, 28, 64, 0.1);
-  border-color: var(--luna-medium);
+  box-shadow: 0 16px 40px -10px var(--holo-glow);
+  border-color: transparent;
+  /* hover 时浮现全息渐变描边 */
+  background-image:
+    linear-gradient(var(--card-bg), var(--card-bg)),
+    var(--holo-border);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
 }
 
 .nav-card::before {
@@ -645,6 +715,8 @@ onUnmounted(() => {
 .nav-card.disabled-card:hover {
   transform: none;
   box-shadow: none;
+  background-image: none;
+  border-color: var(--card-border);
 }
 
 .nav-card.disabled-card::before {

@@ -8,8 +8,11 @@ FROM node:22-slim AS build
 WORKDIR /app
 
 # 先装依赖，充分利用构建缓存（rolldown-vite 使用 glibc 预编译二进制，需 debian 系基础镜像）
+# NPM 镜像源：默认使用 npmmirror（原淘宝），可 --build-arg NPM_REGISTRY=https://registry.npmjs.org/ 切回官方
+ARG NPM_REGISTRY=https://registry.npmmirror.com
 COPY package.json package-lock.json ./
-RUN npm install --legacy-peer-deps
+RUN npm config set registry "$NPM_REGISTRY" && \
+    npm install --legacy-peer-deps
 
 # 拷贝源码并构建
 COPY . .

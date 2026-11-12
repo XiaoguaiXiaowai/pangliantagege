@@ -89,7 +89,7 @@ onBeforeUnmount(() => {
       <p class="section-sub">{{ t('agent.whyEnterpriseSub') }}</p>
       <div class="pillar-grid">
         <div v-for="p in pillars" :key="p.key" class="pillar-card">
-          <div class="pillar-icon" :style="{ background: `linear-gradient(135deg, ${p.color}, #011C40)` }">
+          <div class="pillar-icon" :style="{ background: `linear-gradient(135deg, ${p.color}, #060D24)` }">
             {{ p.icon }}
           </div>
           <h3>{{ p.title }} <span v-if="p.subtitle && p.subtitle !== p.title" class="pillar-en">{{ p.subtitle }}</span></h3>
@@ -150,7 +150,7 @@ onBeforeUnmount(() => {
 .hero {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #011C40 0%, #023859 55%, #26658C 120%);
+  background: linear-gradient(135deg, #060D24 0%, #0A1029 55%, #3E5A9E 120%);
   border-radius: 24px;
   padding: 56px 48px 40px;
   color: #fff;
@@ -171,7 +171,7 @@ onBeforeUnmount(() => {
 .hero::before {
   width: 380px;
   height: 380px;
-  background: #54ACBF;
+  background: #5CC8FF;
   top: -160px;
   right: -100px;
 }
@@ -179,7 +179,7 @@ onBeforeUnmount(() => {
 .hero::after {
   width: 320px;
   height: 320px;
-  background: #A7EBF2;
+  background: #B78AFF;
   bottom: -140px;
   left: -80px;
 }
@@ -196,7 +196,7 @@ onBeforeUnmount(() => {
   font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.04em;
-  color: #A7EBF2;
+  color: #BFD4FF;
   margin-bottom: 20px;
 }
 
@@ -219,7 +219,7 @@ onBeforeUnmount(() => {
 }
 
 .hero-sub strong {
-  color: #A7EBF2;
+  color: #BFD4FF;
 }
 
 .hero-actions {
@@ -234,8 +234,8 @@ onBeforeUnmount(() => {
 
 .btn-primary {
   display: inline-block;
-  background: linear-gradient(135deg, #A7EBF2, #54ACBF);
-  color: #011C40;
+  background: linear-gradient(135deg, #BFD4FF, #5CC8FF);
+  color: #060D24;
   font-weight: 800;
   font-size: 1rem;
   padding: 14px 36px;
@@ -248,7 +248,7 @@ onBeforeUnmount(() => {
   transform: translateY(-3px);
   box-shadow: 0 12px 32px rgba(84, 172, 191, 0.6);
   opacity: 1;
-  color: #011C40;
+  color: #060D24;
 }
 
 .btn-ghost {
@@ -281,7 +281,7 @@ onBeforeUnmount(() => {
 .stat .num {
   font-size: 1.55rem;
   font-weight: 800;
-  color: #A7EBF2;
+  color: #BFD4FF;
   margin-bottom: 4px;
 }
 
@@ -428,7 +428,7 @@ onBeforeUnmount(() => {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #26658C, #011C40);
+  background: linear-gradient(135deg, #3E5A9E, #060D24);
   color: #fff;
   font-size: 1.2rem;
   font-weight: 800;

@@ -8,8 +8,8 @@ import { defineStore } from 'pinia'
  */
 export const useThemeStore = defineStore('theme', {
   state: () => ({
-    /** 'auto' | 'light' | 'dark'；初始为 auto（跟随系统） */
-    theme: 'auto'
+    /** 'auto' | 'light' | 'dark'；初始为 dark（深空主题为暗色设计） */
+    theme: 'dark'
   }),
   getters: {
     /** 系统当前是否为深色偏好 */

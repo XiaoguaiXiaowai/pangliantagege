@@ -1,21 +1,21 @@
 /* ============================================================
-   Luna 2.0 Design System
-   - 浅色（Light）+ 深色（Dark）双主题，通过 <html data-theme> 切换
-   - 语义化 CSS 变量：组件一律引用变量，深浅色自动适配
-   - 字体：英文/数字用 Space Grotesk（Google Fonts），中文/日文回退系统字体
+   Deep Space × Holo Design System（原 Luna 2.0 重设计）
+   - 深色 = 深空轨道：藏蓝星野 + 星光金 + 全息青紫
+   - 浅色 = 白昼星轨：冰白 + 靛蓝 + 暖阳金
+   - 通过 <html data-theme> 切换；组件一律引用语义变量
+   - 字体：Space Grotesk（显示）+ JetBrains Mono（HUD 读数），CJK 回退系统字体
    ============================================================ */
 
 :root {
   color-scheme: light;
 
-  /* ===== Luna 品牌色板（浅色） =====
-     注意：深色模式下这套变量会被整体反转映射（darkest 变浅色、用作文字），
-     因此既有组件中 `color: var(--luna-darkest)` 等写法会自动适配深色。 */
-  --luna-lightest: #A7EBF2; /* 浅青 */
-  --luna-light: #54ACBF;    /* 中青 */
-  --luna-medium: #26658C;   /* 中蓝 */
-  --luna-dark: #023859;     /* 深蓝 */
-  --luna-darkest: #06294E;  /* 最深海军蓝（略提亮，文字更柔和） */
+  /* ===== 品牌色板（浅色 · 白昼星轨） =====
+     注意：变量名保留 luna-* 以兼容既有组件，深色模式下整体反转映射。 */
+  --luna-lightest: #E4EAFB; /* 冰蓝表面 */
+  --luna-light: #7C9AEE;    /* 浅靛 */
+  --luna-medium: #3D63E0;   /* 靛蓝（强调） */
+  --luna-dark: #2A3F8F;     /* 深靛 */
+  --luna-darkest: #1C2450;  /* 墨蓝（主文字） */
 
   /* ===== 语义色 ===== */
   --color-primary: var(--luna-darkest);
@@ -23,56 +23,68 @@
   --color-accent: var(--luna-light);
 
   --text-primary: var(--luna-darkest);
-  --text-secondary: #2F6E93; /* 次级文字（略深于 accent，保证对比度） */
+  --text-secondary: #4A5A94;
+
+  /* ===== 深空 × 全息 扩展令牌（浅色映射） ===== */
+  --star-gold: #E8A93D;
+  --orbit-line: rgba(61, 99, 224, 0.3);
+  --orbit-planet: var(--star-gold);
+  --grad-name: linear-gradient(120deg, #1C2450, #3D63E0 55%, #E8A93D);
+  --holo-border: conic-gradient(
+    from var(--holo-angle, 0deg),
+    #3D63E0, #8A5CF6, #E05CB8, #E8A93D, #3FBFA0, #3D63E0
+  );
+  --holo-glow: rgba(61, 99, 224, 0.25);
+  --hud-text: #3D63E0;
 
   /* ===== 背景与氛围光晕 ===== */
-  --bg-body: #F0F7FA;
-  --bg-glow-1: rgba(167, 235, 242, 0.5);
-  --bg-glow-2: rgba(84, 172, 191, 0.16);
+  --bg-body: #F3F6FE;
+  --bg-glow-1: rgba(124, 154, 238, 0.35);
+  --bg-glow-2: rgba(138, 92, 246, 0.12);
 
   /* ===== 卡片 ===== */
   --card-bg: #FFFFFF;
   --card-bg-soft: rgba(255, 255, 255, 0.82);
-  --card-border: rgba(167, 235, 242, 0.5);
+  --card-border: rgba(61, 99, 224, 0.14);
   --card-radius: 24px;
-  --card-shadow: 0 10px 30px rgba(1, 28, 64, 0.08);
+  --card-shadow: 0 10px 30px rgba(28, 36, 80, 0.08);
 
   /* ===== 页头 / 页脚 ===== */
-  --header-bg: rgba(255, 255, 255, 0.82);
-  --header-border: rgba(167, 235, 242, 0.35);
-  --footer-bg: rgba(255, 255, 255, 0.92);
+  --header-bg: rgba(243, 246, 254, 0.8);
+  --header-border: rgba(61, 99, 224, 0.12);
+  --footer-bg: rgba(243, 246, 254, 0.92);
 
   /* ===== 背景动画 ===== */
-  --ring-color: rgba(84, 172, 191, 0.5);
-  --ring-glow: rgba(84, 172, 191, 0.22);
-  --ring-fill: rgba(167, 235, 242, 0.16);
-  --star-color: rgba(1, 28, 64, 0.3);
+  --ring-color: rgba(61, 99, 224, 0.35);
+  --ring-glow: rgba(61, 99, 224, 0.18);
+  --ring-fill: rgba(124, 154, 238, 0.14);
+  --star-color: rgba(28, 36, 80, 0.35);
 
   /* ===== 导航 / 徽章 / 图标底 ===== */
-  --nav-hover-bg: rgba(167, 235, 242, 0.22);
-  --nav-active-bg: linear-gradient(135deg, #26658C, #54ACBF);
+  --nav-hover-bg: rgba(61, 99, 224, 0.08);
+  --nav-active-bg: linear-gradient(135deg, #3D63E0, #7C9AEE);
   --nav-active-color: #FFFFFF;
-  --nav-active-shadow: rgba(38, 101, 140, 0.3);
-  --badge-bg: linear-gradient(135deg, #f0f4f8, #e2e8f0);
-  --badge-border: rgba(167, 235, 242, 0.5);
-  --icon-tint: rgba(167, 235, 242, 0.22);
-  --icon-tint-muted: rgba(226, 232, 240, 0.6);
+  --nav-active-shadow: rgba(61, 99, 224, 0.3);
+  --badge-bg: linear-gradient(135deg, #eef2fd, #e2e8f8);
+  --badge-border: rgba(61, 99, 224, 0.2);
+  --icon-tint: rgba(61, 99, 224, 0.08);
+  --icon-tint-muted: rgba(226, 232, 248, 0.6);
 
-  /* ===== 按钮 / 强调渐变（深色下保持深底白字，避免浅渐变+白字） ===== */
-  --btn-primary-bg: linear-gradient(135deg, #023859, #26658C);
+  /* ===== 按钮 / 强调渐变 ===== */
+  --btn-primary-bg: linear-gradient(135deg, #3D63E0, #7C9AEE);
   --btn-primary-color: #FFFFFF;
-  --btn-primary-shadow: rgba(38, 101, 140, 0.25);
-  --grad-accent-bg: linear-gradient(135deg, #54ACBF, #26658C);
+  --btn-primary-shadow: rgba(61, 99, 224, 0.25);
+  --grad-accent-bg: linear-gradient(135deg, #7C9AEE, #3D63E0);
   --grad-accent-color: #FFFFFF;
 
   /* ===== 表面渐变 / 装饰 ===== */
-  --card-grad: linear-gradient(145deg, #FFFFFF, #F8FBFD);
-  --card-border-grad: linear-gradient(135deg, rgba(167, 235, 242, 0.9), rgba(84, 172, 191, 0.35), rgba(38, 101, 140, 0.55));
-  --major-header-bg: linear-gradient(135deg, rgba(167, 235, 242, 0.2), rgba(84, 172, 191, 0.05));
-  --surface-tint: rgba(167, 235, 242, 0.3);
-  --surface-hover: rgba(255, 255, 255, 0.8);
-  --icon-badge-bg: linear-gradient(145deg, #26658C, #023859);
-  --card-glow: rgba(84, 172, 191, 0.25);
+  --card-grad: linear-gradient(145deg, #FFFFFF, #F6F8FE);
+  --card-border-grad: linear-gradient(135deg, rgba(61, 99, 224, 0.5), rgba(138, 92, 246, 0.3), rgba(232, 169, 61, 0.4));
+  --major-header-bg: linear-gradient(135deg, rgba(61, 99, 224, 0.08), rgba(138, 92, 246, 0.03));
+  --surface-tint: rgba(61, 99, 224, 0.08);
+  --surface-hover: rgba(255, 255, 255, 0.85);
+  --icon-badge-bg: linear-gradient(145deg, #3D63E0, #2A3F8F);
+  --card-glow: rgba(61, 99, 224, 0.18);
 
   /* ===== 字体 ===== */
   --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
@@ -81,6 +93,7 @@
   --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
     'Noto Sans JP', 'Yu Gothic', 'Meiryo', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   font-family: var(--font-body);
   line-height: 1.6;
@@ -92,64 +105,83 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ===== 深色主题：深海夜航 ===== */
+/* ===== 深色主题：深空轨道（本站主形态） ===== */
 [data-theme='dark'] {
   color-scheme: dark;
 
-  /* Luna 品牌色板（深色）——反转映射：暗色变亮用作文字，亮色变暗用作表面 */
-  --luna-lightest: #16324A; /* 深色表面色 */
-  --luna-light: #4A90A8;    /* 沉稳青 */
-  --luna-medium: #5FC7DC;   /* 亮青（强调色） */
-  --luna-dark: #B9D8E8;     /* 亮蓝（次级文字） */
-  --luna-darkest: #E8F2F8;  /* 近白（主文字） */
+  /* 品牌色板（深色）——反转映射：暗色变亮用作文字，亮色变暗用作表面 */
+  --luna-lightest: #131A38; /* 深空表面色 */
+  --luna-light: #3E5A9E;    /* 暗靛（弱强调） */
+  --luna-medium: #5CC8FF;   /* 全息青（主强调色） */
+  --luna-dark: #A9BFF2;     /* 星尘蓝（次级文字） */
+  --luna-darkest: #EAF1FF;  /* 星白（主文字） */
 
   --color-primary: var(--luna-darkest);
   --color-secondary: var(--luna-medium);
   --color-accent: var(--luna-light);
 
   --text-primary: var(--luna-darkest);
-  --text-secondary: #8FB8CC;
+  --text-secondary: #8DA3D6;
 
-  --bg-body: #081422;
-  --bg-glow-1: rgba(95, 199, 220, 0.1);
-  --bg-glow-2: rgba(38, 101, 140, 0.18);
+  /* ===== 深空 × 全息 扩展令牌 ===== */
+  --star-gold: #FFD479;
+  --orbit-line: rgba(160, 180, 235, 0.32);
+  --orbit-planet: var(--star-gold);
+  --grad-name: linear-gradient(120deg, #FFFFFF, #BFD4FF 45%, #FFD479);
+  --holo-border: conic-gradient(
+    from var(--holo-angle, 0deg),
+    #5CC8FF, #B78AFF, #FF8AD4, #FFD25C, #7CF29C, #5CC8FF
+  );
+  --holo-glow: rgba(92, 200, 255, 0.22);
+  --hud-text: #5CC8FF;
 
-  --card-bg: #0E1E30;
-  --card-bg-soft: rgba(14, 30, 48, 0.82);
-  --card-border: rgba(95, 199, 220, 0.16);
-  --card-shadow: 0 14px 34px rgba(0, 0, 0, 0.4);
+  --bg-body: #03071A;
+  --bg-glow-1: rgba(92, 200, 255, 0.09);
+  --bg-glow-2: rgba(140, 110, 255, 0.11);
 
-  --header-bg: rgba(8, 20, 34, 0.78);
-  --header-border: rgba(95, 199, 220, 0.12);
-  --footer-bg: rgba(10, 24, 40, 0.92);
+  --card-bg: #0A1029;
+  --card-bg-soft: rgba(10, 16, 41, 0.72);
+  --card-border: rgba(140, 160, 220, 0.16);
+  --card-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
 
-  --ring-color: rgba(95, 199, 220, 0.45);
-  --ring-glow: rgba(95, 199, 220, 0.16);
-  --ring-fill: rgba(95, 199, 220, 0.07);
-  --star-color: rgba(167, 235, 242, 0.4);
+  --header-bg: rgba(4, 9, 26, 0.72);
+  --header-border: rgba(140, 160, 220, 0.12);
+  --footer-bg: rgba(4, 9, 26, 0.88);
 
-  --nav-hover-bg: rgba(95, 199, 220, 0.12);
-  --nav-active-bg: linear-gradient(135deg, #1E4E68, #5FC7DC);
-  --nav-active-color: #F0FAFD;
-  --nav-active-shadow: rgba(95, 199, 220, 0.25);
-  --badge-bg: linear-gradient(135deg, rgba(95, 199, 220, 0.18), rgba(95, 199, 220, 0.05));
-  --badge-border: rgba(95, 199, 220, 0.2);
-  --icon-tint: rgba(95, 199, 220, 0.14);
-  --icon-tint-muted: rgba(95, 199, 220, 0.05);
+  --ring-color: rgba(140, 160, 220, 0.28);
+  --ring-glow: rgba(92, 200, 255, 0.14);
+  --ring-fill: rgba(92, 200, 255, 0.05);
+  --star-color: rgba(230, 238, 255, 0.85);
 
-  --btn-primary-bg: linear-gradient(135deg, #0F3A5C, #1E5E85);
-  --btn-primary-color: #F0FAFD;
-  --btn-primary-shadow: rgba(95, 199, 220, 0.25);
-  --grad-accent-bg: linear-gradient(135deg, #16496B, #2A7C9E);
-  --grad-accent-color: #F0FAFD;
+  --nav-hover-bg: rgba(92, 200, 255, 0.1);
+  --nav-active-bg: linear-gradient(135deg, #5CC8FF, #B78AFF);
+  --nav-active-color: #06112B;
+  --nav-active-shadow: rgba(92, 200, 255, 0.3);
+  --badge-bg: linear-gradient(135deg, rgba(92, 200, 255, 0.16), rgba(183, 138, 255, 0.08));
+  --badge-border: rgba(92, 200, 255, 0.25);
+  --icon-tint: rgba(92, 200, 255, 0.1);
+  --icon-tint-muted: rgba(140, 160, 220, 0.06);
 
-  --card-grad: linear-gradient(145deg, #14263C, #0E1E30);
-  --card-border-grad: linear-gradient(135deg, rgba(95, 199, 220, 0.55), rgba(95, 199, 220, 0.15), rgba(30, 94, 133, 0.5));
-  --major-header-bg: linear-gradient(135deg, rgba(95, 199, 220, 0.1), rgba(95, 199, 220, 0.02));
-  --surface-tint: rgba(95, 199, 220, 0.14);
-  --surface-hover: rgba(22, 38, 58, 0.9);
-  --icon-badge-bg: linear-gradient(145deg, #16324A, #0E2236);
-  --card-glow: rgba(95, 199, 220, 0.16);
+  --btn-primary-bg: linear-gradient(135deg, #5CC8FF, #B78AFF);
+  --btn-primary-color: #06112B;
+  --btn-primary-shadow: rgba(92, 200, 255, 0.3);
+  --grad-accent-bg: linear-gradient(135deg, #5CC8FF, #B78AFF);
+  --grad-accent-color: #06112B;
+
+  --card-grad: linear-gradient(145deg, #0E1533, #080E24);
+  --card-border-grad: conic-gradient(
+    from 210deg,
+    rgba(92, 200, 255, 0.65),
+    rgba(183, 138, 255, 0.5),
+    rgba(255, 138, 212, 0.4),
+    rgba(255, 210, 92, 0.45),
+    rgba(92, 200, 255, 0.65)
+  );
+  --major-header-bg: linear-gradient(135deg, rgba(92, 200, 255, 0.08), rgba(183, 138, 255, 0.03));
+  --surface-tint: rgba(92, 200, 255, 0.08);
+  --surface-hover: rgba(20, 28, 58, 0.9);
+  --icon-badge-bg: linear-gradient(145deg, #16204A, #0B1230);
+  --card-glow: rgba(92, 200, 255, 0.15);
 }
 
 /* ===== 主题切换过渡（store 切换时临时加 .theme-switching） ===== */
@@ -174,13 +206,25 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background-color: var(--bg-body);
-  /* 两团氛围光晕：右上青色、左下蓝青，营造纵深 */
+  /* 三团星云光晕：右上青、左下紫、顶部微金，营造深空纵深 */
   background-image:
     radial-gradient(1100px 620px at 88% -12%, var(--bg-glow-1), transparent 62%),
-    radial-gradient(900px 560px at -8% 34%, var(--bg-glow-2), transparent 60%);
+    radial-gradient(900px 560px at -8% 34%, var(--bg-glow-2), transparent 60%),
+    radial-gradient(700px 400px at 50% -20%, var(--ring-fill), transparent 65%);
   background-attachment: fixed;
   color: var(--text-primary);
   overflow-x: clip;
+}
+
+/* ===== 全息渐变边框角度（配合 --holo-border 使用，见 MagicCard） ===== */
+@property --holo-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes holo-spin {
+  to { --holo-angle: 360deg; }
 }
 
 /* 按语言微调排版：拉丁/日文收紧标题字间距，避免长文案换行 */

@@ -5,26 +5,25 @@
     <link rel="icon" type="image/svg+xml" href="/face-laugh-svgrepo-com.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>李佳的个人网站</title>
-    <!-- 首帧前确定主题，避免闪烁（与 stores/theme.js 保持一致逻辑） -->
+    <!-- 首帧前确定主题，避免闪烁（与 stores/theme.js 保持一致逻辑）。
+         深空主题为暗色设计，未手动选择过时默认 dark -->
     <script>
       (function () {
         try {
           var saved = localStorage.getItem('luna-theme')
-          var dark =
-            saved === 'dark' ||
-            (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          var dark = saved ? saved === 'dark' : true
           document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
           document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
         } catch (e) {
-          document.documentElement.setAttribute('data-theme', 'light')
+          document.documentElement.setAttribute('data-theme', 'dark')
         }
       })()
     </script>
-    <!-- Space Grotesk：英文/数字显示字体（中文/日文自动回退系统字体） -->
+    <!-- Space Grotesk：英文/数字显示字体；JetBrains Mono：HUD 数据读数字体（中文/日文自动回退系统字体） -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
       rel="stylesheet"
     />
   </head>

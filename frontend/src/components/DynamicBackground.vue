@@ -1,252 +1,277 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 
-const circles = ref([])
-const stars = ref([])
-const CIRCLE_COUNT = 2
-const RADIUS = 75
-const STAR_COUNT = 28
+/**
+ * 深空星野背景（Deep Space × Holo 主题）
+ * - Canvas 三层视差星野：随鼠标轻微漂移，各自闪烁
+ * - 偶发流星划过
+ * - 两条 CSS 轨道环 + 金色行星，呼应「深空轨道」叙事
+ * - 颜色全部读取 CSS 变量，深浅主题自动适配；尊重 prefers-reduced-motion
+ */
 
+const canvasRef = ref(null)
+
+let ctx = null
+let stars = []
+let meteor = null
 let animationId = null
+let meteorTimer = null
 let reducedMotion = false
+let themeObserver = null
+let palette = { star: 'rgba(230,238,255,0.85)', gold: '#FFD479' }
+
+// 鼠标视差：目标值与实际值（lerp 平滑）
+const parallax = { tx: 0, ty: 0, x: 0, y: 0 }
+
+const LAYERS = [
+  { depth: 0.25, size: [0.6, 1.2], alpha: 0.5 },  // 远层
+  { depth: 0.55, size: [1.0, 1.8], alpha: 0.75 }, // 中层
+  { depth: 1.0, size: [1.4, 2.4], alpha: 1.0 }    // 近层
+]
 
 const prefersReducedMotion = () =>
   window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
+const readPalette = () => {
+  const cs = getComputedStyle(document.documentElement)
+  palette = {
+    star: cs.getPropertyValue('--star-color').trim() || palette.star,
+    gold: cs.getPropertyValue('--star-gold').trim() || palette.gold
+  }
+}
+
+const resize = () => {
+  const canvas = canvasRef.value
+  if (!canvas) return
+  const dpr = Math.min(window.devicePixelRatio || 1, 2)
+  canvas.width = window.innerWidth * dpr
+  canvas.height = window.innerHeight * dpr
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+  initStars()
+  if (reducedMotion) drawStatic()
+}
+
 const initStars = () => {
-  const { innerWidth, innerHeight } = window
-  const list = []
-  for (let i = 0; i < STAR_COUNT; i++) {
-    list.push({
-      id: i,
-      x: Math.random() * innerWidth,
-      y: Math.random() * innerHeight,
-      size: 1 + Math.random() * 2.4,
-      delay: Math.random() * 6,
-      duration: 3 + Math.random() * 5
+  const { innerWidth: w, innerHeight: h } = window
+  const count = Math.min(220, Math.floor((w * h) / 9000))
+  stars = []
+  for (let i = 0; i < count; i++) {
+    const layer = LAYERS[i % LAYERS.length]
+    stars.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: layer.size[0] + Math.random() * (layer.size[1] - layer.size[0]),
+      depth: layer.depth,
+      baseAlpha: layer.alpha * (0.5 + Math.random() * 0.5),
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.4 + Math.random() * 1.2,
+      gold: Math.random() < 0.08 // 少量金色恒星点缀
     })
   }
-  stars.value = list
 }
 
-const initCircles = () => {
-  const { innerWidth, innerHeight } = window
-  const newCircles = []
-
-  for (let i = 0; i < CIRCLE_COUNT; i++) {
-    let x, y
-    let overlap = true
-    let attempts = 0
-
-    // Find non-overlapping position
-    while (overlap && attempts < 100) {
-      attempts++
-      x = Math.random() * (innerWidth - RADIUS * 2) + RADIUS
-      y = Math.random() * (innerHeight - RADIUS * 2) + RADIUS
-
-      overlap = false
-      for (let j = 0; j < newCircles.length; j++) {
-        const other = newCircles[j]
-        const d = Math.sqrt((x - other.x) ** 2 + (y - other.y) ** 2)
-        if (d < RADIUS * 2) {
-          overlap = true
-          break
-        }
-      }
-    }
-
-    // If we couldn't find a spot, just place it somewhere safeish
-    if (overlap) {
-      x = innerWidth / 2 + i * 10
-      y = innerHeight / 2
-    }
-
-    const speed = 1.5
-    const angle = Math.random() * Math.PI * 2
-    const dx = Math.cos(angle) * speed
-    const dy = Math.sin(angle) * speed
-
-    newCircles.push({
-      id: i,
-      x,
-      y,
-      dx,
-      dy,
-      radius: RADIUS
-    })
+const spawnMeteor = () => {
+  const { innerWidth: w } = window
+  meteor = {
+    x: w * 0.2 + Math.random() * w * 0.6,
+    y: -20,
+    vx: -(3 + Math.random() * 3),
+    vy: 4 + Math.random() * 2,
+    life: 1
   }
-
-  circles.value = newCircles
 }
 
-const updatePosition = () => {
-  const { innerWidth, innerHeight } = window
+const drawStar = (s, t) => {
+  const twinkle = 0.55 + 0.45 * Math.sin(t * 0.001 * s.speed + s.phase)
+  const x = s.x + parallax.x * s.depth * 18
+  const y = s.y + parallax.y * s.depth * 18
+  ctx.globalAlpha = s.baseAlpha * twinkle
+  ctx.fillStyle = s.gold ? palette.gold : palette.star
+  ctx.beginPath()
+  ctx.arc(x, y, s.r, 0, Math.PI * 2)
+  ctx.fill()
+}
 
-  // 1. Move and Wall Collision
-  circles.value.forEach((c) => {
-    c.x += c.dx
-    c.y += c.dy
-
-    if (c.x + c.radius > innerWidth) {
-      c.x = innerWidth - c.radius
-      c.dx = -Math.abs(c.dx)
-    } else if (c.x - c.radius < 0) {
-      c.x = c.radius
-      c.dx = Math.abs(c.dx)
-    }
-
-    if (c.y + c.radius > innerHeight) {
-      c.y = innerHeight - c.radius
-      c.dy = -Math.abs(c.dy)
-    } else if (c.y - c.radius < 0) {
-      c.y = c.radius
-      c.dy = Math.abs(c.dy)
-    }
-  })
-
-  // 2. Circle Collision
-  for (let i = 0; i < circles.value.length; i++) {
-    for (let j = i + 1; j < circles.value.length; j++) {
-      const c1 = circles.value[i]
-      const c2 = circles.value[j]
-
-      const dx = c2.x - c1.x
-      const dy = c2.y - c1.y
-      const distance = Math.sqrt(dx * dx + dy * dy)
-
-      if (distance < c1.radius + c2.radius) {
-        const overlap = (c1.radius + c2.radius - distance) / 2
-        const safeDist = distance || 0.001
-        const nx = dx / safeDist
-        const ny = dy / safeDist
-
-        c1.x -= nx * overlap
-        c1.y -= ny * overlap
-        c2.x += nx * overlap
-        c2.y += ny * overlap
-
-        const tx = -ny
-        const ty = nx
-
-        const v1n = c1.dx * nx + c1.dy * ny
-        const v1t = c1.dx * tx + c1.dy * ty
-
-        const v2n = c2.dx * nx + c2.dy * ny
-        const v2t = c2.dx * tx + c2.dy * ty
-
-        c1.dx = v2n * nx + v1t * tx
-        c1.dy = v2n * ny + v1t * ty
-
-        c2.dx = v1n * nx + v2t * tx
-        c2.dy = v1n * ny + v2t * ty
-      }
-    }
+const drawMeteor = () => {
+  if (!meteor) return
+  meteor.x += meteor.vx
+  meteor.y += meteor.vy
+  meteor.life -= 0.012
+  if (meteor.life <= 0 || meteor.y > window.innerHeight + 40) {
+    meteor = null
+    return
   }
-
-  animationId = requestAnimationFrame(updatePosition)
+  const tail = 14
+  const grad = ctx.createLinearGradient(
+    meteor.x, meteor.y,
+    meteor.x - meteor.vx * tail, meteor.y - meteor.vy * tail
+  )
+  grad.addColorStop(0, palette.star)
+  grad.addColorStop(1, 'transparent')
+  ctx.globalAlpha = Math.max(meteor.life, 0) * 0.9
+  ctx.strokeStyle = grad
+  ctx.lineWidth = 1.6
+  ctx.beginPath()
+  ctx.moveTo(meteor.x, meteor.y)
+  ctx.lineTo(meteor.x - meteor.vx * tail, meteor.y - meteor.vy * tail)
+  ctx.stroke()
 }
 
-const startAnimation = () => {
+const frame = (t) => {
+  const { innerWidth: w, innerHeight: h } = window
+  ctx.clearRect(0, 0, w, h)
+
+  // 视差平滑逼近
+  parallax.x += (parallax.tx - parallax.x) * 0.04
+  parallax.y += (parallax.ty - parallax.y) * 0.04
+
+  stars.forEach((s) => drawStar(s, t))
+  drawMeteor()
+  ctx.globalAlpha = 1
+  animationId = requestAnimationFrame(frame)
+}
+
+const drawStatic = () => {
+  const { innerWidth: w, innerHeight: h } = window
+  ctx.clearRect(0, 0, w, h)
+  stars.forEach((s) => drawStar(s, 0))
+  ctx.globalAlpha = 1
+}
+
+const onMouseMove = (e) => {
+  parallax.tx = (e.clientX / window.innerWidth - 0.5) * 2
+  parallax.ty = (e.clientY / window.innerHeight - 0.5) * 2
+}
+
+const start = () => {
+  stop()
+  if (reducedMotion) {
+    drawStatic()
+    return
+  }
+  animationId = requestAnimationFrame(frame)
+  meteorTimer = setInterval(() => {
+    if (!meteor && Math.random() < 0.5) spawnMeteor()
+  }, 6000)
+}
+
+const stop = () => {
   if (animationId) cancelAnimationFrame(animationId)
-  if (reducedMotion) return
-  updatePosition()
+  if (meteorTimer) clearInterval(meteorTimer)
+  animationId = null
+  meteorTimer = null
 }
 
 const handleMotionChange = () => {
   reducedMotion = prefersReducedMotion()
-  startAnimation()
+  start()
 }
 
 onMounted(() => {
+  ctx = canvasRef.value.getContext('2d')
   reducedMotion = prefersReducedMotion()
-  initCircles()
-  initStars()
-  startAnimation()
+  readPalette()
+  resize()
+  start()
+
+  window.addEventListener('resize', resize)
+  window.addEventListener('mousemove', onMouseMove, { passive: true })
   window.matchMedia?.('(prefers-reduced-motion: reduce)').addEventListener?.('change', handleMotionChange)
+
+  // 主题切换时重读调色板
+  themeObserver = new MutationObserver(readPalette)
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
 })
 
 onUnmounted(() => {
-  if (animationId) cancelAnimationFrame(animationId)
+  stop()
+  window.removeEventListener('resize', resize)
+  window.removeEventListener('mousemove', onMouseMove)
   window.matchMedia?.('(prefers-reduced-motion: reduce)').removeEventListener?.('change', handleMotionChange)
+  themeObserver?.disconnect()
 })
 </script>
 
 <template>
   <div class="dynamic-background" aria-hidden="true">
-    <!-- 星空粒子（静态 + 轻微闪烁） -->
-    <div
-      v-for="star in stars"
-      :key="'star-' + star.id"
-      class="star"
-      :style="{
-        left: `${star.x}px`,
-        top: `${star.y}px`,
-        width: `${star.size}px`,
-        height: `${star.size}px`,
-        animationDelay: `${star.delay}s`,
-        animationDuration: `${star.duration}s`
-      }"
-    ></div>
-    <!-- 漂浮光晕环（transform 定位，GPU 合成，避免逐帧重排） -->
-    <div
-      v-for="circle in circles"
-      :key="'circle-' + circle.id"
-      class="floating-circle"
-      :style="{
-        transform: `translate3d(${circle.x}px, ${circle.y}px, 0) translate(-50%, -50%)`
-      }"
-    ></div>
+    <canvas ref="canvasRef" class="starfield"></canvas>
+    <!-- 远景轨道环：缓慢旋转 + 金色行星 -->
+    <div class="orbit-ring ring-a"><span class="planet"></span></div>
+    <div class="orbit-ring ring-b"><span class="planet"></span></div>
   </div>
 </template>
 
 <style scoped>
 .dynamic-background {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  /* 透明，露出 body 上的氛围光晕渐变 */
   background: transparent;
 }
 
-.star {
+.starfield {
   position: absolute;
-  border-radius: 50%;
-  background-color: var(--star-color);
-  animation: star-twinkle 4s ease-in-out infinite;
-  will-change: opacity;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
-@keyframes star-twinkle {
-  0%, 100% { opacity: 0.25; }
-  50% { opacity: 1; }
-}
-
-.floating-circle {
+/* 轨道环：超大虚线圆，缓慢自转；行星为环上一点 */
+.orbit-ring {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 150px;
-  height: 150px;
+  border: 1px dashed var(--orbit-line);
   border-radius: 50%;
-  /* 渐变光晕环：内芯淡色填充 + 描边环 + 内外发光 */
-  background: radial-gradient(circle at 50% 50%, var(--ring-fill) 0%, transparent 62%);
-  border: 10px solid var(--ring-color);
-  box-shadow:
-    0 0 32px 6px var(--ring-glow),
-    inset 0 0 24px 4px var(--ring-glow);
   will-change: transform;
 }
 
-/* 减弱动态效果：静止展示，不跑物理动画 */
+.ring-a {
+  width: 130vmax;
+  height: 130vmax;
+  top: -80vmax;
+  right: -45vmax;
+  animation: orbit-spin 180s linear infinite;
+}
+
+.ring-b {
+  width: 100vmax;
+  height: 100vmax;
+  bottom: -75vmax;
+  left: -40vmax;
+  animation: orbit-spin-reverse 240s linear infinite;
+}
+
+.planet {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--orbit-planet);
+  box-shadow: 0 0 14px 2px var(--orbit-planet);
+}
+
+.ring-b .planet {
+  top: auto;
+  bottom: 18%;
+  width: 7px;
+  height: 7px;
+  opacity: 0.8;
+}
+
+@keyframes orbit-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes orbit-spin-reverse {
+  to { transform: rotate(-360deg); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .star {
+  .orbit-ring {
     animation: none;
-    opacity: 0.6;
   }
 }
 </style>
